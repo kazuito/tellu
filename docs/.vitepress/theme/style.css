@@ -1,0 +1,227 @@
+:root {
+  --vp-c-brand-1: #d9480f;
+  --vp-c-brand-2: #e8590c;
+  --vp-c-brand-3: #f76707;
+  --vp-c-brand-soft: rgba(247, 103, 7, 0.14);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(180deg, #ffcf3d 10%, #ff8a00 60%, #f03e3e 100%);
+  --vp-home-hero-image-background-image: radial-gradient(circle at 50% 50%, rgba(255, 170, 40, 0.35), transparent 65%);
+  --vp-home-hero-image-filter: blur(48px);
+
+  --tixi-stage-radius: 12px;
+}
+
+.dark {
+  --vp-c-brand-1: #ffa94d;
+  --vp-c-brand-2: #ff922b;
+  --vp-c-brand-3: #fd7e14;
+  --vp-c-brand-soft: rgba(255, 146, 43, 0.16);
+}
+
+/* Demos: a stage with the live rendering, then the code that produced it. */
+
+.tixi-demo {
+  margin: 20px 0;
+}
+
+.tixi-demo-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  padding: 32px 24px;
+  border-radius: var(--tixi-stage-radius);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.tixi-demo:has(> div[class*="language-"]) .tixi-demo-stage {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.vp-doc .tixi-demo > div[class*="language-"] {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+@media (max-width: 639px) {
+  .tixi-demo {
+    margin: 16px -24px;
+  }
+
+  .tixi-demo-stage {
+    border-radius: 0;
+    padding: 24px 16px;
+  }
+}
+
+.tixi-demo-canvas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px 40px;
+  max-width: 100%;
+}
+
+.tixi-demo-canvas canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.tixi-demo-canvas figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  max-width: 100%;
+}
+
+.tixi-demo-canvas figcaption {
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.backdrop-light .tixi-demo-canvas figcaption {
+  color: rgba(0, 0, 0, 0.75);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.tixi-demo-hint,
+.tixi-demo-error {
+  position: absolute;
+  inset: auto 16px 12px;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tixi-demo-error {
+  inset: 50% 16px auto;
+  transform: translateY(-50%);
+  font-family: var(--vp-font-family-mono);
+  color: #ffa8a8;
+}
+
+.backdrop-light .tixi-demo-hint {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.tixi-demo-play {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.tixi-demo-play:hover,
+.tixi-demo-play:focus-visible {
+  opacity: 1;
+}
+
+.tixi-demo-play svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Backdrops stand in for the video a caption sits on. */
+
+.backdrop-night {
+  background:
+    radial-gradient(120% 90% at 85% 0%, rgba(84, 110, 190, 0.45), transparent 60%),
+    linear-gradient(160deg, #1d2333 0%, #141824 100%);
+}
+
+.backdrop-checker {
+  background: repeating-conic-gradient(#3a3f4c 0 25%, #30343f 0 50%) 0 0 / 20px 20px;
+}
+
+.backdrop-light {
+  background: linear-gradient(160deg, #f4f1ea 0%, #e6e1d6 100%);
+}
+
+.backdrop-scene {
+  background:
+    radial-gradient(60% 50% at 75% 30%, rgba(255, 214, 140, 0.9), transparent 70%),
+    linear-gradient(180deg, #6fb7e8 0%, #a9d8f0 45%, #7fb069 46%, #4f7f3b 100%);
+}
+
+.backdrop-studio {
+  background:
+    radial-gradient(80% 120% at 50% 120%, rgba(255, 60, 140, 0.45), transparent 60%),
+    radial-gradient(60% 80% at 10% 0%, rgba(0, 200, 255, 0.35), transparent 60%),
+    linear-gradient(180deg, #2a1b4a 0%, #120b24 100%);
+}
+
+.backdrop-street {
+  background:
+    radial-gradient(50% 60% at 20% 30%, rgba(255, 190, 120, 0.35), transparent 70%),
+    linear-gradient(180deg, #5b6470 0%, #3c434d 55%, #2a2f36 100%);
+}
+
+/* Home */
+
+.tixi-hero-caption {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 520px);
+  aspect-ratio: 4 / 3;
+}
+
+.tixi-hero-caption canvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.VPHero .image-container {
+  width: 100%;
+  height: auto;
+}
+
+@media (min-width: 960px) {
+  .VPHero .image-container {
+    width: 440px;
+    height: 360px;
+  }
+}
+
+.next-steps ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px 24px;
+  padding-left: 1.25rem;
+}
+
+.home-showcase {
+  max-width: 880px;
+  margin: 48px auto 0;
+}
+
+.home-showcase h2 {
+  border-top: none;
+  text-align: center;
+}

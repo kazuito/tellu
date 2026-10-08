@@ -1,0 +1,152 @@
+---
+description: Style part of a caption with runs or <tag> markup, override fonts and sizes, and patch individual layers by index or id.
+---
+
+# Rich text
+
+`text` takes either a string or a list of **runs**. A run is a string, or an object with its own `style` override:
+
+```ts demo
+import { fill, linearGradient, shadow, stroke } from "tixi";
+
+export default {
+  text: [
+    "今日は",
+    {
+      text: "最高",
+      style: { fontSize: 112, layers: { 3: { paint: "#ff3d8b" } } },
+    },
+    "の日",
+  ],
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 72,
+    layers: [
+      shadow({ offset: [6, 8], blur: 5, stroke: 20 }),
+      stroke(20, "#1b2a7a"),
+      stroke(11, "#ffffff"),
+      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+    ],
+  },
+};
+```
+
+A run's `style` can override anything in [`TextStyle`](/api/types#textstyle). `layers` gets special treatment, described next.
+
+## Patching layers
+
+A run's `layers` works one of two ways:
+
+- **An array** replaces every layer for that run.
+- **An object** patches the base layers by index or by `id`, keeping everything else.
+
+Patching is usually what you want: the run keeps the caption's look and changes one detail.
+
+```ts
+const style = {
+  layers: [
+    shadow({ stroke: 20 }),           // 0
+    stroke(20, "#1b2a7a", { id: "edge" }), // 1, also "edge"
+    stroke(11, "#ffffff"),            // 2
+    fill("#ffcf3d"),                  // 3
+  ],
+};
+
+// Pink fill, red outer edge:
+{ text: "最高", style: { layers: { 3: { paint: "#ff3d8b" }, edge: { paint: "#c2185b" } } } }
+
+// Hide the shadow:
+{ text: "静か", style: { layers: { 0: { visible: false } } } }
+```
+
+Naming layers with `id` makes patches survive reordering. Insert a layer and `edge` still points at the right one.
+
+::: tip Keep layer counts aligned
+Layers composite by slot (index) across the whole caption, so slot 1 of every run is drawn together. When a run *replaces* its layers, give it the same number of layers in the same roles. Otherwise one run's fill can end up in the same slot as another run's outline.
+:::
+
+## Markup
+
+Building runs by hand gets noisy. `parseMarkup()` turns `<tag>` markup into runs, with one style override per tag name:
+
+```ts demo
+import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
+
+export default {
+  text: parseMarkup("今日は<em>最高</em>の<b>1日</b>だった", {
+    em: {
+      fontSize: 112,
+      layers: {
+        1: { paint: "#5a0026" },
+        3: {
+          paint: linearGradient(["#ffd1e8", "#ff2e7e"], { scope: "glyph" }),
+        },
+      },
+    },
+    b: { fontFamily: "Dela Gothic One", fontWeight: 400, baselineShift: 6 },
+  }),
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 72,
+    layers: [
+      shadow({ offset: [6, 8], blur: 5, stroke: 20 }),
+      stroke(20, "#1b2a7a"),
+      stroke(11, "#ffffff"),
+      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+    ],
+  },
+};
+```
+
+The syntax is deliberately small:
+
+| Markup | Meaning |
+| --- | --- |
+| `<name>…</name>` | Applies the `name` style. Any tag name works, and tags without a style are allowed |
+| Nested tags | Inner styles win, and layer patches merge |
+| `<br/>` | Line break (so does `\n`) |
+| `&lt;` `&gt;` `&amp;` `&quot;` `&#39;` | Escaped characters |
+
+Unclosed or mismatched tags throw an error, so typos surface immediately.
+
+Tag names also reach [`glyphTransform`](./animation#target-glyphs-by-tag) as `glyph.tags`, so markup can drive animation too:
+
+```ts
+parseMarkup("突然の<shake>ドッキリ</shake>！", { shake: { fontSize: 88 } });
+// glyphTransform: (glyph) => glyph.tags.includes("shake") ? { … } : undefined
+```
+
+## Line breaks
+
+`\n` in a string (or `<br/>` in markup) starts a new line. An empty line keeps the height of the style it was typed in.
+
+```ts demo
+import { fill, parseMarkup, stroke } from "tixi";
+
+export default {
+  text: parseMarkup(
+    "<small>番組からのお知らせ</small><br/>今夜9時から特別番組",
+    {
+      small: {
+        fontSize: 28,
+        fontWeight: 400,
+        layers: [stroke(5, "#0b1f44"), fill("#cfe3ff")],
+      },
+    },
+  ),
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 52,
+    lineHeight: 1.5,
+    layers: [stroke(8, "#0b1f44"), fill("#fff")],
+  },
+  align: "center",
+};
+```
+
+## Merging styles yourself
+
+`mergeOverrides(outer, inner)` and `applyOverride(style, override)` are the functions markup uses internally. They are exported for building your own run formats, such as subtitles parsed from a file. See [Style helpers](/api/helpers#mergeoverrides).

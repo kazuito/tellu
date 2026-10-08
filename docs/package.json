@@ -1,0 +1,25 @@
+{
+  "name": "tixi-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev --port 3400",
+    "build": "vitepress build",
+    "preview": "vitepress preview --port 3400",
+    "typecheck": "tsc --noEmit && bun scripts/check-snippets.ts",
+    "check": "bun scripts/check-snippets.ts && bun scripts/check-api.ts && bun scripts/format-snippets.ts --check",
+    "format": "bun scripts/format-snippets.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^7.0.2",
+    "vite": "^5.4.21",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-llms": "^1.14.0",
+    "vue": "^3.5.43"
+  },
+  "dependencies": {
+    "pixi.js": "^8.22.0",
+    "tixi": "workspace:*"
+  }
+}
