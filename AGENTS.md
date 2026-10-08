@@ -18,8 +18,8 @@ Run these from the repo root:
 bun run test        # library unit tests (bun test in packages/tixi)
 bun run typecheck   # tsc --noEmit in every workspace
 bun run build       # tsdown -> packages/tixi/dist (also rewrites `exports` in its package.json)
-bun run dev         # playground at http://localhost:3000
-bun run studio      # Remotion Studio
+bun run dev         # playground at http://localhost:3100
+bun run studio      # Remotion Studio at http://localhost:3200
 bun run lint        # biome check (lint + format + import order)
 bun run lint:fix    # biome check --write
 ```

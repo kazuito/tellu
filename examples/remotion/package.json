@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "studio": "remotion studio src/index.ts",
+    "studio": "remotion studio src/index.ts --port=3200",
     "render": "remotion render src/index.ts Showcase out/showcase.mp4",
     "stills": "bun scripts/stills.ts",
     "typecheck": "tsc --noEmit"

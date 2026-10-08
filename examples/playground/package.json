@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --conditions=tixi-source index.html",
+    "dev": "bun --conditions=tixi-source --port=3100 index.html",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

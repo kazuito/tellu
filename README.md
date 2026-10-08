@@ -13,8 +13,8 @@ bun install
 bun run test       # library unit tests
 bun run typecheck  # every workspace
 bun run build      # packages/tixi/dist
-bun run dev        # playground at http://localhost:3000
-bun run studio     # Remotion Studio
+bun run dev        # playground at http://localhost:3100
+bun run studio     # Remotion Studio at http://localhost:3200
 ```
 
 Render the Remotion sample:
