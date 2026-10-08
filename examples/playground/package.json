@@ -1,0 +1,17 @@
+{
+  "name": "tixi-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --conditions=tixi-source index.html",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pixi.js": "^8.22.0",
+    "tixi": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^7.0.2"
+  }
+}
