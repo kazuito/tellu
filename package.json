@@ -1,0 +1,16 @@
+{
+  "name": "tixi-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "bun run --filter tixi build",
+    "test": "bun run --filter tixi test",
+    "typecheck": "bun run --filter '*' typecheck",
+    "dev": "bun run --filter tixi-playground dev",
+    "studio": "bun run --filter tixi-remotion-example studio"
+  }
+}
