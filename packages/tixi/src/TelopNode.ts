@@ -1,6 +1,7 @@
 import { AlphaFilter, BlurFilter, Container, type DestroyOptions, type Filter, Rectangle, Sprite } from "pixi.js";
 import { type Layout, layoutTelop } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
+import { blurPadding } from "./render/blur";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizePlate } from "./render/plate";
@@ -148,7 +149,7 @@ export class TelopNode extends Container {
     );
 
     for (const group of planGroups(layout)) {
-      const container = createEffectContainer(group.effects, `slot ${group.slot}`, res);
+      const container = createEffectContainer(group.effects, `slot ${group.slot}`);
       for (const { glyph: index, layer } of group.members) {
         const glyph = layout.glyphs[index]!;
         const style = layout.runs[glyph.runIndex]!.style;
@@ -217,7 +218,6 @@ export class TelopNode extends Container {
     const container = createEffectContainer(
       { paint: style.paint, offset: style.offset, blur: style.blur, opacity: style.opacity, filters: style.filters },
       "plate",
-      res,
     );
     const sprite = new Sprite(cached.texture);
     sprite.position.set(x, y);
@@ -285,20 +285,17 @@ function roundBox(box: { x: number; y: number; width: number; height: number }) 
 /** Filters created here are owned by the node; user filters are left alone. */
 const ownedFilters = new WeakSet<Filter>();
 
-function createEffectContainer(effects: Layer, label: string, resolution: number): Container {
+function createEffectContainer(effects: Layer, label: string): Container {
   const container = new Container({ label });
   const [dx, dy] = effects.offset ?? [0, 0];
   container.position.set(dx, dy);
 
   const filters: Filter[] = [];
   if (effects.blur && effects.blur > 0) {
-    // BlurFilter strength is in device pixels; scale it so blur looks the same at any resolution.
-    const blur = new BlurFilter({
-      strength: effects.blur * resolution,
-      quality: effects.blurQuality ?? 4,
-      resolution: "inherit",
-    });
-    blur.padding = effects.blur * 2;
+    // BlurFilter strength is in local units, so the blur looks the same at any resolution.
+    const quality = effects.blurQuality ?? 4;
+    const blur = new BlurFilter({ strength: effects.blur, quality, resolution: "inherit" });
+    blur.padding = blurPadding(effects.blur, quality);
     ownedFilters.add(blur);
     filters.push(blur);
   }

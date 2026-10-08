@@ -64,7 +64,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 4. **Output**: `TelopRenderer` is one shared offscreen WebGL renderer (`preserveDrawingBuffer: true`).
    - `draw()` renders a node synchronously, then `drawImage`s the result into the target 2D canvas, sized to the node's ink bounds.
    - The renderer only grows, in power-of-two steps. Frequent resizes make PixiJS log "destroyed while still bound" warnings.
-   - `BlurFilter` strength is in device pixels, so `TelopNode` multiplies it by `resolution` and sets `padding` explicitly.
+   - `BlurFilter` strength is in local (CSS) px, not device px: never multiply it by `resolution`. Pixi's own padding (`2 × strength`) is too small for multi-pass blurs and crops shadows, so `TelopNode` sets `padding` from `blurReach` (`render/blur.ts`).
 
 **React/Remotion** (`react/Telop.tsx`, `remotion/Telop.tsx`):
 - `<Telop>` keeps a `TelopNode` in a ref and draws in `useLayoutEffect` on every render. It sizes the wrapper div to the layout box and offsets the canvas to the ink bounds.

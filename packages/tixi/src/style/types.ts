@@ -73,7 +73,7 @@ export interface Layer {
   /** Default: `10`. */
   miterLimit?: number;
   offset?: readonly [x: number, y: number];
-  /** Blur strength (PixiJS `BlurFilter` strength). */
+  /** Blur strength in px (PixiJS `BlurFilter` strength). The drawn area grows to fit the whole blur. */
   blur?: number;
   /** PixiJS `BlurFilter` quality. Default: `4`. */
   blurQuality?: number;
