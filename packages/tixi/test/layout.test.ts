@@ -1,0 +1,200 @@
+import { describe, expect, test } from "bun:test";
+import { layoutTelop, type Layout } from "../src/layout/layout";
+import type { TelopLayoutOptions } from "../src/style/types";
+import { fakeMeasurer } from "./fakeMeasurer";
+
+const style = { fontSize: 10, lineHeight: 1 };
+const layout = (options: TelopLayoutOptions) => layoutTelop({ ...options, style: { ...style, ...options.style } }, fakeMeasurer);
+const lineTexts = (result: Layout) =>
+  result.lines.map((line) => result.glyphs.slice(line.start, line.end).map((glyph) => glyph.text).join(""));
+
+describe("line breaking", () => {
+  test("keeps a single line without maxWidth", () => {
+    const result = layout({ text: "こんにちは世界" });
+    expect(lineTexts(result)).toEqual(["こんにちは世界"]);
+    expect(result.width).toBe(70);
+    expect(result.height).toBe(10);
+  });
+
+  test("honors explicit newlines including blank lines", () => {
+    expect(lineTexts(layout({ text: "あ\n\nい" }))).toEqual(["あ", "", "い"]);
+    expect(lineTexts(layout({ text: "あ\r\nい" }))).toEqual(["あ", "い"]);
+  });
+
+  test("wraps CJK at any character", () => {
+    expect(lineTexts(layout({ text: "あいうえおかきくけこ", maxWidth: 40 }))).toEqual(["あいうえ", "おかきく", "けこ"]);
+  });
+
+  test("wraps latin at spaces and drops the space at the break", () => {
+    const result = layout({ text: "hello big world", maxWidth: 40 });
+    expect(lineTexts(result)).toEqual(["hello ", "big ", "world"]);
+    expect(result.lines[0]!.width).toBe(25);
+  });
+
+  test("breaks long words as a last resort", () => {
+    expect(lineTexts(layout({ text: "abcdefghij", maxWidth: 30 }))).toEqual(["abcdef", "ghij"]);
+  });
+
+  test("does not start a line with closing punctuation (行頭禁則)", () => {
+    expect(lineTexts(layout({ text: "あいう」えお", maxWidth: 30 }))).toEqual(["あい", "う」え", "お"]);
+  });
+
+  test("does not end a line with an opening bracket (行末禁則)", () => {
+    expect(lineTexts(layout({ text: "あい「うえ", maxWidth: 30 }))).toEqual(["あい", "「うえ"]);
+  });
+
+  test("hangs 、 and 。 past the edge (ぶら下げ)", () => {
+    expect(lineTexts(layout({ text: "あいう。えお", maxWidth: 30 }))).toEqual(["あいう。", "えお"]);
+  });
+
+  test("kinsoku can be disabled", () => {
+    expect(lineTexts(layout({ text: "あいう」えお", maxWidth: 30, kinsoku: false }))).toEqual(["あいう", "」えお"]);
+  });
+
+  test("letter spacing counts toward wrapping but not after the last glyph", () => {
+    const result = layout({ text: "あいう", style: { letterSpacing: 5 } });
+    expect(result.lines[0]!.width).toBe(40);
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 15, 30]);
+    expect(lineTexts(layout({ text: "あいう", maxWidth: 34, style: { letterSpacing: 5 } }))).toEqual(["あい", "う"]);
+  });
+
+  test("scaleX narrows glyphs (長体)", () => {
+    const result = layout({ text: "あいう", style: { scaleX: 0.5 } });
+    expect(result.width).toBe(15);
+    expect(result.glyphs[1]!.x).toBe(5);
+    expect(result.glyphs[1]!.scaleX).toBe(0.5);
+  });
+
+  test("em letter spacing scales with the font size", () => {
+    const result = layout({ text: "あい", style: { letterSpacing: { em: 0.5 } } });
+    expect(result.glyphs[1]!.x).toBe(15);
+  });
+});
+
+describe("kerning", () => {
+  const kerningMeasurer = {
+    ...fakeMeasurer,
+    measureText(text: string, font: Parameters<typeof fakeMeasurer.measureText>[1]) {
+      return fakeMeasurer.measureText(text, font) - (text.match(/。「/g)?.length ?? 0) * 4;
+    },
+  };
+
+  test("shifts the following glyph instead of shrinking its advance", () => {
+    const result = layoutTelop({ text: "あ。「い", style }, kerningMeasurer);
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 10, 16, 26]);
+    expect(result.glyphs[2]!.advance).toBe(10);
+    expect(result.lines[0]!.width).toBe(36);
+  });
+
+  test("drops kerning across a line break", () => {
+    const result = layoutTelop({ text: "あ。「い", style, maxWidth: 20 }, kerningMeasurer);
+    expect(lineTexts(result)).toEqual(["あ。", "「い"]);
+    expect(result.glyphs[2]!.x).toBe(0);
+    expect(result.lines[1]!.width).toBe(20);
+  });
+});
+
+describe("alignment", () => {
+  test("center and right align within maxWidth", () => {
+    expect(layout({ text: "あい", maxWidth: 100, align: "center" }).lines[0]!.x).toBe(40);
+    expect(layout({ text: "あい", maxWidth: 100, align: "right" }).lines[0]!.x).toBe(80);
+  });
+
+  test("centers lines against the widest line without maxWidth", () => {
+    const result = layout({ text: "あいうえ\nあい", align: "center" });
+    expect(result.width).toBe(40);
+    expect(result.lines[1]!.x).toBe(10);
+  });
+
+  test("justify spreads CJK lines but not the last line", () => {
+    const result = layout({ text: "あいうえおかき", maxWidth: 55, align: "justify" });
+    expect(lineTexts(result)).toEqual(["あいうえお", "かき"]);
+    expect(result.lines[0]!.width).toBeCloseTo(55);
+    expect(result.glyphs[4]!.x).toBeCloseTo(45);
+    expect(result.glyphs[6]!.x).toBe(10);
+  });
+
+  test("justify spreads latin lines at spaces", () => {
+    const result = layout({ text: "ab cd efgh", maxWidth: 30, align: "justify" });
+    expect(lineTexts(result)).toEqual(["ab cd ", "efgh"]);
+    const [a, b, , c] = result.glyphs;
+    expect(b!.x - a!.x).toBe(5);
+    expect(c!.x).toBeCloseTo(20);
+  });
+});
+
+describe("vertical metrics", () => {
+  test("mixed font sizes share a baseline", () => {
+    const result = layout({ text: ["あ", { text: "い", style: { fontSize: 20 } }] });
+    const [small, big] = result.glyphs;
+    expect(small!.y).toBe(big!.y);
+    expect(result.lines[0]!.height).toBe(20);
+    expect(result.lines[0]!.baseline).toBe(16);
+  });
+
+  test("line height adds half-leading above and below", () => {
+    const result = layout({ text: "あ\nい", style: { lineHeight: 2 } });
+    expect(result.lines.map((line) => line.baseline)).toEqual([13, 33]);
+    expect(result.height).toBe(40);
+  });
+
+  test("absolute line height", () => {
+    expect(layout({ text: "あ\nい", style: { lineHeight: { px: 30 } } }).height).toBe(60);
+  });
+
+  test("baseline shift raises a run", () => {
+    const result = layout({ text: ["あ", { text: "い", style: { baselineShift: 4 } }] });
+    expect(result.glyphs[0]!.y - result.glyphs[1]!.y).toBe(4);
+  });
+});
+
+describe("overflow", () => {
+  test("shrink scales the font until it fits", () => {
+    const result = layout({ text: "あいうえお", maxWidth: 25, wrap: "none", overflow: "shrink" });
+    expect(result.fontScale).toBeCloseTo(0.5, 2);
+    expect(result.lines[0]!.width).toBeLessThanOrEqual(25.01);
+    expect(result.glyphs[0]!.fontSize).toBeCloseTo(5, 1);
+  });
+
+  test("shrink respects maxLines while wrapping", () => {
+    const result = layout({ text: "あいうえおかきくけこ", maxWidth: 40, maxLines: 2, overflow: "shrink" });
+    expect(result.lines.length).toBe(2);
+    expect(result.fontScale).toBeLessThan(1);
+  });
+
+  test("squeeze compresses overflowing lines horizontally", () => {
+    const result = layout({ text: "あいうえ\nあ", maxWidth: 20, wrap: "none", overflow: "squeeze" });
+    expect(result.lines[0]!.width).toBe(20);
+    expect(result.glyphs[0]!.scaleX).toBe(0.5);
+    expect(result.glyphs[1]!.x).toBe(5);
+    expect(result.glyphs[4]!.scaleX).toBe(1);
+  });
+
+  test("maxLines truncates when not shrinking", () => {
+    expect(lineTexts(layout({ text: "あいうえおかき", maxWidth: 20, maxLines: 2 }))).toEqual(["あい", "うえ"]);
+  });
+});
+
+describe("glyphs", () => {
+  test("indexes glyphs across runs and lines", () => {
+    const result = layout({ text: ["あい", { text: "う\nえ", tags: ["em"] }] });
+    expect(result.glyphs.map((glyph) => [glyph.text, glyph.runIndex, glyph.lineIndex, glyph.indexInLine])).toEqual([
+      ["あ", 0, 0, 0],
+      ["い", 0, 0, 1],
+      ["う", 1, 0, 2],
+      ["え", 1, 1, 0],
+    ]);
+    expect(result.runs[1]!.tags).toEqual(["em"]);
+  });
+
+  test("keeps emoji and combining sequences as one glyph", () => {
+    const result = layout({ text: "👨‍👩‍👧が" });
+    expect(result.glyphs.map((glyph) => glyph.text)).toEqual(["👨‍👩‍👧", "が"]);
+  });
+
+  test("empty text still has one line", () => {
+    const result = layout({ text: "" });
+    expect(result.lines.length).toBe(1);
+    expect(result.height).toBe(10);
+  });
+});

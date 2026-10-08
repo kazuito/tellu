@@ -1,0 +1,71 @@
+import { normalizeRuns } from "./layout/layout";
+import { fontSpecOf, fontToCss } from "./layout/measure";
+import { resolveStyle } from "./style/defaults";
+import type { TelopLayoutOptions } from "./style/types";
+
+export interface FontRequest {
+  /** CSS font shorthand, e.g. `"900 16px 'Noto Sans JP'"`. */
+  font: string;
+  /** Characters that will be drawn; needed for fonts split by `unicode-range`. */
+  text: string;
+}
+
+/** The fonts (and the characters drawn with each) a telop needs. */
+export function fontRequests(options: Pick<TelopLayoutOptions, "text" | "style">): FontRequest[] {
+  const requests = new Map<string, string>();
+  for (const run of normalizeRuns(options.text, resolveStyle(options.style))) {
+    const font = fontToCss(fontSpecOf(run.style, 16));
+    requests.set(font, (requests.get(font) ?? "") + run.text);
+  }
+  return [...requests].map(([font, text]) => ({ font, text: text || " " }));
+}
+
+function fontFaceSet(): FontFaceSet | undefined {
+  return typeof document !== "undefined" ? document.fonts : undefined;
+}
+
+/** Whether every font face the telop needs is loaded. */
+export function fontsReady(options: Pick<TelopLayoutOptions, "text" | "style">): boolean {
+  const fonts = fontFaceSet();
+  if (!fonts) return true;
+  return fontRequests(options).every(({ font, text }) => {
+    try {
+      return fonts.check(font, text);
+    } catch {
+      return true;
+    }
+  });
+}
+
+/** Loads every font face the telop needs. Resolves when they can be measured. */
+export async function loadFonts(options: Pick<TelopLayoutOptions, "text" | "style"> | readonly FontRequest[]): Promise<void> {
+  const fonts = fontFaceSet();
+  if (!fonts) return;
+  const requests = Array.isArray(options) ? (options as readonly FontRequest[]) : fontRequests(options as TelopLayoutOptions);
+  await Promise.all(requests.map(({ font, text }) => fonts.load(font, text)));
+}
+
+let fontEpoch = 0;
+const epochListeners = new Set<() => void>();
+
+/** Increments whenever the document finishes loading web fonts. */
+export function getFontEpoch(): number {
+  return fontEpoch;
+}
+
+/** Calls `listener` after the document finishes loading web fonts. Returns an unsubscribe function. */
+export function subscribeFontEpoch(listener: () => void): () => void {
+  const fonts = fontFaceSet();
+  if (!fonts) return () => {};
+  if (epochListeners.size === 0) fonts.addEventListener("loadingdone", bumpEpoch);
+  epochListeners.add(listener);
+  return () => {
+    epochListeners.delete(listener);
+    if (epochListeners.size === 0) fonts.removeEventListener("loadingdone", bumpEpoch);
+  };
+}
+
+function bumpEpoch(): void {
+  fontEpoch++;
+  for (const listener of epochListeners) listener();
+}

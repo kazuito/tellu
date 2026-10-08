@@ -1,0 +1,72 @@
+{
+  "name": "tixi",
+  "version": "0.1.0",
+  "description": "Advanced telop (caption) rendering on PixiJS — multi-layer strokes, shadows, gradients, rich text and Japanese line breaking.",
+  "type": "module",
+  "license": "MIT",
+  "author": "kazuito",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "telop",
+    "caption",
+    "subtitle",
+    "pixi",
+    "pixijs",
+    "remotion",
+    "text",
+    "stroke"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "pixi.js": "^8.21.0",
+    "react": ">=18",
+    "remotion": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "remotion": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.3.0",
+    "pixi.js": "^8.22.0",
+    "react": "^19.3.0",
+    "remotion": "^4.0.534",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2"
+  },
+  "exports": {
+    ".": {
+      "tixi-source": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "tixi-source": "./src/react/index.ts",
+      "default": "./dist/react.js"
+    },
+    "./remotion": {
+      "tixi-source": "./src/remotion/index.ts",
+      "default": "./dist/remotion.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./react": "./dist/react.js",
+      "./remotion": "./dist/remotion.js",
+      "./package.json": "./package.json"
+    }
+  }
+}
