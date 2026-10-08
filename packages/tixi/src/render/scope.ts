@@ -1,15 +1,5 @@
-import type { Layout, LayoutGlyph, LayoutLine } from "../layout/layout";
-import type { PaintScope } from "../style/types";
-import type { Box } from "./paint";
-
-export function glyphBox(glyph: LayoutGlyph): Box {
-  return { x: glyph.x, y: glyph.y - glyph.ascent, width: glyph.advance, height: glyph.ascent + glyph.descent };
-}
-
-/** The line's ink-relevant box: content width × (ascent + descent). */
-export function contentBox(line: LayoutLine): Box {
-  return { x: line.x, y: line.baseline - line.ascent, width: line.width, height: line.ascent + line.descent };
-}
+import type { Layout, LayoutGlyph } from "../layout/layout";
+import type { Box, PaintScope } from "../style/types";
 
 export function unionBox(boxes: readonly Box[]): Box {
   if (boxes.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
@@ -32,13 +22,13 @@ export class ScopeBoxes {
   private block: Box;
 
   constructor(layout: Layout) {
-    this.lines = layout.lines.map(contentBox);
-    this.block = unionBox(layout.lines.filter((line) => line.end > line.start).map(contentBox));
+    this.lines = layout.lines.map((line) => line.contentBox);
+    this.block = unionBox(layout.lines.filter((line) => line.end > line.start).map((line) => line.contentBox));
   }
 
   get(scope: PaintScope | null, glyph: LayoutGlyph): Box {
     if (scope === "line") return this.lines[glyph.lineIndex]!;
     if (scope === "block") return this.block;
-    return glyphBox(glyph);
+    return glyph.box;
   }
 }

@@ -38,3 +38,7 @@ examples/remotion/out
 
 # lefthook
 lefthook-local.yml
+
+# docs
+docs/.vitepress/cache
+docs/.vitepress/dist

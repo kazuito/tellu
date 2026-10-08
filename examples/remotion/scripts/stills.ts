@@ -11,6 +11,7 @@ const frames: Record<string, number[]> = {
   Sale: [30, 70, 180],
   GameStream: [80, 130, 200],
   Cinema: [40, 100, 160, 230],
+  Documentary: [30, 150],
   Credits: [60, 200, 300],
   Shorts: [35, 70, 120, 170],
 };

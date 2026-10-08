@@ -1,13 +1,6 @@
 import type { Canvas2D } from "../canvas";
-import type { GradientStop, GradientStopInput, Paint, PaintScope } from "../style/types";
+import type { Box, GradientStop, GradientStopInput, Paint, PaintScope } from "../style/types";
 import { objectId } from "../utils/stableKey";
-
-export interface Box {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 
 export function colorToCss(color: string | number): string {
   return typeof color === "number" ? `#${(color & 0xffffff).toString(16).padStart(6, "0")}` : color;

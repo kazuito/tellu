@@ -12,6 +12,19 @@ export interface FontSpec {
 export interface FontMetrics {
   ascent: number;
   descent: number;
+  /**
+   * Distance from the alphabetic baseline down to the ideographic baseline, the bottom of the em box
+   * that vertical text is centered on. Default: the em size split in the ratio of `ascent` to `descent`.
+   */
+  ideographicDescent?: number;
+}
+
+/** Ink extents of a glyph relative to its baseline origin, in px (`top` is negative above the baseline). */
+export interface InkBounds {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
 }
 
 /** Text measurement backend. Swap it to lay out text outside the browser (e.g. in tests). */
@@ -19,6 +32,8 @@ export interface Measurer {
   /** Advance width of `text` in px, without letter spacing or scaling. */
   measureText(text: string, font: FontSpec): number;
   fontMetrics(font: FontSpec): FontMetrics;
+  /** Places vertical punctuation and small kana by their ink. Without it they are moved by a fixed amount. */
+  inkBounds?(text: string, font: FontSpec): InkBounds;
 }
 
 const GENERIC_FAMILIES = new Set([
@@ -59,6 +74,7 @@ export class CanvasMeasurer implements Measurer {
   private context: Canvas2D | undefined;
   private widths = new Map<string, number>();
   private metrics = new Map<string, FontMetrics>();
+  private inks = new Map<string, InkBounds>();
 
   private get ctx(): Canvas2D {
     this.context ??= context2d(createCanvas(1, 1));
@@ -94,15 +110,34 @@ export class CanvasMeasurer implements Measurer {
         ascent: m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent,
         descent: m.fontBoundingBoxDescent ?? m.actualBoundingBoxDescent,
       };
+      if (typeof m.ideographicBaseline === "number") metrics.ideographicDescent = -m.ideographicBaseline;
       this.metrics.set(key, metrics);
     }
     return metrics;
+  }
+
+  inkBounds(text: string, font: FontSpec): InkBounds {
+    const key = `${fontToCss(font)}\u0000${text}`;
+    let bounds = this.inks.get(key);
+    if (!bounds) {
+      this.use(font);
+      const m = this.ctx.measureText(text);
+      bounds = {
+        left: -m.actualBoundingBoxLeft,
+        top: -m.actualBoundingBoxAscent,
+        right: m.actualBoundingBoxRight,
+        bottom: m.actualBoundingBoxDescent,
+      };
+      this.inks.set(key, bounds);
+    }
+    return bounds;
   }
 
   /** Drops cached measurements, e.g. after a web font finished loading. */
   clear(): void {
     this.widths.clear();
     this.metrics.clear();
+    this.inks.clear();
   }
 }
 

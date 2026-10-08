@@ -1,14 +1,17 @@
 import { type AnyCanvas, type Canvas2D, context2d, createCanvas } from "../canvas";
 import { type FontSpec, fontToCss } from "../layout/measure";
-import type { Layer, StrokePosition } from "../style/types";
-import { type Box, createPaintStyle } from "./paint";
+import type { Box, Layer, StrokePosition } from "../style/types";
+import { createPaintStyle } from "./paint";
 import { signedDistanceField, strokeCoverage } from "./sdf";
 
 export interface GlyphShape {
   text: string;
   font: FontSpec;
+  /** Applied on screen, after `rotation`. */
   scaleX: number;
   scaleY: number;
+  /** Clockwise, in degrees. */
+  rotation: 0 | 90;
   resolution: number;
   /** Sub-pixel position of the glyph origin in device pixels, `[0, 1)`. */
   fracX: number;
@@ -37,6 +40,32 @@ interface FieldEntry {
 
 const SUPERSAMPLE = 2;
 const AA_MARGIN = 2;
+
+type Matrix = readonly [a: number, b: number, c: number, d: number];
+
+/** Glyph space → device pixels: rotate, then scale on screen. */
+function glyphMatrix({ scaleX, scaleY, rotation, resolution }: GlyphShape): Matrix {
+  return rotation === 90
+    ? [0, resolution * scaleY, -resolution * scaleX, 0]
+    : [resolution * scaleX, 0, 0, resolution * scaleY];
+}
+
+function transformBounds(bounds: GlyphBounds, [a, b, c, d]: Matrix): GlyphBounds {
+  const xs = [bounds.left, bounds.right];
+  const ys = [bounds.top, bounds.bottom];
+  const result = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+  for (const x of xs) {
+    for (const y of ys) {
+      const tx = a * x + c * y;
+      const ty = b * x + d * y;
+      result.left = Math.min(result.left, tx);
+      result.right = Math.max(result.right, tx);
+      result.top = Math.min(result.top, ty);
+      result.bottom = Math.max(result.bottom, ty);
+    }
+  }
+  return result;
+}
 
 export function layerShape(layer: Layer): {
   width: number;
@@ -97,12 +126,13 @@ export class GlyphRasterizer {
    */
   rasterize(shape: GlyphShape, layer: Layer, paintBox: Box, reach: number): RasterResult {
     const { resolution: res, scaleX, scaleY, fracX, fracY } = shape;
-    const bounds = this.glyphBounds(shape.text, shape.font);
+    const matrix = glyphMatrix(shape);
+    const bounds = transformBounds(this.glyphBounds(shape.text, shape.font), matrix);
     const margin = reach * res + AA_MARGIN;
-    const left = Math.floor(fracX + bounds.left * scaleX * res - margin);
-    const top = Math.floor(fracY + bounds.top * scaleY * res - margin);
-    const width = Math.max(1, Math.ceil(fracX + bounds.right * scaleX * res + margin) - left);
-    const height = Math.max(1, Math.ceil(fracY + bounds.bottom * scaleY * res + margin) - top);
+    const left = Math.floor(fracX + bounds.left - margin);
+    const top = Math.floor(fracY + bounds.top - margin);
+    const width = Math.max(1, Math.ceil(fracX + bounds.right + margin) - left);
+    const height = Math.max(1, Math.ceil(fracY + bounds.bottom + margin) - top);
 
     const canvas = createCanvas(width, height);
     const ctx = context2d(canvas);
@@ -112,7 +142,7 @@ export class GlyphRasterizer {
     const isFill = strokeWidth === 0 && position === "outside";
 
     if (isFill || scaleX === scaleY) {
-      ctx.setTransform(res * scaleX, 0, 0, res * scaleY, glyphX, glyphY);
+      ctx.setTransform(...matrix, glyphX, glyphY);
       ctx.font = fontToCss(shape.font);
       ctx.fillStyle = ctx.strokeStyle = "#000";
       ctx.lineJoin = join;
@@ -136,7 +166,7 @@ export class GlyphRasterizer {
       }
     } else {
       // Non-uniform scale would distort a native stroke, so grow the scaled glyph with a distance field instead.
-      const entry = this.distanceField(shape, glyphX, glyphY, width, height);
+      const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height);
       const pixels = strokeCoverage(
         entry.field,
         entry.width,
@@ -156,19 +186,31 @@ export class GlyphRasterizer {
     return { canvas, offsetX: left, offsetY: top };
   }
 
-  private distanceField(shape: GlyphShape, glyphX: number, glyphY: number, width: number, height: number): FieldEntry {
+  private distanceField(
+    shape: GlyphShape,
+    matrix: Matrix,
+    glyphX: number,
+    glyphY: number,
+    width: number,
+    height: number,
+  ): FieldEntry {
     const css = fontToCss(shape.font);
-    const key = [css, shape.text, shape.scaleX, shape.scaleY, shape.resolution, glyphX, glyphY, width, height].join(
-      "\u0000",
-    );
+    const key = [css, shape.text, ...matrix, glyphX, glyphY, width, height].join("\u0000");
     let entry = this.fieldCache.get(key);
     if (entry) return entry;
 
     const fieldWidth = width * SUPERSAMPLE;
     const fieldHeight = height * SUPERSAMPLE;
     const ctx = context2d(createCanvas(fieldWidth, fieldHeight));
-    const scale = shape.resolution * SUPERSAMPLE;
-    ctx.setTransform(scale * shape.scaleX, 0, 0, scale * shape.scaleY, glyphX * SUPERSAMPLE, glyphY * SUPERSAMPLE);
+    const [a, b, c, d] = matrix;
+    ctx.setTransform(
+      a * SUPERSAMPLE,
+      b * SUPERSAMPLE,
+      c * SUPERSAMPLE,
+      d * SUPERSAMPLE,
+      glyphX * SUPERSAMPLE,
+      glyphY * SUPERSAMPLE,
+    );
     ctx.font = css;
     ctx.fillStyle = "#000";
     ctx.fillText(shape.text, 0, 0);

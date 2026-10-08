@@ -9,6 +9,8 @@ export interface Cluster {
   start: number;
   end: number;
   kind: ClusterKind;
+  /** Several graphemes set as one glyph (縦中横). */
+  combined?: boolean;
 }
 
 /** No break is allowed before this cluster. */
@@ -79,14 +81,17 @@ export function computeBreaks(clusters: readonly Cluster[], options: BreakOption
       breaks[i] = BREAK_PREFERRED;
     }
 
-    if (breaks[i] && kinsoku && prohibited(prev.text, cur.text, kinsoku)) breaks[i] = BREAK_NONE;
+    if (breaks[i] && kinsoku && prohibited(prev, cur, kinsoku)) breaks[i] = BREAK_NONE;
   }
   return breaks;
 }
 
-function prohibited(prev: string, cur: string, rules: KinsokuRules): boolean {
-  if (rules.lineStart.includes(cur) || rules.lineEnd.includes(prev)) return true;
-  return prev === cur && rules.inseparable.includes(cur);
+/** Kinsoku compares single graphemes; a combined cluster counts as its first or last character. */
+function prohibited(prev: Cluster, cur: Cluster, rules: KinsokuRules): boolean {
+  const first = cur.combined ? [...cur.text][0]! : cur.text;
+  const last = prev.combined ? [...prev.text].at(-1)! : prev.text;
+  if (rules.lineStart.includes(first) || rules.lineEnd.includes(last)) return true;
+  return !cur.combined && prev.text === cur.text && rules.inseparable.includes(cur.text);
 }
 
 /**

@@ -6,6 +6,7 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 - Shadows and glows as ordinary layers (they can be outlined too)
 - Solid colors, linear / radial gradients and image patterns, stretched per glyph, per line or over the whole block
 - Rich text: change font, size, color or any layer for part of the text (runs or `<tag>` markup)
+- Horizontal and vertical writing (縦書き) with upright / sideways glyphs, vertical punctuation and 縦中横
 - Automatic line wrapping with Japanese kinsoku (禁則処理), hanging punctuation (ぶら下げ) and optional phrase breaking (文節改行)
 - Letter spacing, condensed / expanded glyphs (長体 / 平体) with uniform outlines, kerning, baseline shift, line height
 - Fit to width by shrinking the font or squeezing the line (長体で収める)
@@ -15,6 +16,8 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 ```sh
 bun add tixi pixi.js
 ```
+
+**[Documentation](https://kazuito.github.io/tixi/)**: guides, live examples and the API reference ([`llms.txt`](https://kazuito.github.io/tixi/llms.txt) for AI assistants).
 
 ## Usage
 
@@ -135,25 +138,48 @@ Gradients and patterns are stretched over `scope`: `"glyph"` (each character), `
 | `scaleX` / `scaleY` | `1` | 長体 / 平体; outlines stay uniform |
 | `lineHeight` | `1.2` | multiplier or `{ px }` |
 | `kerning` | `true` | |
-| `baselineShift` | `0` | px or `{ em }`, raises the run |
+| `baselineShift` | `0` | px or `{ em }`, raises the run (moves it right in vertical text) |
+| `textOrientation` | `"mixed"` | vertical text: `"upright"` / `"sideways"` for every glyph |
+| `textCombineUpright` | `"digits 2"` | vertical text: 縦中横 for runs of up to N digits (`"digits 3"`, …), `"all"` or `"none"` |
 | `layers` | white fill | |
 
 ### Layout
 
 | Option | Default | |
 | --- | --- | --- |
-| `maxWidth` | | layout box width; enables wrapping |
+| `writingMode` | `"horizontal-tb"` | `"vertical-rl"` (縦書き, lines right → left) or `"vertical-lr"` |
+| `maxWidth` | | layout box width; the line length (enables wrapping) in horizontal text |
+| `maxHeight` | | layout box height; the line length (enables wrapping) in vertical text |
 | `wrap` | `"auto"` | `"none"` keeps explicit lines only |
-| `align` | `"left"` | `"center"`, `"right"`, `"justify"` |
+| `align` | `"start"` | `"center"`, `"end"`, `"justify"`; `"left"` / `"top"` = start, `"right"` / `"bottom"` = end |
 | `lineBreak` | `"char"` | `"phrase"` keeps Japanese phrases together (heuristic, `Intl.Segmenter`) |
 | `kinsoku` | `true` | `false` or custom `{ lineStart, lineEnd, inseparable, hanging }` |
-| `overflow` | `"visible"` | `"shrink"` scales the font to fit `maxWidth` / `maxLines`; `"squeeze"` compresses overflowing lines |
+| `overflow` | `"visible"` | `"shrink"` scales the font to fit `maxWidth` / `maxHeight` / `maxLines`; `"squeeze"` compresses overflowing lines |
 | `minScale` | `0.3` | lower bound for `shrink` / `squeeze` |
 | `maxLines` | | truncates (or bounds `shrink`) |
 | `background` | | plate: `{ paint, padding, radius, stroke, mode: "block" \| "line", offset, blur, opacity }` |
 | `glyphTransform` | | `(glyph) => ({ x, y, scale, scaleX, scaleY, rotation, skewX, skewY, opacity, visible, origin })`; angles in degrees |
 
 `layoutText(options, measurer?)` runs the layout without rendering; pass your own `Measurer` to lay out outside the browser.
+
+### Vertical writing (縦書き)
+
+```tsx
+<Text
+  text={parseMarkup("第12話\n消えた<tcy>!?</tcy>ラーメンの謎", { tcy: { textCombineUpright: "all" } })}
+  writingMode="vertical-rl"
+  maxHeight={800}
+  align="center"
+  textStyle={style}
+/>
+```
+
+Everything else works the same way: layers, rich text, kinsoku, `shrink` / `squeeze`, plates and glyph transforms. Options follow CSS (`writing-mode`, `text-orientation`, `text-combine-upright`):
+
+- **Lines** are stacked right → left (`vertical-rl`) or left → right (`vertical-lr`). `maxHeight` is the line length, `maxWidth` bounds `shrink`, and `align` runs along the column.
+- **Glyphs**: with `textOrientation: "mixed"` CJK stays upright and latin text is turned 90°. Brackets, `ー`, `〜` and `…` are turned too, `、。` move to the top right and small kana move up and right, approximating the fonts' vertical forms (Canvas 2D cannot use the `vert` feature).
+- **縦中横**: up to two consecutive digits are set horizontally in one cell by default (`"第12話"`). Use `textCombineUpright: "all"` on a run (e.g. a markup tag) for anything else, such as `!?` or `100%`; text wider than 1em is condensed.
+- **Geometry** stays physical: `scaleX` / `scaleY`, gradient angles, plate `padding` (`[x, y]`, defaulting to 12 across and 24 along a vertical line) and `glyphTransform` offsets all use screen axes. `layout.lines` reports logical `inlineStart` / `inlineSize` / `blockStart` / `blockSize` plus a physical `contentBox`.
 
 ## How it works
 
@@ -165,7 +191,7 @@ Gradients and patterns are stretched over `scope`: `"glyph"` (each character), `
 
 ## Limitations
 
-- Horizontal text only (vertical writing is planned).
+- Vertical forms are approximated by rotating and moving the horizontal glyphs, so fonts with distinctive vertical alternates (e.g. `〜`, which is also mirrored in vertical fonts) differ slightly from CSS. Ruby (furigana) is not supported yet.
 - Glyphs are drawn one at a time, so ligatures (e.g. `fi`) are not formed.
 - Where outlines of different colors in the same slot overlap, the brighter one wins.
 

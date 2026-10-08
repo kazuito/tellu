@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Composition, Series } from "remotion";
 import { CINEMA_DURATION, Cinema } from "./compositions/Cinema";
 import { CREDITS_DURATION, Credits } from "./compositions/Credits";
+import { DOCUMENTARY_DURATION, Documentary } from "./compositions/Documentary";
 import { GAME_STREAM_DURATION, GameStream } from "./compositions/GameStream";
 import { LOWER_THIRD_DURATION, LowerThird } from "./compositions/LowerThird";
 import { NEWS_DURATION, News } from "./compositions/News";
@@ -29,6 +30,7 @@ const SCENES = [
   { id: "Sale", component: Sale, durationInFrames: SALE_DURATION },
   { id: "GameStream", component: GameStream, durationInFrames: GAME_STREAM_DURATION },
   { id: "Cinema", component: Cinema, durationInFrames: CINEMA_DURATION },
+  { id: "Documentary", component: Documentary, durationInFrames: DOCUMENTARY_DURATION },
   { id: "Credits", component: Credits, durationInFrames: CREDITS_DURATION },
 ];
 

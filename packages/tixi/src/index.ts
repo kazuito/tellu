@@ -15,6 +15,7 @@ export {
   fontSpecOf,
   fontToCss,
   getDefaultMeasurer,
+  type InkBounds,
   type Measurer,
 } from "./layout/measure";
 export { parseMarkup } from "./markup";

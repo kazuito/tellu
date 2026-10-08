@@ -2,6 +2,13 @@ import type { BLEND_MODES, Filter } from "pixi.js";
 
 export type ColorValue = string | number;
 
+export interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface GradientStop {
   offset: number;
   color: ColorValue;
@@ -96,6 +103,13 @@ export type Length = number | { em: number };
 /** Multiplier of the font size, or `{ px }` for an absolute line height. */
 export type LineHeight = number | { px: number };
 
+/** CSS `writing-mode`. `vertical-rl` stacks lines right → left (縦書き), `vertical-lr` left → right. */
+export type WritingMode = "horizontal-tb" | "vertical-rl" | "vertical-lr";
+
+export type TextOrientation = "mixed" | "upright" | "sideways";
+
+export type TextCombineUpright = "none" | "all" | "digits" | "digits 2" | "digits 3" | "digits 4";
+
 export interface TextStyle {
   fontFamily: string | readonly string[];
   fontSize: number;
@@ -109,8 +123,22 @@ export interface TextStyle {
   scaleY: number;
   lineHeight: LineHeight;
   kerning: boolean;
-  /** Moves glyphs up by this amount relative to the baseline. */
+  /** Moves glyphs up (right in vertical text) by this amount relative to the baseline. */
   baselineShift: Length;
+  /**
+   * Glyph orientation in vertical text (CSS `text-orientation`).
+   * - `mixed`: CJK upright, latin and digits rotated
+   * - `upright`: every glyph upright
+   * - `sideways`: every glyph rotated, like horizontal text turned 90° clockwise
+   */
+  textOrientation: TextOrientation;
+  /**
+   * 縦中横 in vertical text (CSS `text-combine-upright`): set horizontally inside one upright cell,
+   * condensed to fit 1em.
+   * - `all`: each run of this style
+   * - `digits` / `digits N`: runs of at most N (default 2) ASCII digits
+   */
+  textCombineUpright: TextCombineUpright;
   /** Bottom → top. */
   layers: readonly Layer[];
 }
@@ -134,12 +162,16 @@ export type Run = string | RunObject;
 
 export type TextContent = string | readonly Run[];
 
-export type TextAlign = "left" | "center" | "right" | "justify";
+/**
+ * Position of each line along the line direction. `start` / `end` follow the writing mode;
+ * `left` / `top` mean `start` and `right` / `bottom` mean `end` in either direction.
+ */
+export type TextAlign = "start" | "center" | "end" | "justify" | "left" | "right" | "top" | "bottom";
 
 /**
- * - `visible`: let lines overflow `maxWidth`
- * - `shrink`: scale the font down until the text fits `maxWidth` (and `maxLines`)
- * - `squeeze`: compress overflowing lines horizontally (長体で収める)
+ * - `visible`: let lines overflow the line length
+ * - `shrink`: scale the font down until the text fits `maxWidth`, `maxHeight` and `maxLines`
+ * - `squeeze`: compress overflowing lines along the line (長体で収める)
  */
 export type Overflow = "visible" | "shrink" | "squeeze";
 
@@ -162,7 +194,7 @@ export interface KinsokuRules {
 
 export interface PlateStyle {
   paint: Paint;
-  /** `[x, y]` padding around the text. Default: `[24, 12]`. */
+  /** `[x, y]` padding around the text. Default: 24 along the lines and 12 across them (`[24, 12]` in horizontal text). */
   padding?: number | readonly [x: number, y: number];
   radius?: number;
   stroke?: { width: number; paint: Paint };
@@ -190,7 +222,7 @@ export interface GlyphContext {
   runIndex: number;
   tags: readonly string[];
   isWhitespace: boolean;
-  /** Glyph box in layout coordinates. */
+  /** Glyph cell in layout coordinates: its advance along the line × the font's extent across it. */
   x: number;
   y: number;
   width: number;
@@ -220,11 +252,21 @@ export type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | 
 export interface LayoutOptions {
   text: TextContent;
   style?: Partial<TextStyle>;
-  /** Width of the layout box. Enables wrapping unless `wrap` is `"none"`. */
+  /** Default: `"horizontal-tb"`. */
+  writingMode?: WritingMode;
+  /**
+   * Width of the layout box. In horizontal text it is the line length and enables wrapping;
+   * in vertical text it only bounds `overflow: "shrink"`.
+   */
   maxWidth?: number;
-  /** Default: `"auto"` when `maxWidth` is set. */
+  /**
+   * Height of the layout box. In vertical text it is the line length and enables wrapping;
+   * in horizontal text it only bounds `overflow: "shrink"`.
+   */
+  maxHeight?: number;
+  /** Default: `"auto"` when the line length (`maxWidth`, or `maxHeight` in vertical text) is set. */
   wrap?: "auto" | "none";
-  /** Default: `"left"`. */
+  /** Default: `"start"`. */
   align?: TextAlign;
   /** Default: `"visible"`. */
   overflow?: Overflow;

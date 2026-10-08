@@ -346,6 +346,137 @@ await demo("overflow: squeeze (長体で収める)", {
   background: { paint: "rgba(255,255,255,0.08)", padding: 0 },
 });
 
+const guide = { paint: "rgba(255,255,255,0.08)", padding: 0 } as const;
+const verticalSample = "「ちょっと待って！」\n第12話は2026年の\nRemotionとラーメン〜。";
+
+/** tixi next to the browser's own `writing-mode` rendering of the same text. */
+async function compareWithCss(title: string, props: TextNodeProps, fontSize: number, fontWeight: number) {
+  const stage = section(title);
+  stage.classList.add("row");
+  const tixi = document.createElement("figure");
+  tixi.innerHTML = "<figcaption>tixi</figcaption>";
+  const css = document.createElement("figure");
+  css.innerHTML = "<figcaption>CSS writing-mode</figcaption>";
+  const reference = document.createElement("div");
+  Object.assign(reference.style, {
+    writingMode: props.writingMode,
+    font: `${fontWeight} ${fontSize}px "Noto Sans JP"`,
+    lineHeight: "1.2",
+    whiteSpace: "pre",
+    color: "#fff",
+    background: guide.paint,
+    textCombineUpright: "digits 2",
+  });
+  reference.textContent = typeof props.text === "string" ? props.text : "";
+  css.append(reference);
+  stage.append(tixi, css);
+  await drawInto(tixi, props);
+}
+
+await compareWithCss(
+  "writingMode: vertical-rl",
+  {
+    text: verticalSample,
+    writingMode: "vertical-rl",
+    style: { fontFamily: "Noto Sans JP", fontSize: 56, layers: [fill("#ffffff")] },
+    background: guide,
+  },
+  56,
+  400,
+);
+
+await demo("Vertical telop: layers, gradient per line, plate", {
+  text: parseMarkup("<em>第3話</em><br/>消えた<red>ラーメン</red>の謎", {
+    em: { fontSize: 44, layers: { 3: { paint: "#ffe600" } } },
+    red: { layers: { 3: { paint: linearGradient(["#ffe0e0", "#ff3b30"], { angle: 180, scope: "glyph" }) } } },
+  }),
+  writingMode: "vertical-rl",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 80,
+    lineHeight: 1.3,
+    layers: [
+      shadow({ color: "rgba(0,0,0,0.55)", offset: [8, 10], blur: 6, stroke: 20 }),
+      stroke(20, "#1b2a7a"),
+      stroke(10, "#ffffff"),
+      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"], { angle: 180, scope: "line" })),
+    ],
+  },
+  background: { paint: "rgba(0, 20, 40, 0.6)", radius: 12 },
+});
+
+await compare(
+  "textOrientation",
+  Object.fromEntries(
+    (["mixed", "upright", "sideways"] as const).map((textOrientation) => [
+      textOrientation,
+      {
+        text: "tixi v2で縦書きOK",
+        writingMode: "vertical-rl",
+        style: { ...simple(44), textOrientation },
+        background: guide,
+      },
+    ]),
+  ),
+);
+
+await compare("textCombineUpright (縦中横)", {
+  '"digits 2" (default)': {
+    text: "全12話　2026年",
+    writingMode: "vertical-rl",
+    style: simple(44),
+    background: guide,
+  },
+  '"digits 4"': {
+    text: "全12話　2026年",
+    writingMode: "vertical-rl",
+    style: { ...simple(44), textCombineUpright: "digits 4" },
+    background: guide,
+  },
+  '"all" via markup': {
+    text: parseMarkup("本当に<tcy>!?</tcy>　<tcy>100%</tcy>", { tcy: { textCombineUpright: "all" } }),
+    writingMode: "vertical-rl",
+    style: simple(44),
+    background: guide,
+  },
+});
+
+await compare(
+  "Vertical wrap with kinsoku (maxHeight 300) and align",
+  Object.fromEntries(
+    (["start", "center", "end", "justify"] as const).map((align) => [
+      align,
+      {
+        text: kinsokuText,
+        writingMode: "vertical-rl",
+        maxHeight: 300,
+        align,
+        style: { ...simple(36), lineHeight: 1.4 },
+        background: guide,
+      },
+    ]),
+  ),
+);
+
+await compare("vertical-lr, shrink to maxWidth × maxHeight", {
+  "vertical-lr": {
+    text: "左から右へ\n行が進みます",
+    writingMode: "vertical-lr",
+    style: simple(40),
+    background: guide,
+  },
+  "shrink 160 × 240": {
+    text: "長い縦書きテロップも枠に収まるまで縮小します",
+    writingMode: "vertical-rl",
+    maxWidth: 160,
+    maxHeight: 240,
+    overflow: "shrink",
+    style: simple(48),
+    background: guide,
+  },
+});
+
 await animatedDemo(
   "glyphTransform (animated)",
   {

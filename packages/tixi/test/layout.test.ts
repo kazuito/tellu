@@ -34,7 +34,7 @@ describe("line breaking", () => {
   test("wraps latin at spaces and drops the space at the break", () => {
     const result = layout({ text: "hello big world", maxWidth: 40 });
     expect(lineTexts(result)).toEqual(["hello ", "big ", "world"]);
-    expect(result.lines[0]!.width).toBe(25);
+    expect(result.lines[0]!.inlineSize).toBe(25);
   });
 
   test("breaks long words as a last resort", () => {
@@ -59,7 +59,7 @@ describe("line breaking", () => {
 
   test("letter spacing counts toward wrapping but not after the last glyph", () => {
     const result = layout({ text: "あいう", style: { letterSpacing: 5 } });
-    expect(result.lines[0]!.width).toBe(40);
+    expect(result.lines[0]!.inlineSize).toBe(40);
     expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 15, 30]);
     expect(lineTexts(layout({ text: "あいう", maxWidth: 34, style: { letterSpacing: 5 } }))).toEqual(["あい", "う"]);
   });
@@ -89,33 +89,33 @@ describe("kerning", () => {
     const result = layoutText({ text: "あ。「い", style }, kerningMeasurer);
     expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 10, 16, 26]);
     expect(result.glyphs[2]!.advance).toBe(10);
-    expect(result.lines[0]!.width).toBe(36);
+    expect(result.lines[0]!.inlineSize).toBe(36);
   });
 
   test("drops kerning across a line break", () => {
     const result = layoutText({ text: "あ。「い", style, maxWidth: 20 }, kerningMeasurer);
     expect(lineTexts(result)).toEqual(["あ。", "「い"]);
     expect(result.glyphs[2]!.x).toBe(0);
-    expect(result.lines[1]!.width).toBe(20);
+    expect(result.lines[1]!.inlineSize).toBe(20);
   });
 });
 
 describe("alignment", () => {
   test("center and right align within maxWidth", () => {
-    expect(layout({ text: "あい", maxWidth: 100, align: "center" }).lines[0]!.x).toBe(40);
-    expect(layout({ text: "あい", maxWidth: 100, align: "right" }).lines[0]!.x).toBe(80);
+    expect(layout({ text: "あい", maxWidth: 100, align: "center" }).lines[0]!.inlineStart).toBe(40);
+    expect(layout({ text: "あい", maxWidth: 100, align: "right" }).lines[0]!.inlineStart).toBe(80);
   });
 
   test("centers lines against the widest line without maxWidth", () => {
     const result = layout({ text: "あいうえ\nあい", align: "center" });
     expect(result.width).toBe(40);
-    expect(result.lines[1]!.x).toBe(10);
+    expect(result.lines[1]!.inlineStart).toBe(10);
   });
 
   test("justify spreads CJK lines but not the last line", () => {
     const result = layout({ text: "あいうえおかき", maxWidth: 55, align: "justify" });
     expect(lineTexts(result)).toEqual(["あいうえお", "かき"]);
-    expect(result.lines[0]!.width).toBeCloseTo(55);
+    expect(result.lines[0]!.inlineSize).toBeCloseTo(55);
     expect(result.glyphs[4]!.x).toBeCloseTo(45);
     expect(result.glyphs[6]!.x).toBe(10);
   });
@@ -134,7 +134,7 @@ describe("vertical metrics", () => {
     const result = layout({ text: ["あ", { text: "い", style: { fontSize: 20 } }] });
     const [small, big] = result.glyphs;
     expect(small!.y).toBe(big!.y);
-    expect(result.lines[0]!.height).toBe(20);
+    expect(result.lines[0]!.blockSize).toBe(20);
     expect(result.lines[0]!.baseline).toBe(16);
   });
 
@@ -158,7 +158,7 @@ describe("overflow", () => {
   test("shrink scales the font until it fits", () => {
     const result = layout({ text: "あいうえお", maxWidth: 25, wrap: "none", overflow: "shrink" });
     expect(result.fontScale).toBeCloseTo(0.5, 2);
-    expect(result.lines[0]!.width).toBeLessThanOrEqual(25.01);
+    expect(result.lines[0]!.inlineSize).toBeLessThanOrEqual(25.01);
     expect(result.glyphs[0]!.fontSize).toBeCloseTo(5, 1);
   });
 
@@ -170,7 +170,7 @@ describe("overflow", () => {
 
   test("squeeze compresses overflowing lines horizontally", () => {
     const result = layout({ text: "あいうえ\nあ", maxWidth: 20, wrap: "none", overflow: "squeeze" });
-    expect(result.lines[0]!.width).toBe(20);
+    expect(result.lines[0]!.inlineSize).toBe(20);
     expect(result.glyphs[0]!.scaleX).toBe(0.5);
     expect(result.glyphs[1]!.x).toBe(5);
     expect(result.glyphs[4]!.scaleX).toBe(1);

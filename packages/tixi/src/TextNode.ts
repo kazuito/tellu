@@ -6,7 +6,7 @@ import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizePlate } from "./render/plate";
 import { GlyphRasterizer, layerReach, layerShape } from "./render/rasterize";
-import { glyphBox, ScopeBoxes } from "./render/scope";
+import { ScopeBoxes } from "./render/scope";
 import { TextureCache } from "./render/textureCache";
 import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } from "./style/types";
 import { stableKey } from "./utils/stableKey";
@@ -166,6 +166,7 @@ export class TextNode extends Container {
           font,
           scaleX: glyph.scaleX,
           scaleY: glyph.scaleY,
+          rotation: glyph.rotation,
           resolution: res,
           fracX,
           fracY,
@@ -176,6 +177,7 @@ export class TextNode extends Container {
           fontToCss(font),
           glyph.scaleX,
           glyph.scaleY,
+          glyph.rotation,
           res,
           fracX,
           fracY,
@@ -243,7 +245,7 @@ export class TextNode extends Container {
         sprite.visible = true;
         continue;
       }
-      const box = glyphBox(layout.glyphs[index]!);
+      const { box } = layout.glyphs[index]!;
       const [ox, oy] = t.origin ?? [0.5, 0.5];
       const px = box.x + ox * box.width;
       const py = box.y + oy * box.height;
@@ -321,7 +323,6 @@ export function createGlyphContexts(layout: Layout): GlyphContext[] {
   let visibleIndex = 0;
   return layout.glyphs.map((glyph) => {
     const line = layout.lines[glyph.lineIndex]!;
-    const box = glyphBox(glyph);
     return {
       index: glyph.index,
       count: layout.glyphs.length,
@@ -335,7 +336,7 @@ export function createGlyphContexts(layout: Layout): GlyphContext[] {
       runIndex: glyph.runIndex,
       tags: layout.runs[glyph.runIndex]!.tags,
       isWhitespace: glyph.isWhitespace,
-      ...box,
+      ...glyph.box,
     };
   });
 }

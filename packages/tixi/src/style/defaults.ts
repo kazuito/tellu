@@ -11,6 +11,8 @@ export const defaultStyle: TextStyle = {
   lineHeight: 1.2,
   kerning: true,
   baselineShift: 0,
+  textOrientation: "mixed",
+  textCombineUpright: "digits 2",
   layers: [{ paint: "#ffffff" }],
 };
 

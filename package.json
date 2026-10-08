@@ -4,7 +4,8 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "docs"
   ],
   "scripts": {
     "build": "bun run --filter tixi build",
@@ -12,6 +13,11 @@
     "typecheck": "bun run --filter '*' typecheck",
     "dev": "bun run --filter tixi-playground dev",
     "studio": "bun run --filter tixi-remotion-example studio",
+    "docs:dev": "bun run --filter tixi-docs dev",
+    "docs:build": "bun run --filter tixi-docs build",
+    "docs:preview": "bun run --filter tixi-docs preview",
+    "docs:check": "bun run --filter tixi-docs check",
+    "docs:format": "bun run --filter tixi-docs format",
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "prepare": "lefthook install"
