@@ -1,6 +1,6 @@
 import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, linearGradient, parseMarkup, shadow, stroke, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, linearGradient, parseMarkup, shadow, stroke, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -13,7 +13,7 @@ const STAR = Array.from({ length: 48 }, (_, i) => {
   return `${50 + radius * Math.cos(angle)}% ${50 + radius * Math.sin(angle)}%`;
 }).join(",");
 
-const price: Partial<TelopStyle> = {
+const price: Partial<TextStyle> = {
   fontFamily: FONTS.heavy,
   fontWeight: 400,
   fontSize: 230,
@@ -29,7 +29,7 @@ const Ribbon = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   return (
-    <Telop
+    <Text
       text="期間限定"
       textStyle={{
         fontFamily: FONTS.heavy,
@@ -57,7 +57,7 @@ const Ribbon = () => {
 const Product = () => {
   const frame = useCurrentFrame();
   return (
-    <Telop
+    <Text
       text={parseMarkup("ふわもち枕<sub> PREMIUM</sub>", {
         sub: {
           fontFamily: FONTS.latin,
@@ -88,7 +88,7 @@ const OldPrice = () => {
   const strike = ramp(frame, 25, 10, easeOut);
   return (
     <div style={{ position: "absolute", left: 960, top: 300, translate: "-50% 0", opacity: ramp(frame, 0, 8) }}>
-      <Telop
+      <Text
         text="通常価格 ¥19,800"
         textStyle={{
           fontFamily: FONTS.gothic,
@@ -119,7 +119,7 @@ const Price = () => {
   const { fps } = useVideoConfig();
   const slam = spring({ frame, fps, config: { damping: 8, stiffness: 180 } });
   return (
-    <Telop
+    <Text
       text={parseMarkup("<y>¥</y>9,800<t>(税込)</t>", {
         y: { fontSize: 140 },
         t: {
@@ -167,7 +167,7 @@ const Burst = () => {
           rotate: `${frame * 0.8}deg`,
         }}
       />
-      <Telop
+      <Text
         text={parseMarkup("<n>50</n>%<br/>OFF", { n: { fontSize: 120 } })}
         textStyle={{
           fontFamily: FONTS.latin,
@@ -205,7 +205,7 @@ const CallNow = () => {
         translate: `0 ${(1 - enter) * 300}px`,
       }}
     >
-      <Telop
+      <Text
         text={"今すぐ\nお電話を！"}
         textStyle={{
           fontFamily: FONTS.gothic,
@@ -216,7 +216,7 @@ const CallNow = () => {
         }}
         glyphTransform={() => ({ opacity: Math.floor(frame / 8) % 2 === 0 ? 1 : 0.4 })}
       />
-      <Telop
+      <Text
         text={parseMarkup("<s>フリーダイヤル</s>0120-000-000", {
           s: { fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 40, baselineShift: 10, layers: [fill("#00843d")] },
         })}
@@ -233,7 +233,7 @@ const CallNow = () => {
 };
 
 const Disclaimer = () => (
-  <Telop
+  <Text
     text="※画像はイメージです。※お一人様3点まで。※送料は別途かかります。"
     textStyle={{
       fontFamily: FONTS.gothic,

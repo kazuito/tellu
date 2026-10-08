@@ -22,7 +22,7 @@ bun add tixi pixi.js
 
 ```tsx
 import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
-import { Telop } from "tixi/remotion"; // or "tixi/react" outside Remotion
+import { Text } from "tixi/remotion"; // or "tixi/react" outside Remotion
 
 const style = {
   fontFamily: "Noto Sans JP",
@@ -40,7 +40,7 @@ const style = {
 export const Caption = () => {
   const frame = useCurrentFrame();
   return (
-    <Telop
+    <Text
       text={parseMarkup("今日は<em>最高</em>の日", { em: { fontSize: 120, layers: { 3: { paint: "#ff3d8b" } } } })}
       textStyle={style}
       maxWidth={1600}
@@ -53,7 +53,7 @@ export const Caption = () => {
 };
 ```
 
-`<Telop>` renders a block the size of the layout box; outlines, shadows and transformed glyphs may paint outside of it. `anchor` picks which point of the box sits at the element's position.
+`<Text>` renders a block the size of the layout box; outlines, shadows and transformed glyphs may paint outside of it. `anchor` picks which point of the box sits at the element's position.
 
 `tixi/remotion` holds the frame with `delayRender` until the renderer is ready, the fonts are loaded and the frame is drawn. Render with ANGLE so headless Chrome has WebGL:
 
@@ -62,29 +62,29 @@ export const Caption = () => {
 Config.setChromiumOpenGlRenderer("angle");
 ```
 
-tixi loads exactly the font faces and `unicode-range` subsets each telop's text needs, but it can only see `@font-face` rules that are already declared. Mount telops after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](../../examples/remotion/src/fonts.tsx)). Telops also re-measure whenever the document finishes loading fonts later.
+tixi loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](../../examples/remotion/src/fonts.tsx)). `<Text>` also re-measures whenever the document finishes loading fonts later.
 
 ### Vanilla
 
 ```ts
-import { createCanvasTelop, fill, stroke } from "tixi";
+import { createCanvasText, fill, stroke } from "tixi";
 
-const telop = await createCanvasTelop(canvas, {
+const canvasText = await createCanvasText(canvas, {
   text: "こんにちは",
   style: { fontFamily: "Noto Sans JP", fontWeight: 900, fontSize: 72, layers: [stroke(10, "#000"), fill("#fff")] },
 });
-telop.update({ text: "さようなら" }); // redraws synchronously
+canvasText.update({ text: "さようなら" }); // redraws synchronously
 ```
 
-The canvas is resized to the telop's ink bounds; `telop.lastDraw.x / y` is its offset from the layout box.
+The canvas is resized to the text's ink bounds; `canvasText.lastDraw.x / y` is its offset from the layout box.
 
 ### Inside a PixiJS scene
 
 ```ts
-import { loadFonts, TelopNode } from "tixi";
+import { loadFonts, TextNode } from "tixi";
 
 await loadFonts(props);
-const node = new TelopNode(props, { resolution: app.renderer.resolution });
+const node = new TextNode(props, { resolution: app.renderer.resolution });
 app.stage.addChild(node);
 node.update({ glyphTransform: (glyph) => ({ rotation: Math.sin(t + glyph.index) * 10 }) });
 ```
@@ -153,7 +153,7 @@ Gradients and patterns are stretched over `scope`: `"glyph"` (each character), `
 | `background` | | plate: `{ paint, padding, radius, stroke, mode: "block" \| "line", offset, blur, opacity }` |
 | `glyphTransform` | | `(glyph) => ({ x, y, scale, scaleX, scaleY, rotation, skewX, skewY, opacity, visible, origin })`; angles in degrees |
 
-`layoutTelop(options, measurer?)` runs the layout without rendering; pass your own `Measurer` to lay out outside the browser.
+`layoutText(options, measurer?)` runs the layout without rendering; pass your own `Measurer` to lay out outside the browser.
 
 ## How it works
 
@@ -161,7 +161,7 @@ Gradients and patterns are stretched over `scope`: `"glyph"` (each character), `
 2. **Rasterize** — each glyph × layer is drawn once with Canvas 2D (native `strokeText` for uniform scale, a distance field for 長体 / 平体 so outline width stays even) and cached as a texture.
 3. **Compose** — PixiJS sprites grouped per layer slot, merged with `max` blending, then blurred / filtered / faded as a whole. Glyph transforms only move sprites, so animation doesn't re-rasterize.
 
-`TelopRenderer` keeps one offscreen WebGL context for any number of telops and copies each into its own canvas synchronously.
+`TextRenderer` keeps one offscreen WebGL context for any number of `TextNode`s and copies each into its own canvas synchronously.
 
 ## Limitations
 

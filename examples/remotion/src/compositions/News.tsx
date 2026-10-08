@@ -1,13 +1,13 @@
 import { AbsoluteFill, interpolate, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, linearGradient, shadow, stroke, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, linearGradient, shadow, stroke, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeIn, easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
 
 export const NEWS_DURATION = 240;
 
-const newsSuper: Partial<TelopStyle> = {
+const newsSuper: Partial<TextStyle> = {
   fontFamily: FONTS.gothic,
   fontWeight: 900,
   fontSize: 64,
@@ -19,7 +19,7 @@ const newsSuper: Partial<TelopStyle> = {
   ],
 };
 
-const newsLabel: Partial<TelopStyle> = {
+const newsLabel: Partial<TextStyle> = {
   fontFamily: FONTS.gothic,
   fontWeight: 900,
   fontSize: 44,
@@ -34,14 +34,14 @@ const BreakingBar = () => {
   const drop = ramp(frame, 0, 12, easeOut);
   return (
     <div style={{ position: "absolute", left: 88, top: 62, display: "flex", translate: `0 ${(drop - 1) * 200}px` }}>
-      <Telop
+      <Text
         text="ニュース速報"
         textStyle={newsLabel}
         background={{ paint: "#d7000f", padding: [28, 14] }}
         style={{ marginRight: 56 }}
         glyphTransform={() => ({ opacity: frame < 30 && Math.floor(frame / 5) % 2 === 1 ? 0.35 : 1 })}
       />
-      <Telop
+      <Text
         text="首都圏で記録的な大雨　気象庁「命を守る行動を」"
         textStyle={{ ...newsLabel, layers: [fill("#0b1f44")] }}
         maxWidth={1100}
@@ -58,7 +58,7 @@ const LiveBadge = () => {
   const { fps } = useVideoConfig();
   const seconds = 12 + Math.floor(frame / fps);
   return (
-    <Telop
+    <Text
       text={[{ text: "● ", style: { layers: [fill("#ff2d2d")] } }, `LIVE  15:42:${String(seconds).padStart(2, "0")}`]}
       textStyle={{ ...newsLabel, fontSize: 34, letterSpacing: { em: 0.04 } }}
       background={{ paint: "rgba(0,0,0,0.55)", padding: [20, 10], radius: 6 }}
@@ -78,7 +78,7 @@ const Location = () => {
       {["東京・千代田区", "午後3時40分ごろ"].map((line, index) => {
         const t = ramp(frame, 20 + index * 6, 10, easeOut);
         return (
-          <Telop
+          <Text
             key={line}
             text={line}
             textStyle={{ ...newsLabel, fontSize: 38 }}
@@ -97,12 +97,12 @@ const Interview = () => {
   const opacity = interpolate(frame, [0, 6, durationInFrames - 6, durationInFrames], [0, 1, 1, 0]);
   return (
     <div style={{ position: "absolute", left: 960, top: 940, translate: "-50% -100%", opacity, textAlign: "center" }}>
-      <Telop
+      <Text
         text="近くに住む人"
         textStyle={{ ...newsSuper, fontSize: 36 }}
         style={{ display: "block", margin: "0 auto 18px" }}
       />
-      <Telop text={"「こんな雨は初めて」\n「傘がまったく役に立たない」"} textStyle={newsSuper} align="center" />
+      <Text text={"「こんな雨は初めて」\n「傘がまったく役に立たない」"} textStyle={newsSuper} align="center" />
     </div>
   );
 };
@@ -126,14 +126,14 @@ const Ticker = () => {
         translate: `0 ${(1 - enter) * 120}px`,
       }}
     >
-      <Telop
+      <Text
         text="NEWS"
         textStyle={{ ...newsLabel, fontSize: 38, letterSpacing: { em: 0.1 } }}
         background={{ paint: linearGradient(["#ff3030", "#b00010"], { scope: "block" }), padding: [30, 20] }}
         style={{ zIndex: 1, margin: "0 30px" }}
       />
       <div style={{ position: "relative", flex: 1, height: "100%", overflow: "hidden" }}>
-        <Telop
+        <Text
           text={TICKER}
           textStyle={{ ...newsLabel, fontSize: 40 }}
           wrap="none"

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { AbsoluteFill, random, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, linearGradient, shadow, stroke, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, linearGradient, shadow, stroke, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -39,7 +39,7 @@ const COMMENTS: Comment[] = [
   { text: "GG", start: 170, row: 3, color: "#7fdbff" },
 ];
 
-const nico: Partial<TelopStyle> = {
+const nico: Partial<TextStyle> = {
   fontFamily: FONTS.gothic,
   fontWeight: 900,
   fontSize: 52,
@@ -49,9 +49,9 @@ const nico: Partial<TelopStyle> = {
 const FlowingComment = ({ comment }: { comment: Comment }) => {
   const frame = useCurrentFrame();
   const progress = frame / COMMENT_FRAMES;
-  const telop = useMemo(
+  const label = useMemo(
     () => (
-      <Telop
+      <Text
         text={comment.text}
         textStyle={{
           ...nico,
@@ -72,13 +72,13 @@ const FlowingComment = ({ comment }: { comment: Comment }) => {
         opacity: 0.92,
       }}
     >
-      {telop}
+      {label}
     </div>
   );
 };
 
 const StreamTitle = () => (
-  <Telop
+  <Text
     text="【実況】テロップで遊ぶ　#12"
     textStyle={{ fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 32, layers: [fill("#ffffff")] }}
     background={{ paint: "rgba(145,70,255,0.9)", padding: [20, 10], radius: 8 }}
@@ -89,7 +89,7 @@ const StreamTitle = () => (
 const Setup = () => {
   const frame = useCurrentFrame();
   return (
-    <Telop
+    <Text
       text="ここで まさかの…"
       textStyle={{
         fontFamily: FONTS.pop,
@@ -110,7 +110,7 @@ const Reaction = () => {
   const slam = spring({ frame, fps, config: { damping: 7, stiffness: 240 } });
   const shake = Math.max(0, 1 - frame / 20) * 16;
   return (
-    <Telop
+    <Text
       text="神回避！！"
       textStyle={{
         fontFamily: FONTS.brush,

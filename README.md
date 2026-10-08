@@ -4,7 +4,7 @@
 | --- | --- |
 | [`packages/tixi`](packages/tixi) | The library: telop rendering on PixiJS ([README](packages/tixi/README.md)) |
 | [`examples/remotion`](examples/remotion) | Remotion project using `tixi/remotion`: variety-show captions, karaoke subtitles, a lower third |
-| [`examples/playground`](examples/playground) | Browser playground for every feature, plus `TelopNode` inside a PixiJS app |
+| [`examples/playground`](examples/playground) | Browser playground for every feature, plus `TextNode` inside a PixiJS app |
 
 ## Commands
 

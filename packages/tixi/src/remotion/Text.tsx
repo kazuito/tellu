@@ -1,18 +1,18 @@
 import { forwardRef, type ReactNode, useEffect, useRef, useState } from "react";
 import { cancelRender, continueRender, delayRender } from "remotion";
-import { Telop as BaseTelop, type TelopComponentProps } from "../react/Telop";
+import { Text as BaseText, type TextProps } from "../react/Text";
 
-export interface RemotionTelopProps extends TelopComponentProps {
-  /** Label shown when Remotion times out waiting for this telop. */
+export interface RemotionTextProps extends TextProps {
+  /** Label shown when Remotion times out waiting for this text. */
   delayRenderLabel?: string;
 }
 
 /**
- * `<Telop>` that holds Remotion's frame capture (`delayRender`) until the renderer is ready,
+ * `<Text>` that holds Remotion's frame capture (`delayRender`) until the renderer is ready,
  * fonts are loaded and the current props are drawn. Render with `--gl=angle` for WebGL in headless Chrome.
  */
-export const Telop = forwardRef<HTMLDivElement, RemotionTelopProps>(function Telop(
-  { delayRenderLabel = "tixi: drawing telop", onPendingChange, onError, ...props },
+export const Text = forwardRef<HTMLDivElement, RemotionTextProps>(function Text(
+  { delayRenderLabel = "tixi: drawing text", onPendingChange, onError, ...props },
   ref,
 ): ReactNode {
   const [initialHandle] = useState(() => delayRender(delayRenderLabel));
@@ -28,7 +28,7 @@ export const Telop = forwardRef<HTMLDivElement, RemotionTelopProps>(function Tel
   useEffect(() => release, []);
 
   return (
-    <BaseTelop
+    <BaseText
       ref={ref}
       {...props}
       onPendingChange={(pending) => {

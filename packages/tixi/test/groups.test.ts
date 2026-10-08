@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { layoutTelop } from "../src/layout/layout";
+import { layoutText } from "../src/layout/layout";
 import { planGroups } from "../src/render/groups";
 import { fill, shadow, stroke } from "../src/style/helpers";
 import { stableKey } from "../src/utils/stableKey";
@@ -7,7 +7,7 @@ import { fakeMeasurer } from "./fakeMeasurer";
 
 describe("planGroups", () => {
   test("orders groups by slot so every outline sits below every fill", () => {
-    const layout = layoutTelop(
+    const layout = layoutText(
       { text: "あい う", style: { fontSize: 10, layers: [shadow(), stroke(4, "black"), fill("white")] } },
       fakeMeasurer,
     );
@@ -17,7 +17,7 @@ describe("planGroups", () => {
   });
 
   test("splits a slot when a run changes its effects", () => {
-    const layout = layoutTelop(
+    const layout = layoutText(
       {
         text: ["あ", { text: "い", style: { layers: { 0: { blur: 6 }, 1: { paint: "red" } } } }],
         style: { fontSize: 10, layers: [stroke(4, "black"), fill("white")] },
@@ -33,7 +33,7 @@ describe("planGroups", () => {
   });
 
   test("skips hidden layers", () => {
-    const layout = layoutTelop(
+    const layout = layoutText(
       { text: "あ", style: { layers: [stroke(4, "black", { visible: false }), fill("white")] } },
       fakeMeasurer,
     );

@@ -1,6 +1,6 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { linearGradient } from "tixi";
-import { Telop } from "tixi/remotion";
+import { Text } from "tixi/remotion";
 import { Background } from "../components/Background";
 import { lowerThirdName, lowerThirdTitle } from "../styles";
 
@@ -26,7 +26,7 @@ export const LowerThird = () => {
     <AbsoluteFill>
       <Background from="#141e30" to="#243b55" />
       <div style={{ position: "absolute", left: 120, top: 760, translate: `${-exit * 900}px 0` }}>
-        <Telop
+        <Text
           text="山田 太郎"
           textStyle={lowerThirdName}
           background={{
@@ -44,7 +44,7 @@ export const LowerThird = () => {
             return { opacity: t, x: (1 - t) * 40 };
           }}
         />
-        <Telop
+        <Text
           text="株式会社テロップ研究所 フロントエンドエンジニア / PixiJS 愛好家"
           textStyle={lowerThirdTitle}
           maxWidth={620}

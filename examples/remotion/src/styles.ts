@@ -1,7 +1,7 @@
-import { fill, glow, linearGradient, shadow, stroke, type TelopStyle } from "tixi";
+import { fill, glow, linearGradient, shadow, stroke, type TextStyle } from "tixi";
 import { FONTS } from "./fonts";
 
-type Style = Partial<TelopStyle>;
+type Style = Partial<TextStyle>;
 
 /** Yellow gradient with navy and white outlines, the classic variety-show look. */
 export const variety: Style = {
@@ -32,7 +32,7 @@ export const punchline: Style = {
   ],
 };
 
-/** Soft rounded telop with a glow. */
+/** Soft rounded text with a glow. */
 export const cute: Style = {
   fontFamily: FONTS.rounded,
   fontWeight: 900,

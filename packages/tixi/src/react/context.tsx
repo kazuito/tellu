@@ -1,31 +1,31 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import { TelopRenderer } from "../TelopRenderer";
+import { TextRenderer } from "../TextRenderer";
 
-const RendererContext = createContext<TelopRenderer | Promise<TelopRenderer> | null>(null);
+const RendererContext = createContext<TextRenderer | Promise<TextRenderer> | null>(null);
 
-export interface TelopRendererProviderProps {
-  /** Renderer used by `<Telop>` components below. Default: `TelopRenderer.shared()`. */
-  renderer: TelopRenderer | Promise<TelopRenderer>;
+export interface TextRendererProviderProps {
+  /** Renderer used by `<Text>` components below. Default: `TextRenderer.shared()`. */
+  renderer: TextRenderer | Promise<TextRenderer>;
   children?: ReactNode;
 }
 
-export function TelopRendererProvider({ renderer, children }: TelopRendererProviderProps): ReactNode {
+export function TextRendererProvider({ renderer, children }: TextRendererProviderProps): ReactNode {
   return <RendererContext.Provider value={renderer}>{children}</RendererContext.Provider>;
 }
 
 /** The renderer for this subtree, or `null` while it is being created. */
-export function useTelopRenderer(onError?: (error: unknown) => void): TelopRenderer | null {
+export function useTextRenderer(onError?: (error: unknown) => void): TextRenderer | null {
   const source = useContext(RendererContext);
-  const [renderer, setRenderer] = useState<TelopRenderer | null>(source instanceof TelopRenderer ? source : null);
+  const [renderer, setRenderer] = useState<TextRenderer | null>(source instanceof TextRenderer ? source : null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: a new onError must not recreate the renderer
   useEffect(() => {
-    if (source instanceof TelopRenderer) {
+    if (source instanceof TextRenderer) {
       setRenderer(source);
       return;
     }
     let active = true;
-    (source ?? TelopRenderer.shared()).then(
+    (source ?? TextRenderer.shared()).then(
       (instance) => active && setRenderer(instance),
       (error: unknown) => active && onError?.(error),
     );
@@ -34,5 +34,5 @@ export function useTelopRenderer(onError?: (error: unknown) => void): TelopRende
     };
   }, [source]);
 
-  return source instanceof TelopRenderer ? source : renderer;
+  return source instanceof TextRenderer ? source : renderer;
 }

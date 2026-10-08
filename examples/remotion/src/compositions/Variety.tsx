@@ -1,6 +1,6 @@
 import { AbsoluteFill, Easing, interpolate, random, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { linearGradient } from "tixi";
-import { Telop } from "tixi/remotion";
+import { Text } from "tixi/remotion";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
 import { note, punchline, variety } from "../styles";
@@ -11,7 +11,7 @@ const CornerTitle = () => {
   const frame = useCurrentFrame();
   const slide = interpolate(frame, [0, 14], [-700, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
-    <Telop
+    <Text
       text="検証！PixiJSで本格テロップは作れるのか？"
       textStyle={{ fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 52, layers: [{ paint: "#ffffff" }] }}
       maxWidth={760}
@@ -33,7 +33,7 @@ const PopIn = () => {
   const { fps, durationInFrames } = useVideoConfig();
   const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: "clamp" });
   return (
-    <Telop
+    <Text
       text="できた！！"
       textStyle={{ ...variety, fontSize: 200 }}
       anchor="center"
@@ -59,7 +59,7 @@ const Punchline = () => {
   });
   const shake = interpolate(frame, [0, 24], [18, 0], { extrapolateRight: "clamp" });
   return (
-    <Telop
+    <Text
       text="いや、縁取り何重やねん！"
       textStyle={punchline}
       anchor="center"
@@ -76,7 +76,7 @@ const Punchline = () => {
 const Note = () => {
   const frame = useCurrentFrame();
   return (
-    <Telop
+    <Text
       text="※文字はすべてPixiJSで描画しています"
       textStyle={note}
       anchor="bottom-right"

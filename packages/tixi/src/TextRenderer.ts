@@ -1,6 +1,6 @@
 import { type AutoDetectOptions, autoDetectRenderer, Container, type Renderer } from "pixi.js";
 import type { AnyCanvas } from "./canvas";
-import type { TelopNode } from "./TelopNode";
+import type { TextNode } from "./TextNode";
 
 const MIN_CAPACITY = 2048;
 
@@ -8,7 +8,7 @@ function nextPowerOfTwo(value: number, min: number): number {
   return Math.max(min, 2 ** Math.ceil(Math.log2(Math.max(1, value))));
 }
 
-export interface TelopRendererOptions extends Partial<AutoDetectOptions> {}
+export interface TextRendererOptions extends Partial<AutoDetectOptions> {}
 
 export interface DrawOptions {
   /** Output pixel density. Default: the node's resolution. */
@@ -27,11 +27,11 @@ export interface DrawResult {
 }
 
 /**
- * One offscreen PixiJS renderer that draws telops into ordinary canvases.
- * Sharing it keeps any number of telops on a single WebGL context.
+ * One offscreen PixiJS renderer that draws `TextNode`s into ordinary canvases.
+ * Sharing it keeps any number of nodes on a single WebGL context.
  */
-export class TelopRenderer {
-  private static sharedRenderer: Promise<TelopRenderer> | undefined;
+export class TextRenderer {
+  private static sharedRenderer: Promise<TextRenderer> | undefined;
   private readonly stage = new Container();
   private capacityWidth = 0;
   private capacityHeight = 0;
@@ -39,7 +39,7 @@ export class TelopRenderer {
 
   private constructor(readonly renderer: Renderer) {}
 
-  static async create(options: TelopRendererOptions = {}): Promise<TelopRenderer> {
+  static async create(options: TextRendererOptions = {}): Promise<TextRenderer> {
     const renderer = await autoDetectRenderer({
       preference: "webgl",
       backgroundAlpha: 0,
@@ -50,23 +50,23 @@ export class TelopRenderer {
       height: 1,
       ...options,
     });
-    return new TelopRenderer(renderer);
+    return new TextRenderer(renderer);
   }
 
-  /** The renderer shared by `<Telop>` components. Options only apply to the first call. */
-  static shared(options?: TelopRendererOptions): Promise<TelopRenderer> {
-    TelopRenderer.sharedRenderer ??= TelopRenderer.create(options).catch((error: unknown) => {
-      TelopRenderer.sharedRenderer = undefined;
+  /** The renderer shared by `<Text>` components. Options only apply to the first call. */
+  static shared(options?: TextRendererOptions): Promise<TextRenderer> {
+    TextRenderer.sharedRenderer ??= TextRenderer.create(options).catch((error: unknown) => {
+      TextRenderer.sharedRenderer = undefined;
       throw error;
     });
-    return TelopRenderer.sharedRenderer;
+    return TextRenderer.sharedRenderer;
   }
 
   /**
    * Renders `node` and copies the result into `target`, resizing it to the drawn region.
    * Runs synchronously, so the target is complete when this returns.
    */
-  draw(node: TelopNode, target: AnyCanvas, options: DrawOptions = {}): DrawResult {
+  draw(node: TextNode, target: AnyCanvas, options: DrawOptions = {}): DrawResult {
     const resolution = options.resolution ?? node.resolution;
     if (node.resolution !== resolution) node.resolution = resolution;
     const bounds = options.bounds ?? node.getInkBounds();
@@ -125,7 +125,7 @@ export class TelopRenderer {
   }
 
   /**
-   * The renderer only grows, in power-of-two steps, so drawing telops of different sizes rarely reallocates
+   * The renderer only grows, in power-of-two steps, so drawing nodes of different sizes rarely reallocates
    * (each resize also makes PixiJS drop its pooled filter textures).
    */
   private ensureCapacity(pixelWidth: number, pixelHeight: number, resolution: number): void {
@@ -142,9 +142,9 @@ export class TelopRenderer {
   }
 
   destroy(): void {
-    if (TelopRenderer.sharedRenderer) {
-      void TelopRenderer.sharedRenderer.then((shared) => {
-        if (shared === this) TelopRenderer.sharedRenderer = undefined;
+    if (TextRenderer.sharedRenderer) {
+      void TextRenderer.sharedRenderer.then((shared) => {
+        if (shared === this) TextRenderer.sharedRenderer = undefined;
       });
     }
     this.stage.destroy();

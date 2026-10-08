@@ -1,5 +1,5 @@
 import { stripUndefined } from "./defaults";
-import type { Layer, LayerPatch, StyleOverride, TelopStyle } from "./types";
+import type { Layer, LayerPatch, StyleOverride, TextStyle } from "./types";
 
 export function isLayerPatch(layers: readonly Layer[] | LayerPatch): layers is LayerPatch {
   return !Array.isArray(layers);
@@ -38,10 +38,10 @@ function mergeLayerPatches(outer: LayerPatch, inner: LayerPatch): LayerPatch {
   return merged;
 }
 
-export function applyOverride(base: TelopStyle, override: StyleOverride | undefined): TelopStyle {
+export function applyOverride(base: TextStyle, override: StyleOverride | undefined): TextStyle {
   if (!override) return base;
   const { layers, ...rest } = override;
-  const style: TelopStyle = { ...base, ...stripUndefined(rest) };
+  const style: TextStyle = { ...base, ...stripUndefined(rest) };
   if (layers) style.layers = isLayerPatch(layers) ? applyLayerPatch(base.layers, layers) : layers;
   return style;
 }

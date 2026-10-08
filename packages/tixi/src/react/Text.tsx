@@ -10,10 +10,10 @@ import {
 import { fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "../fonts";
 import type { Layout } from "../layout/layout";
 import type { Measurer } from "../layout/measure";
-import type { TelopProps, TelopStyle } from "../style/types";
-import { TelopNode } from "../TelopNode";
-import type { DrawResult, TelopRenderer } from "../TelopRenderer";
-import { useTelopRenderer } from "./context";
+import type { TextNodeProps, TextStyle } from "../style/types";
+import { TextNode } from "../TextNode";
+import type { DrawResult, TextRenderer } from "../TextRenderer";
+import { useTextRenderer } from "./context";
 
 export type Anchor =
   | "top-left"
@@ -39,14 +39,14 @@ const ANCHORS: Record<Exclude<Anchor, readonly [number, number]>, readonly [numb
   "bottom-right": [1, 1],
 };
 
-export interface TelopDrawEvent extends DrawResult {
+export interface TextDrawEvent extends DrawResult {
   layout: Layout;
-  node: TelopNode;
+  node: TextNode;
 }
 
-export interface TelopComponentProps extends Omit<TelopProps, "style"> {
+export interface TextProps extends Omit<TextNodeProps, "style"> {
   /** Text style (font, layers, …). `style` styles the wrapper element. */
-  textStyle?: Partial<TelopStyle>;
+  textStyle?: Partial<TextStyle>;
   /**
    * Point of the layout box placed at the element's position, applied as a CSS translate.
    * Default: `"top-left"` (no translate).
@@ -56,21 +56,21 @@ export interface TelopComponentProps extends Omit<TelopProps, "style"> {
   resolution?: number;
   /** Wait for web fonts before drawing so no fallback font is ever measured. Default: `true`. */
   waitForFonts?: boolean;
-  renderer?: TelopRenderer;
+  renderer?: TextRenderer;
   measurer?: Measurer;
   className?: string;
   style?: CSSProperties;
-  onDraw?: (event: TelopDrawEvent) => void;
+  onDraw?: (event: TextDrawEvent) => void;
   /** `true` while fonts or the renderer are loading, i.e. while the canvas may not match the props. */
   onPendingChange?: (pending: boolean) => void;
   onError?: (error: unknown) => void;
 }
 
 /**
- * Draws a telop into a canvas. The element takes the size of the layout box; outlines, shadows and
+ * Draws text into a canvas. The element takes the size of the layout box; outlines, shadows and
  * transformed glyphs may paint outside of it.
  */
-export const Telop = forwardRef<HTMLDivElement, TelopComponentProps>(function Telop(props, ref): ReactNode {
+export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, ref): ReactNode {
   const {
     textStyle,
     anchor = "top-left",
@@ -83,13 +83,13 @@ export const Telop = forwardRef<HTMLDivElement, TelopComponentProps>(function Te
     onDraw,
     onPendingChange,
     onError,
-    ...telop
+    ...rest
   } = props;
-  const sharedRenderer = useTelopRenderer(onError);
+  const sharedRenderer = useTextRenderer(onError);
   const renderer = rendererProp ?? sharedRenderer;
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const nodeRef = useRef<TelopNode | null>(null);
+  const nodeRef = useRef<TextNode | null>(null);
   // Fonts that finish loading after a draw (e.g. a stylesheet added later) trigger a re-measure.
   const fontEpoch = useSyncExternalStore(subscribeFontEpoch, getFontEpoch, getFontEpoch);
   const drawnEpoch = useRef(fontEpoch);
@@ -103,7 +103,7 @@ export const Telop = forwardRef<HTMLDivElement, TelopComponentProps>(function Te
     callbacks.current.onPendingChange?.(pending);
   };
 
-  const telopProps: TelopProps = { ...telop, style: textStyle };
+  const nodeProps: TextNodeProps = { ...rest, style: textStyle };
   const draw = () => {
     const canvas = canvasRef.current;
     const wrapper = wrapperRef.current;
@@ -112,13 +112,13 @@ export const Telop = forwardRef<HTMLDivElement, TelopComponentProps>(function Te
       const pixelRatio = resolution ?? (typeof devicePixelRatio === "number" ? devicePixelRatio : 1);
       let node = nodeRef.current;
       if (!node) {
-        node = new TelopNode(telopProps, { resolution: pixelRatio, measurer });
+        node = new TextNode(nodeProps, { resolution: pixelRatio, measurer });
         nodeRef.current = node;
       } else if (drawnEpoch.current !== fontEpoch) {
-        node.props = telopProps;
+        node.props = nodeProps;
         node.invalidate();
       } else {
-        node.props = telopProps;
+        node.props = nodeProps;
       }
       drawnEpoch.current = fontEpoch;
       const result = renderer.draw(node, canvas, { resolution: pixelRatio });
@@ -143,13 +143,13 @@ export const Telop = forwardRef<HTMLDivElement, TelopComponentProps>(function Te
       setPending(true);
       return;
     }
-    if (!waitForFonts || fontsReady(telopProps)) {
+    if (!waitForFonts || fontsReady(nodeProps)) {
       draw();
       return;
     }
     setPending(true);
     let active = true;
-    loadFonts(telopProps).then(
+    loadFonts(nodeProps).then(
       () => {
         if (!active) return;
         drawnEpoch.current = -1;

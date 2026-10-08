@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { AbsoluteFill, Sequence, useCurrentFrame } from "remotion";
-import { fill, glow, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, glow, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -21,14 +21,14 @@ const STAFF = [
   { role: "制作", names: ["tixi project"] },
 ];
 
-const role: Partial<TelopStyle> = {
+const role: Partial<TextStyle> = {
   fontFamily: FONTS.serif,
   fontWeight: 500,
   fontSize: 34,
   letterSpacing: { em: 0.2 },
   layers: [fill("#b9b4a8")],
 };
-const name: Partial<TelopStyle> = {
+const name: Partial<TextStyle> = {
   fontFamily: FONTS.serif,
   fontWeight: 900,
   fontSize: 52,
@@ -41,8 +41,8 @@ const Roll = memo(() => (
   <div style={{ display: "flex", flexDirection: "column", gap: 90 }}>
     {STAFF.map((entry) => (
       <div key={entry.role} style={{ display: "flex", alignItems: "flex-start", gap: 70 }}>
-        <Telop text={entry.role} textStyle={role} maxWidth={760} align="right" style={{ marginTop: 18 }} />
-        <Telop text={entry.names.join("\n")} textStyle={name} />
+        <Text text={entry.role} textStyle={role} maxWidth={760} align="right" style={{ marginTop: 18 }} />
+        <Text text={entry.names.join("\n")} textStyle={name} />
       </div>
     ))}
   </div>
@@ -51,7 +51,7 @@ const Roll = memo(() => (
 const ThankYou = () => {
   const frame = useCurrentFrame();
   return (
-    <Telop
+    <Text
       text="Thank you for watching"
       textStyle={{
         fontFamily: FONTS.serif,

@@ -96,7 +96,7 @@ export type Length = number | { em: number };
 /** Multiplier of the font size, or `{ px }` for an absolute line height. */
 export type LineHeight = number | { px: number };
 
-export interface TelopStyle {
+export interface TextStyle {
   fontFamily: string | readonly string[];
   fontSize: number;
   fontWeight: FontWeight;
@@ -118,7 +118,7 @@ export interface TelopStyle {
 /** Patch layers of the base style by index or by `id`. */
 export type LayerPatch = { readonly [indexOrId: string]: Partial<Layer> };
 
-export type StyleOverride = Partial<Omit<TelopStyle, "layers">> & {
+export type StyleOverride = Partial<Omit<TextStyle, "layers">> & {
   /** An array replaces all layers; an object patches layers by index or `id`. */
   layers?: readonly Layer[] | LayerPatch;
 };
@@ -132,7 +132,7 @@ export interface RunObject {
 
 export type Run = string | RunObject;
 
-export type TelopText = string | readonly Run[];
+export type TextContent = string | readonly Run[];
 
 export type TextAlign = "left" | "center" | "right" | "justify";
 
@@ -217,9 +217,9 @@ export interface GlyphTransform {
 
 export type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefined;
 
-export interface TelopLayoutOptions {
-  text: TelopText;
-  style?: Partial<TelopStyle>;
+export interface LayoutOptions {
+  text: TextContent;
+  style?: Partial<TextStyle>;
   /** Width of the layout box. Enables wrapping unless `wrap` is `"none"`. */
   maxWidth?: number;
   /** Default: `"auto"` when `maxWidth` is set. */
@@ -239,7 +239,7 @@ export interface TelopLayoutOptions {
   locale?: string;
 }
 
-export interface TelopProps extends TelopLayoutOptions {
+export interface TextNodeProps extends LayoutOptions {
   background?: PlateStyle;
   glyphTransform?: GlyphTransformFn;
 }

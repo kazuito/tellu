@@ -1,7 +1,7 @@
 import { normalizeRuns } from "./layout/layout";
 import { fontSpecOf, fontToCss } from "./layout/measure";
 import { resolveStyle } from "./style/defaults";
-import type { TelopLayoutOptions } from "./style/types";
+import type { LayoutOptions } from "./style/types";
 
 export interface FontRequest {
   /** CSS font shorthand, e.g. `"900 16px 'Noto Sans JP'"`. */
@@ -10,8 +10,8 @@ export interface FontRequest {
   text: string;
 }
 
-/** The fonts (and the characters drawn with each) a telop needs. */
-export function fontRequests(options: Pick<TelopLayoutOptions, "text" | "style">): FontRequest[] {
+/** The fonts (and the characters drawn with each) the text needs. */
+export function fontRequests(options: Pick<LayoutOptions, "text" | "style">): FontRequest[] {
   const requests = new Map<string, string>();
   for (const run of normalizeRuns(options.text, resolveStyle(options.style))) {
     const font = fontToCss(fontSpecOf(run.style, 16));
@@ -24,8 +24,8 @@ function fontFaceSet(): FontFaceSet | undefined {
   return typeof document !== "undefined" ? document.fonts : undefined;
 }
 
-/** Whether every font face the telop needs is loaded. */
-export function fontsReady(options: Pick<TelopLayoutOptions, "text" | "style">): boolean {
+/** Whether every font face the text needs is loaded. */
+export function fontsReady(options: Pick<LayoutOptions, "text" | "style">): boolean {
   const fonts = fontFaceSet();
   if (!fonts) return true;
   return fontRequests(options).every(({ font, text }) => {
@@ -37,15 +37,15 @@ export function fontsReady(options: Pick<TelopLayoutOptions, "text" | "style">):
   });
 }
 
-/** Loads every font face the telop needs. Resolves when they can be measured. */
+/** Loads every font face the text needs. Resolves when they can be measured. */
 export async function loadFonts(
-  options: Pick<TelopLayoutOptions, "text" | "style"> | readonly FontRequest[],
+  options: Pick<LayoutOptions, "text" | "style"> | readonly FontRequest[],
 ): Promise<void> {
   const fonts = fontFaceSet();
   if (!fonts) return;
   const requests = Array.isArray(options)
     ? (options as readonly FontRequest[])
-    : fontRequests(options as TelopLayoutOptions);
+    : fontRequests(options as LayoutOptions);
   await Promise.all(requests.map(({ font, text }) => fonts.load(font, text)));
 }
 

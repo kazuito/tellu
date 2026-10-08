@@ -54,27 +54,27 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
    - Kerning comes from measuring growing prefixes of a run. It is stored separately from each cluster's own advance: `kern[k]` shifts glyph k and is dropped at line starts. Folding kerning into the advance was a real bug (「 after 。 got hidden behind the next glyph).
 2. **Style model** (`style/`): every decoration is a `Layer` (the glyph grown by `stroke` px and painted with `paint`), stacked bottom → top.
    - A rich-text run's `layers` is either an array (replaces all layers) or a patch keyed by index or `id`. Patches are resolved in `merge.ts`.
-3. **Render** (`render/`, `TelopNode.ts`):
+3. **Render** (`render/`, `TextNode.ts`):
    - Each glyph × layer is rasterized once into its own canvas texture (`rasterize.ts`), cached in `TextureCache`. The cache key includes the sub-pixel offset, the layer shape, the paint, and the paint's scope box relative to the glyph.
    - When scaleX equals scaleY, strokes use native `strokeText`. When they differ (長体/平体), strokes are grown from a supersampled signed distance field (`sdf.ts`) so outline width stays uniform.
    - `planGroups` groups sprites by **layer slot** (index) plus an effects signature (offset, blur, opacity, blend mode, filters). Groups render in slot order, so all outlines sit below all fills.
    - Inside a group, sprites use `blendMode: "max"`. Every group container always gets an `AlphaFilter` to isolate it, so overlapping semi-transparent outlines don't compound.
-   - `TelopNode.refresh()` compares a `stableKey` of the props minus `glyphTransform`. Only when that key changes does it rebuild. Otherwise it just reapplies glyph transforms to existing sprites, which keeps per-frame animation cheap.
+   - `TextNode.refresh()` compares a `stableKey` of the props minus `glyphTransform`. Only when that key changes does it rebuild. Otherwise it just reapplies glyph transforms to existing sprites, which keeps per-frame animation cheap.
    - `stableKey` hashes plain data structurally and class instances (filters, images) by identity.
-4. **Output**: `TelopRenderer` is one shared offscreen WebGL renderer (`preserveDrawingBuffer: true`).
+4. **Output**: `TextRenderer` is one shared offscreen WebGL renderer (`preserveDrawingBuffer: true`).
    - `draw()` renders a node synchronously, then `drawImage`s the result into the target 2D canvas, sized to the node's ink bounds.
    - The renderer only grows, in power-of-two steps. Frequent resizes make PixiJS log "destroyed while still bound" warnings.
-   - `BlurFilter` strength is in local (CSS) px, not device px: never multiply it by `resolution`. Pixi's own padding (`2 × strength`) is too small for multi-pass blurs and crops shadows, so `TelopNode` sets `padding` from `blurReach` (`render/blur.ts`).
+   - `BlurFilter` strength is in local (CSS) px, not device px: never multiply it by `resolution`. Pixi's own padding (`2 × strength`) is too small for multi-pass blurs and crops shadows, so `TextNode` sets `padding` from `blurReach` (`render/blur.ts`).
 
-**React/Remotion** (`react/Telop.tsx`, `remotion/Telop.tsx`):
-- `<Telop>` keeps a `TelopNode` in a ref and draws in `useLayoutEffect` on every render. It sizes the wrapper div to the layout box and offsets the canvas to the ink bounds.
+**React/Remotion** (`react/Text.tsx`, `remotion/Text.tsx`):
+- `<Text>` keeps a `TextNode` in a ref and draws in `useLayoutEffect` on every render. It sizes the wrapper div to the layout box and offsets the canvas to the ink bounds.
 - It reports `onPendingChange` while the renderer or fonts aren't ready, and also while `document.fonts.status === "loading"`.
 - It subscribes to `document.fonts` `loadingdone` (`subscribeFontEpoch`) and re-measures when fonts finish loading.
 - The Remotion wrapper maps pending to `delayRender`/`continueRender`.
 
 ## Constraints and gotchas
 
-- Fonts: tixi can only load `unicode-range` subsets for `@font-face` rules that are already declared. If a telop draws before the stylesheet loads, it falls back silently. Apps must gate telops on the stylesheet; see `FontGate` in `examples/remotion/src/fonts.tsx`, whose `continueRender` runs in an effect after the children mount.
+- Fonts: tixi can only load `unicode-range` subsets for `@font-face` rules that are already declared. If text draws before the stylesheet loads, it falls back silently. Apps must gate `<Text>` on the stylesheet; see `FontGate` in `examples/remotion/src/fonts.tsx`, whose `continueRender` runs in an effect after the children mount.
 - Remotion needs `Config.setChromiumOpenGlRenderer("angle")` because PixiJS needs WebGL in headless Chrome.
 - Known limitations: horizontal text only (vertical writing is planned), no ligatures (glyphs are drawn individually), and overlapping outlines of different colors in the same slot combine per channel with `max`.
 - Pixi, Remotion and React are peer deps that tsdown keeps external. Code under `layout/`, `style/` and `markup.ts` must stay free of Pixi/DOM runtime imports so `bun test` can run it.

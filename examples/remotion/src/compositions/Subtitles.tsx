@@ -1,6 +1,6 @@
 import { AbsoluteFill, interpolate, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
 import { fill, shadow, stroke } from "tixi";
-import { Telop } from "tixi/remotion";
+import { Text } from "tixi/remotion";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
 import { speakerColors, subtitle } from "../styles";
@@ -31,7 +31,7 @@ export const SCRIPT: Line[] = [
 
 export const SUBTITLES_DURATION = Math.ceil(11.4 * 30);
 
-/** Two identical telops; the colored copy is revealed left to right with clip-path. */
+/** Two identical texts; the colored copy is revealed left to right with clip-path. */
 const KaraokeLine = ({ line }: { line: Line }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -45,15 +45,15 @@ const KaraokeLine = ({ line }: { line: Line }) => {
 
   return (
     <div style={{ position: "absolute", left: 960, top: 1000, translate: `-50% calc(-100% + ${lift}px)`, opacity }}>
-      <Telop
+      <Text
         text={line.name}
         textStyle={{ fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 34, layers: [fill("#111111")] }}
         background={{ paint: color, padding: [18, 6], radius: 999 }}
         style={{ display: "block", marginBottom: 22, marginLeft: 8 }}
       />
       <div style={{ position: "relative" }}>
-        <Telop text={line.text} textStyle={subtitle} />
-        <Telop
+        <Text text={line.text} textStyle={subtitle} />
+        <Text
           text={line.text}
           textStyle={{
             ...subtitle,

@@ -1,6 +1,6 @@
 import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, linearGradient, parseMarkup, shadow, stroke, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, linearGradient, parseMarkup, shadow, stroke, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -13,14 +13,14 @@ const REVEAL = 220;
 const CHOICES = ["Telephone Operator", "Television Opaque Projector", "Tele-Optical Lettering", "Title Overlay Panel"];
 const ANSWER = 1;
 
-const question: Partial<TelopStyle> = {
+const question: Partial<TextStyle> = {
   fontFamily: FONTS.gothic,
   fontWeight: 900,
   fontSize: 72,
   layers: [stroke(10, "#0d1b4c"), fill("#ffffff")],
 };
 
-const choice: Partial<TelopStyle> = {
+const choice: Partial<TextStyle> = {
   fontFamily: [FONTS.latin, FONTS.gothic],
   fontWeight: 900,
   fontSize: 52,
@@ -31,7 +31,7 @@ const Question = () => {
   const frame = useCurrentFrame();
   const open = ramp(frame, 0, 10, easeOut);
   return (
-    <Telop
+    <Text
       text={parseMarkup("<q>Q.3</q>　「テロップ」の語源になった英語は？", {
         q: {
           fontFamily: FONTS.latin,
@@ -88,7 +88,7 @@ const Choice = ({ index }: { index: number }) => {
         opacity: revealed && !correct ? 0.35 : 1,
       }}
     >
-      <Telop
+      <Text
         text={parseMarkup(`<k>${"ABCD"[index]}</k>　${CHOICES[index]}`, {
           k: { fontSize: 64, layers: [fill(highlight ? "#ffffff" : "#ffd400")] },
         })}
@@ -134,7 +134,7 @@ const Timer = () => {
           placeItems: "center",
         }}
       >
-        <Telop
+        <Text
           text={String(remaining)}
           textStyle={{
             fontFamily: FONTS.latin,
@@ -154,7 +154,7 @@ const Correct = () => {
   const { fps } = useVideoConfig();
   const slam = spring({ frame, fps, config: { damping: 10, stiffness: 200 } });
   return (
-    <Telop
+    <Text
       text="正解！"
       textStyle={{
         fontFamily: FONTS.heavy,
@@ -183,7 +183,7 @@ const Correct = () => {
 const Explanation = () => {
   const frame = useCurrentFrame();
   return (
-    <Telop
+    <Text
       text={parseMarkup("<h>TEL</h>evision <h>OP</h>aque projector の略", {
         h: { layers: { 1: { paint: "#ffd400" } } },
       })}

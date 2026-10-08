@@ -1,11 +1,11 @@
 import { type Canvas2D, context2d, createCanvas } from "../canvas";
-import type { TelopStyle } from "../style/types";
+import type { TextStyle } from "../style/types";
 
 export interface FontSpec {
-  family: TelopStyle["fontFamily"];
+  family: TextStyle["fontFamily"];
   size: number;
-  weight: TelopStyle["fontWeight"];
-  style: TelopStyle["fontStyle"];
+  weight: TextStyle["fontWeight"];
+  style: TextStyle["fontStyle"];
   kerning: boolean;
 }
 
@@ -50,7 +50,7 @@ export function fontToCss(font: FontSpec): string {
   return `${font.style} ${font.weight} ${font.size}px ${fontFamilyToCss(font.family)}`;
 }
 
-export function fontSpecOf(style: TelopStyle, size: number = style.fontSize): FontSpec {
+export function fontSpecOf(style: TextStyle, size: number = style.fontSize): FontSpec {
   return { family: style.fontFamily, size, weight: style.fontWeight, style: style.fontStyle, kerning: style.kerning };
 }
 

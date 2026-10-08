@@ -1,2 +1,2 @@
-export { TelopRendererProvider, type TelopRendererProviderProps, useTelopRenderer } from "./context";
-export { type Anchor, Telop, type TelopComponentProps, type TelopDrawEvent } from "./Telop";
+export { TextRendererProvider, type TextRendererProviderProps, useTextRenderer } from "./context";
+export { type Anchor, Text, type TextDrawEvent, type TextProps } from "./Text";

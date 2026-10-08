@@ -1,5 +1,5 @@
 import { AlphaFilter, BlurFilter, Container, type DestroyOptions, type Filter, Rectangle, Sprite } from "pixi.js";
-import { type Layout, layoutTelop } from "./layout/layout";
+import { type Layout, layoutText } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
 import { blurPadding } from "./render/blur";
 import { planGroups } from "./render/groups";
@@ -8,10 +8,10 @@ import { plateBoxes, rasterizePlate } from "./render/plate";
 import { GlyphRasterizer, layerReach, layerShape } from "./render/rasterize";
 import { glyphBox, ScopeBoxes } from "./render/scope";
 import { TextureCache } from "./render/textureCache";
-import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TelopProps } from "./style/types";
+import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } from "./style/types";
 import { stableKey } from "./utils/stableKey";
 
-export interface TelopNodeOptions {
+export interface TextNodeOptions {
   /** Text measurement backend. Default: Canvas 2D. */
   measurer?: Measurer;
   /** Pixel density of the generated glyph bitmaps. Default: `devicePixelRatio` or `1`. */
@@ -29,11 +29,11 @@ const DEG = Math.PI / 180;
 const SUBPIXEL_STEPS = 4;
 
 /**
- * A telop as a PixiJS container. Add it to any scene, or draw it with `TelopRenderer`.
+ * Styled text as a PixiJS container. Add it to any scene, or draw it with `TextRenderer`.
  * The local origin is the top-left of the layout box.
  */
-export class TelopNode extends Container {
-  private _props: TelopProps;
+export class TextNode extends Container {
+  private _props: TextNodeProps;
   private _resolution: number;
   private _layout: Layout | undefined;
   private contexts: GlyphContext[] = [];
@@ -46,8 +46,8 @@ export class TelopNode extends Container {
   private readonly plateLayer = new Container({ label: "plate" });
   private readonly glyphLayer = new Container({ label: "glyphs" });
 
-  constructor(props: TelopProps, options: TelopNodeOptions = {}) {
-    super({ label: "telop" });
+  constructor(props: TextNodeProps, options: TextNodeOptions = {}) {
+    super({ label: "text" });
     this._props = props;
     this.measurer = options.measurer ?? getDefaultMeasurer();
     this._resolution = options.resolution ?? (typeof devicePixelRatio === "number" ? devicePixelRatio : 1);
@@ -55,17 +55,17 @@ export class TelopNode extends Container {
     this.refresh();
   }
 
-  get props(): TelopProps {
+  get props(): TextNodeProps {
     return this._props;
   }
 
-  set props(props: TelopProps) {
+  set props(props: TextNodeProps) {
     this._props = props;
     this.refresh();
   }
 
   /** Merges `props` into the current props. */
-  update(props: Partial<TelopProps>): this {
+  update(props: Partial<TextNodeProps>): this {
     this._props = { ...this._props, ...props };
     this.refresh();
     return this;
@@ -89,7 +89,7 @@ export class TelopNode extends Container {
     return new Rectangle(0, 0, this.layout.width, this.layout.height);
   }
 
-  /** Everything this telop paints, including outlines, shadows, blur and glyph transforms, in local coordinates. */
+  /** Everything this node paints, including outlines, shadows, blur and glyph transforms, in local coordinates. */
   getInkBounds(): Rectangle {
     let minX = Infinity;
     let minY = Infinity;
@@ -131,7 +131,7 @@ export class TelopNode extends Container {
   }
 
   private build(): void {
-    const layout = layoutTelop(this._props, this.measurer);
+    const layout = layoutText(this._props, this.measurer);
     this._layout = layout;
     this.contexts = createGlyphContexts(layout);
 

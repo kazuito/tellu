@@ -1,10 +1,10 @@
-export { type CanvasTelop, type CreateCanvasTelopOptions, createCanvasTelop } from "./createTelop";
+export { type CanvasText, type CreateCanvasTextOptions, createCanvasText } from "./createCanvasText";
 export { type FontRequest, fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "./fonts";
 export {
   type Layout,
   type LayoutGlyph,
   type LayoutLine,
-  layoutTelop,
+  layoutText,
   normalizeRuns,
   type ResolvedRun,
 } from "./layout/layout";
@@ -31,5 +31,5 @@ export {
 } from "./style/helpers";
 export { applyOverride, mergeOverrides } from "./style/merge";
 export type * from "./style/types";
-export { createGlyphContexts, TelopNode, type TelopNodeOptions } from "./TelopNode";
-export { type DrawOptions, type DrawResult, TelopRenderer, type TelopRendererOptions } from "./TelopRenderer";
+export { createGlyphContexts, TextNode, type TextNodeOptions } from "./TextNode";
+export { type DrawOptions, type DrawResult, TextRenderer, type TextRendererOptions } from "./TextRenderer";

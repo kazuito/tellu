@@ -1,6 +1,6 @@
-import type { KinsokuRules, Length, LineHeight, TelopStyle } from "./types";
+import type { KinsokuRules, Length, LineHeight, TextStyle } from "./types";
 
-export const defaultStyle: TelopStyle = {
+export const defaultStyle: TextStyle = {
   fontFamily: "sans-serif",
   fontSize: 64,
   fontWeight: "normal",
@@ -24,7 +24,7 @@ export const defaultKinsoku: KinsokuRules = {
   hanging: "、。,.，．",
 };
 
-export function resolveStyle(style: Partial<TelopStyle> | undefined): TelopStyle {
+export function resolveStyle(style: Partial<TextStyle> | undefined): TextStyle {
   return style ? { ...defaultStyle, ...stripUndefined(style) } : defaultStyle;
 }
 

@@ -1,6 +1,6 @@
 import { AbsoluteFill, interpolate, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, glow, linearGradient, shadow, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, glow, linearGradient, shadow, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -14,7 +14,7 @@ const CUES = [
   { text: "この街の灯りを\n最後に見ておきたいんだ", start: 192, end: 262 },
 ];
 
-const chapterTitle: Partial<TelopStyle> = {
+const chapterTitle: Partial<TextStyle> = {
   fontFamily: FONTS.serif,
   fontWeight: 900,
   fontSize: 128,
@@ -25,7 +25,7 @@ const chapterTitle: Partial<TelopStyle> = {
   ],
 };
 
-const filmSubtitle: Partial<TelopStyle> = {
+const filmSubtitle: Partial<TextStyle> = {
   fontFamily: FONTS.serif,
   fontWeight: 500,
   fontSize: 50,
@@ -40,12 +40,12 @@ const TitleCard = () => {
   const fadeOut = 1 - ramp(frame, durationInFrames - 15, 15);
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", gap: 36, opacity: fadeOut }}>
-      <Telop
+      <Text
         text="第三章"
         textStyle={{ ...chapterTitle, fontSize: 44, letterSpacing: { em: 0.6 } }}
         glyphTransform={() => ({ opacity: ramp(frame, 0, 20) })}
       />
-      <Telop
+      <Text
         text="夜明けの約束"
         textStyle={chapterTitle}
         glyphTransform={(glyph) => {
@@ -53,7 +53,7 @@ const TitleCard = () => {
           return { opacity: t, x: (glyph.indexInLine - (glyph.lineLength - 1) / 2) * (1 - t) * 40 };
         }}
       />
-      <Telop
+      <Text
         text="CHAPTER III — A PROMISE AT DAWN"
         textStyle={{
           fontFamily: FONTS.serif,
@@ -73,7 +73,7 @@ const Cue = ({ text }: { text: string }) => {
   const { durationInFrames } = useVideoConfig();
   const opacity = interpolate(frame, [0, 3, durationInFrames - 3, durationInFrames], [0, 1, 1, 0]);
   return (
-    <Telop
+    <Text
       text={text}
       textStyle={filmSubtitle}
       anchor="bottom"

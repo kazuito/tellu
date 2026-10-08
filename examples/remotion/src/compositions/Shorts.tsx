@@ -1,6 +1,6 @@
 import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, parseMarkup, shadow, stroke, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, parseMarkup, shadow, stroke, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -19,14 +19,14 @@ const WORD_COUNT = PAGES.flat().length;
 
 export const SHORTS_DURATION = FIRST_WORD + WORD_COUNT * WORD_FRAMES + 40;
 
-const caption: Partial<TelopStyle> = {
+const caption: Partial<TextStyle> = {
   fontFamily: FONTS.latin,
   fontWeight: 900,
   fontSize: 88,
   layers: [shadow({ offset: [0, 10], blur: 0, stroke: 16, color: "#000000" }), stroke(16, "#000000"), fill("#ffffff")],
 };
 
-const activeCaption: Partial<TelopStyle> = {
+const activeCaption: Partial<TextStyle> = {
   ...caption,
   fontSize: 100,
   layers: [shadow({ offset: [0, 12], blur: 0, stroke: 18, color: "#000000" }), stroke(18, "#000000"), fill("#ffe600")],
@@ -37,7 +37,7 @@ const Hook = () => {
   const { fps } = useVideoConfig();
   const pop = spring({ frame, fps, config: { damping: 12 } });
   return (
-    <Telop
+    <Text
       text={parseMarkup("知らないと損する<br/>テロップ術<n>3選</n>", {
         n: { fontSize: 120, layers: [fill("#ff1f4b")] },
       })}
@@ -72,7 +72,7 @@ const Page = ({ words, firstIndex }: { words: string[]; firstIndex: number }) =>
         const isActive = index === active;
         const pop = spring({ frame: frame - index * WORD_FRAMES, fps, config: { damping: 11, stiffness: 220 } });
         return (
-          <Telop
+          <Text
             key={firstIndex + index}
             text={word}
             textStyle={isActive ? activeCaption : caption}
@@ -106,7 +106,7 @@ export const Shorts = () => {
           <Page words={words} firstIndex={PAGE_STARTS[index]!} />
         </Sequence>
       ))}
-      <Telop
+      <Text
         text="@tixi_dev"
         textStyle={{
           fontFamily: FONTS.latin,

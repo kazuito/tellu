@@ -30,7 +30,7 @@ function loadStylesheet(): Promise<void> {
 
 /**
  * Renders children once the @font-face rules exist. The rules are split by unicode-range and tixi
- * loads only the subsets each telop needs, but it can only see rules that are already declared.
+ * loads only the subsets each `<Text>` needs, but it can only see rules that are already declared.
  */
 export const FontGate = ({ children }: { children: ReactNode }) => {
   const [handle] = useState(() => delayRender("Loading font stylesheet"));

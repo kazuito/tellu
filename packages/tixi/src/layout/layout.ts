@@ -1,12 +1,12 @@
 import { resolveKinsoku, resolveLength, resolveLineHeight, resolveStyle } from "../style/defaults";
 import { applyOverride } from "../style/merge";
-import type { KinsokuRules, TelopLayoutOptions, TelopStyle, TelopText } from "../style/types";
+import type { KinsokuRules, LayoutOptions, TextContent, TextStyle } from "../style/types";
 import { type FontMetrics, fontSpecOf, getDefaultMeasurer, type Measurer } from "./measure";
 import { BREAK_FALLBACK, BREAK_PREFERRED, type Cluster, computeBreaks, segmentRuns } from "./segment";
 
 export interface ResolvedRun {
   text: string;
-  style: TelopStyle;
+  style: TextStyle;
   tags: readonly string[];
 }
 
@@ -61,7 +61,7 @@ export interface Layout {
 
 const EPSILON = 0.01;
 
-export function normalizeRuns(text: TelopText, base: TelopStyle): ResolvedRun[] {
+export function normalizeRuns(text: TextContent, base: TextStyle): ResolvedRun[] {
   const runs = typeof text === "string" ? [text] : text;
   return runs.map((run) =>
     typeof run === "string"
@@ -71,7 +71,7 @@ export function normalizeRuns(text: TelopText, base: TelopStyle): ResolvedRun[] 
 }
 
 interface Prepared {
-  options: TelopLayoutOptions;
+  options: LayoutOptions;
   runs: ResolvedRun[];
   clusters: Cluster[];
   breaks: Uint8Array;
@@ -87,7 +87,7 @@ interface LineRange {
   forced: boolean;
 }
 
-export function layoutTelop(options: TelopLayoutOptions, measurer: Measurer = getDefaultMeasurer()): Layout {
+export function layoutText(options: LayoutOptions, measurer: Measurer = getDefaultMeasurer()): Layout {
   const base = resolveStyle(options.style);
   const runs = normalizeRuns(options.text, base);
   const locale = options.locale ?? "ja";

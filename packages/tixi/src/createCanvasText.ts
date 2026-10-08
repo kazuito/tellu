@@ -1,40 +1,40 @@
 import { loadFonts } from "./fonts";
-import type { TelopProps } from "./style/types";
-import { TelopNode, type TelopNodeOptions } from "./TelopNode";
-import { type DrawResult, TelopRenderer } from "./TelopRenderer";
+import type { TextNodeProps } from "./style/types";
+import { TextNode, type TextNodeOptions } from "./TextNode";
+import { type DrawResult, TextRenderer } from "./TextRenderer";
 
-export interface CanvasTelop {
-  readonly node: TelopNode;
-  readonly renderer: TelopRenderer;
-  /** Region of the telop drawn into the canvas by the last draw. */
+export interface CanvasText {
+  readonly node: TextNode;
+  readonly renderer: TextRenderer;
+  /** Region of the text drawn into the canvas by the last draw. */
   readonly lastDraw: DrawResult;
   /** Merges props and redraws. Wait for `loadFonts` first when new fonts or characters appear. */
-  update(props: Partial<TelopProps>): DrawResult;
+  update(props: Partial<TextNodeProps>): DrawResult;
   draw(): DrawResult;
   destroy(): void;
 }
 
-export interface CreateCanvasTelopOptions extends TelopNodeOptions {
-  renderer?: TelopRenderer;
+export interface CreateCanvasTextOptions extends TextNodeOptions {
+  renderer?: TextRenderer;
   /** Default: `true`. */
   waitForFonts?: boolean;
 }
 
 /**
- * Draws a telop into a canvas without touching PixiJS directly. The canvas is resized to the telop's ink bounds;
+ * Draws text into a canvas without touching PixiJS directly. The canvas is resized to the text's ink bounds;
  * `lastDraw.x` / `lastDraw.y` give its offset from the layout box origin.
  */
-export async function createCanvasTelop(
+export async function createCanvasText(
   canvas: HTMLCanvasElement | OffscreenCanvas,
-  props: TelopProps,
-  options: CreateCanvasTelopOptions = {},
-): Promise<CanvasTelop> {
+  props: TextNodeProps,
+  options: CreateCanvasTextOptions = {},
+): Promise<CanvasText> {
   const { renderer: providedRenderer, waitForFonts = true, ...nodeOptions } = options;
   const [renderer] = await Promise.all([
-    providedRenderer ?? TelopRenderer.shared(),
+    providedRenderer ?? TextRenderer.shared(),
     waitForFonts ? loadFonts(props) : undefined,
   ]);
-  const node = new TelopNode(props, nodeOptions);
+  const node = new TextNode(props, nodeOptions);
   let lastDraw = renderer.draw(node, canvas);
 
   return {

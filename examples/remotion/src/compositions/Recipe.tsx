@@ -1,6 +1,6 @@
 import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, parseMarkup, stroke, type TelopStyle } from "tixi";
-import { Telop } from "tixi/remotion";
+import { fill, parseMarkup, stroke, type TextStyle } from "tixi";
+import { Text } from "tixi/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -11,7 +11,7 @@ const STEP_FRAME = 90;
 
 const INGREDIENTS = ["卵 … 3個", "牛乳 … 大さじ2", "バター … 10g", "ケチャップライス … 300g"];
 
-const step: Partial<TelopStyle> = {
+const step: Partial<TextStyle> = {
   fontFamily: FONTS.rounded,
   fontWeight: 900,
   fontSize: 68,
@@ -22,7 +22,7 @@ const Title = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   return (
-    <Telop
+    <Text
       text={parseMarkup("<s>〜 かんたん15分 〜</s><br/>ふわとろオムライス", {
         s: { fontSize: 40, layers: [stroke(8, "#ffffff"), fill("#d2691e")] },
       })}
@@ -46,7 +46,7 @@ const Ingredients = () => {
   const frame = useCurrentFrame();
   return (
     <div style={{ position: "absolute", left: 1380, top: 110 }}>
-      <Telop
+      <Text
         text="材料（2人分）"
         textStyle={{ fontFamily: FONTS.rounded, fontWeight: 900, fontSize: 44, layers: [fill("#ffffff")] }}
         background={{ paint: "#a0522d", padding: [24, 10], radius: 999 }}
@@ -56,7 +56,7 @@ const Ingredients = () => {
         {INGREDIENTS.map((line, index) => {
           const t = ramp(frame, 6 + index * 8, 10, easeOut);
           return (
-            <Telop
+            <Text
               key={line}
               text={line}
               textStyle={{ fontFamily: FONTS.rounded, fontWeight: 900, fontSize: 40, layers: [fill("#5a3a1a")] }}
@@ -86,7 +86,7 @@ const Step = () => {
         translate: `0 ${(1 - enter) * 260}px`,
       }}
     >
-      <Telop
+      <Text
         text={parseMarkup("STEP<br/><n>2</n>", { n: { fontSize: 72 } })}
         textStyle={{
           fontFamily: FONTS.latin,
@@ -98,7 +98,7 @@ const Step = () => {
         align="center"
         background={{ paint: "#e8590c", padding: [26, 22], radius: 999, stroke: { width: 6, paint: "#ffffff" } }}
       />
-      <Telop
+      <Text
         text={parseMarkup("バターを溶かし、卵液を<mk>一気に</mk>流し込む", {
           mk: { layers: { marker: { visible: true } } },
         })}
@@ -117,7 +117,7 @@ const Point = () => {
   const { fps } = useVideoConfig();
   const pop = spring({ frame, fps, config: { damping: 9 } });
   return (
-    <Telop
+    <Text
       text={parseMarkup("<p>POINT!</p> 火は中火のまま", { p: { fontFamily: FONTS.latin, layers: [fill("#fff3bf")] } })}
       textStyle={{ fontFamily: FONTS.rounded, fontWeight: 900, fontSize: 46, layers: [fill("#ffffff")] }}
       background={{ paint: "#2f9e44", padding: [30, 14], radius: 999 }}

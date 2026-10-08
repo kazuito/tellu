@@ -1,6 +1,6 @@
 import { Application, NoiseFilter } from "pixi.js";
 import {
-  createCanvasTelop,
+  createCanvasText,
   type DrawResult,
   fill,
   type GlyphContext,
@@ -13,9 +13,9 @@ import {
   radialGradient,
   shadow,
   stroke,
-  TelopNode,
-  type TelopProps,
-  type TelopStyle,
+  TextNode,
+  type TextNodeProps,
+  type TextStyle,
 } from "tixi";
 
 const root = document.getElementById("root")!;
@@ -34,19 +34,19 @@ function setCssSize(canvas: HTMLCanvasElement, { width, height }: DrawResult) {
   canvas.style.height = `${height}px`;
 }
 
-async function drawInto(parent: HTMLElement, props: TelopProps) {
+async function drawInto(parent: HTMLElement, props: TextNodeProps) {
   const canvas = document.createElement("canvas");
   parent.append(canvas);
-  const telop = await createCanvasTelop(canvas, props);
-  setCssSize(canvas, telop.lastDraw);
-  return { telop, canvas };
+  const canvasText = await createCanvasText(canvas, props);
+  setCssSize(canvas, canvasText.lastDraw);
+  return { canvasText, canvas };
 }
 
-async function demo(title: string, props: TelopProps) {
+async function demo(title: string, props: TextNodeProps) {
   return drawInto(section(title), props);
 }
 
-async function compare(title: string, variants: Record<string, TelopProps>) {
+async function compare(title: string, variants: Record<string, TextNodeProps>) {
   const stage = section(title);
   stage.classList.add("row");
   for (const [label, props] of Object.entries(variants)) {
@@ -62,17 +62,17 @@ async function compare(title: string, variants: Record<string, TelopProps>) {
 /** Draws every frame into the resting ink bounds grown by `margin`, so the canvas size stays fixed. */
 async function animatedDemo(
   title: string,
-  props: TelopProps,
+  props: TextNodeProps,
   { x = 0, top = 0, bottom = 0 }: { x?: number; top?: number; bottom?: number },
   transform: (glyph: GlyphContext, time: number) => GlyphTransform | void,
 ) {
-  const { telop, canvas } = await demo(title, props);
-  const ink = telop.node.getInkBounds();
+  const { canvasText, canvas } = await demo(title, props);
+  const ink = canvasText.node.getInkBounds();
   const bounds = { x: ink.x - x, y: ink.y - top, width: ink.width + x * 2, height: ink.height + top + bottom };
-  const draw = () => telop.renderer.draw(telop.node, canvas, { bounds });
+  const draw = () => canvasText.renderer.draw(canvasText.node, canvas, { bounds });
   setCssSize(canvas, draw());
   const frame = (time: number) => {
-    telop.node.update({ glyphTransform: (glyph) => transform(glyph, time) });
+    canvasText.node.update({ glyphTransform: (glyph) => transform(glyph, time) });
     draw();
     requestAnimationFrame(frame);
   };
@@ -92,7 +92,7 @@ const hash = (seed: number) => {
   return (value - Math.floor(value)) * 2 - 1;
 };
 
-const variety: TelopProps = {
+const variety: TextNodeProps = {
   text: "今日もいい天気ですね！",
   style: {
     fontFamily: "Noto Sans JP",
@@ -107,7 +107,7 @@ const variety: TelopProps = {
   },
 };
 
-const simple = (fontSize: number, outline = "#111"): Partial<TelopStyle> => ({
+const simple = (fontSize: number, outline = "#111"): Partial<TextStyle> => ({
   fontFamily: "Noto Sans JP",
   fontWeight: 900,
   fontSize,
@@ -164,7 +164,7 @@ await demo("Per-line plates with a stroke, <br/> in markup", {
   },
 });
 
-const paragraph = "字幕は読みやすさが大切です。Telop text should stay readable at a glance.";
+const paragraph = "字幕は読みやすさが大切です。Caption text should stay readable at a glance.";
 await compare(
   "align (maxWidth 360)",
   Object.fromEntries(
@@ -210,7 +210,7 @@ await compare("kerning on / off", {
   "kerning: false": { text: "AVATAR WAVE Typography", style: { ...simple(64), kerning: false } },
 });
 
-const scaledStyle: Partial<TelopStyle> = {
+const scaledStyle: Partial<TextStyle> = {
   fontFamily: "Noto Sans JP",
   fontWeight: 900,
   fontSize: 80,
@@ -438,11 +438,11 @@ await animatedDemo(
 );
 
 {
-  const stage = section("TelopNode inside a PixiJS Application");
+  const stage = section("TextNode inside a PixiJS Application");
   const app = new Application();
   await app.init({ width: 900, height: 200, background: "#1d3557", resolution: devicePixelRatio, autoDensity: true });
   stage.append(app.canvas);
-  const props: TelopProps = {
+  const props: TextNodeProps = {
     text: "Pixiシーンに直接配置",
     style: {
       fontFamily: "Noto Sans JP",
@@ -452,7 +452,7 @@ await animatedDemo(
     },
   };
   await loadFonts(props);
-  const node = new TelopNode(props);
+  const node = new TextNode(props);
   node.position.set((900 - node.layout.width) / 2, (200 - node.layout.height) / 2);
   app.stage.addChild(node);
   app.ticker.add(({ lastTime }) => {

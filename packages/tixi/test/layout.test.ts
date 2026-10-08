@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { type Layout, layoutTelop } from "../src/layout/layout";
-import type { TelopLayoutOptions } from "../src/style/types";
+import { type Layout, layoutText } from "../src/layout/layout";
+import type { LayoutOptions } from "../src/style/types";
 import { fakeMeasurer } from "./fakeMeasurer";
 
 const style = { fontSize: 10, lineHeight: 1 };
-const layout = (options: TelopLayoutOptions) =>
-  layoutTelop({ ...options, style: { ...style, ...options.style } }, fakeMeasurer);
+const layout = (options: LayoutOptions) =>
+  layoutText({ ...options, style: { ...style, ...options.style } }, fakeMeasurer);
 const lineTexts = (result: Layout) =>
   result.lines.map((line) =>
     result.glyphs
@@ -86,14 +86,14 @@ describe("kerning", () => {
   };
 
   test("shifts the following glyph instead of shrinking its advance", () => {
-    const result = layoutTelop({ text: "あ。「い", style }, kerningMeasurer);
+    const result = layoutText({ text: "あ。「い", style }, kerningMeasurer);
     expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 10, 16, 26]);
     expect(result.glyphs[2]!.advance).toBe(10);
     expect(result.lines[0]!.width).toBe(36);
   });
 
   test("drops kerning across a line break", () => {
-    const result = layoutTelop({ text: "あ。「い", style, maxWidth: 20 }, kerningMeasurer);
+    const result = layoutText({ text: "あ。「い", style, maxWidth: 20 }, kerningMeasurer);
     expect(lineTexts(result)).toEqual(["あ。", "「い"]);
     expect(result.glyphs[2]!.x).toBe(0);
     expect(result.lines[1]!.width).toBe(20);
