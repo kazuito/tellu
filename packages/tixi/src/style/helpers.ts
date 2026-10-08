@@ -18,7 +18,12 @@ export interface ShadowOptions extends Omit<LayerOptions, "offset"> {
   stroke?: number;
 }
 
-export function shadow({ color = "rgba(0,0,0,0.6)", offset = [4, 4], stroke = 0, ...options }: ShadowOptions = {}): Layer {
+export function shadow({
+  color = "rgba(0,0,0,0.6)",
+  offset = [4, 4],
+  stroke = 0,
+  ...options
+}: ShadowOptions = {}): Layer {
   return { blur: 4, ...options, paint: color, stroke, offset };
 }
 

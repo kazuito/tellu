@@ -51,7 +51,12 @@ export const note: Style = {
   fontWeight: 900,
   fontSize: 42,
   letterSpacing: 1,
-  layers: [glow({ color: "#ff8fd3", stroke: 8, blur: 10, opacity: 0.8 }), stroke(7, "#ffffff"), stroke(3.5, "#ff5fae"), fill("#ffffff")],
+  layers: [
+    glow({ color: "#ff8fd3", stroke: 8, blur: 10, opacity: 0.8 }),
+    stroke(7, "#ffffff"),
+    stroke(3.5, "#ff5fae"),
+    fill("#ffffff"),
+  ],
 };
 
 export const subtitle: Style = {
@@ -59,7 +64,11 @@ export const subtitle: Style = {
   fontWeight: 900,
   fontSize: 64,
   lineHeight: 1.3,
-  layers: [shadow({ offset: [0, 4], blur: 6, stroke: 10, color: "rgba(0,0,0,0.6)" }), stroke(10, "#000000"), fill("#ffffff")],
+  layers: [
+    shadow({ offset: [0, 4], blur: 6, stroke: 10, color: "rgba(0,0,0,0.6)" }),
+    stroke(10, "#000000"),
+    fill("#ffffff"),
+  ],
 };
 
 export const speakerColors = {

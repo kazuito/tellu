@@ -20,7 +20,13 @@ export const SCRIPT: Line[] = [
   { speaker: "A", name: "ずんだ", text: "テロップって、CSSだけだと限界あるよね", start: 0.2, end: 2.6 },
   { speaker: "B", name: "めたん", text: "縁取りを何重にも重ねたり、ぼかした影を付けたり", start: 2.8, end: 5.4 },
   { speaker: "A", name: "ずんだ", text: "それ全部、tixiならレイヤーを並べるだけ！", start: 5.6, end: 8.0 },
-  { speaker: "B", name: "めたん", text: "カラオケ風のワイプも、テロップを重ねて切り抜くだけです", start: 8.2, end: 11.0 },
+  {
+    speaker: "B",
+    name: "めたん",
+    text: "カラオケ風のワイプも、テロップを重ねて切り抜くだけです",
+    start: 8.2,
+    end: 11.0,
+  },
 ];
 
 export const SUBTITLES_DURATION = Math.ceil(11.4 * 30);
@@ -29,15 +35,16 @@ export const SUBTITLES_DURATION = Math.ceil(11.4 * 30);
 const KaraokeLine = ({ line }: { line: Line }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
-  const progress = interpolate(frame, [6, durationInFrames - 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const progress = interpolate(frame, [6, durationInFrames - 10], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   const opacity = interpolate(frame, [0, 5, durationInFrames - 5, durationInFrames], [0, 1, 1, 0]);
   const lift = interpolate(frame, [0, 8], [20, 0], { extrapolateRight: "clamp" });
   const color = speakerColors[line.speaker];
 
   return (
-    <div
-      style={{ position: "absolute", left: 960, top: 1000, translate: `-50% calc(-100% + ${lift}px)`, opacity }}
-    >
+    <div style={{ position: "absolute", left: 960, top: 1000, translate: `-50% calc(-100% + ${lift}px)`, opacity }}>
       <Telop
         text={line.name}
         textStyle={{ fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 34, layers: [fill("#111111")] }}
@@ -50,7 +57,11 @@ const KaraokeLine = ({ line }: { line: Line }) => {
           text={line.text}
           textStyle={{
             ...subtitle,
-            layers: [shadow({ offset: [0, 4], blur: 6, stroke: 10, color: "rgba(0,0,0,0.6)" }), stroke(10, "#000000"), fill(color)],
+            layers: [
+              shadow({ offset: [0, 4], blur: 6, stroke: 10, color: "rgba(0,0,0,0.6)" }),
+              stroke(10, "#000000"),
+              fill(color),
+            ],
           }}
           style={{
             position: "absolute",

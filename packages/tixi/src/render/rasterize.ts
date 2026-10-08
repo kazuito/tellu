@@ -1,7 +1,7 @@
-import { context2d, createCanvas, type AnyCanvas, type Canvas2D } from "../canvas";
-import { fontToCss, type FontSpec } from "../layout/measure";
+import { type AnyCanvas, type Canvas2D, context2d, createCanvas } from "../canvas";
+import { type FontSpec, fontToCss } from "../layout/measure";
 import type { Layer, StrokePosition } from "../style/types";
-import { createPaintStyle, type Box } from "./paint";
+import { type Box, createPaintStyle } from "./paint";
 import { signedDistanceField, strokeCoverage } from "./sdf";
 
 export interface GlyphShape {
@@ -38,7 +38,12 @@ interface FieldEntry {
 const SUPERSAMPLE = 2;
 const AA_MARGIN = 2;
 
-export function layerShape(layer: Layer): { width: number; position: StrokePosition; join: CanvasLineJoin; miterLimit: number } {
+export function layerShape(layer: Layer): {
+  width: number;
+  position: StrokePosition;
+  join: CanvasLineJoin;
+  miterLimit: number;
+} {
   return {
     width: Math.max(0, layer.stroke ?? 0),
     position: layer.strokePosition ?? "outside",
@@ -132,7 +137,14 @@ export class GlyphRasterizer {
     } else {
       // Non-uniform scale would distort a native stroke, so grow the scaled glyph with a distance field instead.
       const entry = this.distanceField(shape, glyphX, glyphY, width, height);
-      const pixels = strokeCoverage(entry.field, entry.width, entry.height, SUPERSAMPLE, strokeWidth * res * SUPERSAMPLE, position);
+      const pixels = strokeCoverage(
+        entry.field,
+        entry.width,
+        entry.height,
+        SUPERSAMPLE,
+        strokeWidth * res * SUPERSAMPLE,
+        position,
+      );
       ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
     }
 
@@ -146,7 +158,9 @@ export class GlyphRasterizer {
 
   private distanceField(shape: GlyphShape, glyphX: number, glyphY: number, width: number, height: number): FieldEntry {
     const css = fontToCss(shape.font);
-    const key = [css, shape.text, shape.scaleX, shape.scaleY, shape.resolution, glyphX, glyphY, width, height].join("\u0000");
+    const key = [css, shape.text, shape.scaleX, shape.scaleY, shape.resolution, glyphX, glyphY, width, height].join(
+      "\u0000",
+    );
     let entry = this.fieldCache.get(key);
     if (entry) return entry;
 

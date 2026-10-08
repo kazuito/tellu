@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { defaultStyle } from "../src/style/defaults";
 import { fill, linearGradient, shadow, stroke } from "../src/style/helpers";
 import { applyOverride, mergeOverrides } from "../src/style/merge";
-import { defaultStyle } from "../src/style/defaults";
 
 const base = { ...defaultStyle, layers: [stroke(8, "black", { id: "edge" }), fill("white")] };
 

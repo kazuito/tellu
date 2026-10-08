@@ -1,7 +1,7 @@
-import { TelopNode, type TelopNodeOptions } from "./TelopNode";
-import { TelopRenderer, type DrawResult } from "./TelopRenderer";
 import { loadFonts } from "./fonts";
 import type { TelopProps } from "./style/types";
+import { TelopNode, type TelopNodeOptions } from "./TelopNode";
+import { type DrawResult, TelopRenderer } from "./TelopRenderer";
 
 export interface CanvasTelop {
   readonly node: TelopNode;
@@ -45,10 +45,12 @@ export async function createCanvasTelop(
     },
     update(next) {
       node.update(next);
-      return (lastDraw = renderer.draw(node, canvas));
+      lastDraw = renderer.draw(node, canvas);
+      return lastDraw;
     },
     draw() {
-      return (lastDraw = renderer.draw(node, canvas));
+      lastDraw = renderer.draw(node, canvas);
+      return lastDraw;
     },
     destroy() {
       node.destroy();

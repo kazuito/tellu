@@ -1,7 +1,7 @@
-import { context2d, createCanvas, type AnyCanvas } from "../canvas";
+import { type AnyCanvas, context2d, createCanvas } from "../canvas";
 import type { Layout } from "../layout/layout";
 import type { PlateStyle } from "../style/types";
-import { createPaintStyle, type Box } from "./paint";
+import { type Box, createPaintStyle } from "./paint";
 import { contentBox, unionBox } from "./scope";
 
 export function platePadding(style: PlateStyle): [number, number] {
@@ -18,7 +18,11 @@ export function plateBoxes(layout: Layout, style: PlateStyle): Box[] {
   return boxes.map((box) => ({ x: box.x - px, y: box.y - py, width: box.width + px * 2, height: box.height + py * 2 }));
 }
 
-export function rasterizePlate(style: PlateStyle, boxes: readonly Box[], resolution: number): { canvas: AnyCanvas; x: number; y: number } {
+export function rasterizePlate(
+  style: PlateStyle,
+  boxes: readonly Box[],
+  resolution: number,
+): { canvas: AnyCanvas; x: number; y: number } {
   const strokeWidth = style.stroke?.width ?? 0;
   const bounds = unionBox(boxes);
   const margin = strokeWidth / 2 + 1;

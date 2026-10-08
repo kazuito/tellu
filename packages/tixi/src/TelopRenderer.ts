@@ -1,6 +1,6 @@
-import { autoDetectRenderer, Container, type AutoDetectOptions, type Renderer } from "pixi.js";
+import { type AutoDetectOptions, autoDetectRenderer, Container, type Renderer } from "pixi.js";
 import type { AnyCanvas } from "./canvas";
-import { TelopNode } from "./TelopNode";
+import type { TelopNode } from "./TelopNode";
 
 const MIN_CAPACITY = 2048;
 
@@ -110,7 +110,17 @@ export class TelopRenderer {
     const ctx = target.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     if (!ctx) throw new Error("tixi: the target canvas has no 2D context");
     ctx.clearRect(0, 0, pixelWidth, pixelHeight);
-    ctx.drawImage(this.renderer.canvas as CanvasImageSource, 0, 0, pixelWidth, pixelHeight, 0, 0, pixelWidth, pixelHeight);
+    ctx.drawImage(
+      this.renderer.canvas as CanvasImageSource,
+      0,
+      0,
+      pixelWidth,
+      pixelHeight,
+      0,
+      0,
+      pixelWidth,
+      pixelHeight,
+    );
     return { x, y, width, height, resolution };
   }
 
@@ -119,7 +129,12 @@ export class TelopRenderer {
    * (each resize also makes PixiJS drop its pooled filter textures).
    */
   private ensureCapacity(pixelWidth: number, pixelHeight: number, resolution: number): void {
-    if (pixelWidth <= this.capacityWidth && pixelHeight <= this.capacityHeight && resolution === this.capacityResolution) return;
+    if (
+      pixelWidth <= this.capacityWidth &&
+      pixelHeight <= this.capacityHeight &&
+      resolution === this.capacityResolution
+    )
+      return;
     this.capacityWidth = Math.max(this.capacityWidth, nextPowerOfTwo(pixelWidth, MIN_CAPACITY));
     this.capacityHeight = Math.max(this.capacityHeight, nextPowerOfTwo(pixelHeight, MIN_CAPACITY / 2));
     this.capacityResolution = resolution;

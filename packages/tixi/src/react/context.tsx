@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { TelopRenderer } from "../TelopRenderer";
 
 const RendererContext = createContext<TelopRenderer | Promise<TelopRenderer> | null>(null);
@@ -18,6 +18,7 @@ export function useTelopRenderer(onError?: (error: unknown) => void): TelopRende
   const source = useContext(RendererContext);
   const [renderer, setRenderer] = useState<TelopRenderer | null>(source instanceof TelopRenderer ? source : null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new onError must not recreate the renderer
   useEffect(() => {
     if (source instanceof TelopRenderer) {
       setRenderer(source);

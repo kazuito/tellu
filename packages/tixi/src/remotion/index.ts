@@ -1,2 +1,2 @@
-export { Telop, type RemotionTelopProps } from "./Telop";
-export { TelopRendererProvider, useTelopRenderer, type Anchor, type TelopDrawEvent } from "../react";
+export { type Anchor, type TelopDrawEvent, TelopRendererProvider, useTelopRenderer } from "../react";
+export { type RemotionTelopProps, Telop } from "./Telop";

@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState, type ReactNode } from "react";
+import { forwardRef, type ReactNode, useEffect, useRef, useState } from "react";
 import { cancelRender, continueRender, delayRender } from "remotion";
 import { Telop as BaseTelop, type TelopComponentProps } from "../react/Telop";
 
@@ -24,6 +24,7 @@ export const Telop = forwardRef<HTMLDivElement, RemotionTelopProps>(function Tel
     handle.current = null;
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: release only on unmount
   useEffect(() => release, []);
 
   return (

@@ -1,11 +1,11 @@
 import {
+  type CSSProperties,
   forwardRef,
+  type ReactNode,
   useEffect,
   useLayoutEffect,
   useRef,
   useSyncExternalStore,
-  type CSSProperties,
-  type ReactNode,
 } from "react";
 import { fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "../fonts";
 import type { Layout } from "../layout/layout";

@@ -1,21 +1,35 @@
-export { TelopNode, createGlyphContexts, type TelopNodeOptions } from "./TelopNode";
-export { TelopRenderer, type DrawOptions, type DrawResult, type TelopRendererOptions } from "./TelopRenderer";
-export { createCanvasTelop, type CanvasTelop, type CreateCanvasTelopOptions } from "./createTelop";
-export { fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch, type FontRequest } from "./fonts";
-export { parseMarkup } from "./markup";
-
-export { layoutTelop, normalizeRuns, type Layout, type LayoutGlyph, type LayoutLine, type ResolvedRun } from "./layout/layout";
+export { type CanvasTelop, type CreateCanvasTelopOptions, createCanvasTelop } from "./createTelop";
+export { type FontRequest, fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "./fonts";
+export {
+  type Layout,
+  type LayoutGlyph,
+  type LayoutLine,
+  layoutTelop,
+  normalizeRuns,
+  type ResolvedRun,
+} from "./layout/layout";
 export {
   CanvasMeasurer,
+  type FontMetrics,
+  type FontSpec,
   fontSpecOf,
   fontToCss,
   getDefaultMeasurer,
-  type FontMetrics,
-  type FontSpec,
   type Measurer,
 } from "./layout/measure";
-
+export { parseMarkup } from "./markup";
 export { defaultKinsoku, defaultStyle, resolveStyle } from "./style/defaults";
-export { fill, glow, linearGradient, radialGradient, shadow, stroke, type GlowOptions, type ShadowOptions } from "./style/helpers";
+export {
+  fill,
+  type GlowOptions,
+  glow,
+  linearGradient,
+  radialGradient,
+  type ShadowOptions,
+  shadow,
+  stroke,
+} from "./style/helpers";
 export { applyOverride, mergeOverrides } from "./style/merge";
 export type * from "./style/types";
+export { createGlyphContexts, TelopNode, type TelopNodeOptions } from "./TelopNode";
+export { type DrawOptions, type DrawResult, TelopRenderer, type TelopRendererOptions } from "./TelopRenderer";

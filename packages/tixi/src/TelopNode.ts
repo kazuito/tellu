@@ -1,11 +1,11 @@
-import { AlphaFilter, BlurFilter, Container, Rectangle, Sprite, type DestroyOptions, type Filter } from "pixi.js";
-import { layoutTelop, type Layout } from "./layout/layout";
+import { AlphaFilter, BlurFilter, Container, type DestroyOptions, type Filter, Rectangle, Sprite } from "pixi.js";
+import { type Layout, layoutTelop } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizePlate } from "./render/plate";
 import { GlyphRasterizer, layerReach, layerShape } from "./render/rasterize";
-import { ScopeBoxes, glyphBox } from "./render/scope";
+import { glyphBox, ScopeBoxes } from "./render/scope";
 import { TextureCache } from "./render/textureCache";
 import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TelopProps } from "./style/types";
 import { stableKey } from "./utils/stableKey";
@@ -160,7 +160,15 @@ export class TelopNode extends Container {
         const originY = (pixelY + fracY) / res;
         const scopeBox = scopes.get(paintScope(layer.paint), glyph);
         const paintBox = { ...scopeBox, x: scopeBox.x - originX, y: scopeBox.y - originY };
-        const shape = { text: glyph.text, font, scaleX: glyph.scaleX, scaleY: glyph.scaleY, resolution: res, fracX, fracY };
+        const shape = {
+          text: glyph.text,
+          font,
+          scaleX: glyph.scaleX,
+          scaleY: glyph.scaleY,
+          resolution: res,
+          fracX,
+          fracY,
+        };
 
         const key = [
           glyph.text,
@@ -221,7 +229,7 @@ export class TelopNode extends Container {
     const fn = this._props.glyphTransform;
     if (!fn && !this.transformed) return;
     const layout = this.layout;
-    const transforms: (GlyphTransform | null)[] = this.contexts.map((context) => (fn && fn(context)) || null);
+    const transforms: (GlyphTransform | null)[] = this.contexts.map((context) => fn?.(context) || null);
 
     for (const { sprite, glyph: index, baseX, baseY } of this.glyphSprites) {
       const t = transforms[index];

@@ -1,8 +1,8 @@
 import { resolveKinsoku, resolveLength, resolveLineHeight, resolveStyle } from "../style/defaults";
 import { applyOverride } from "../style/merge";
 import type { KinsokuRules, TelopLayoutOptions, TelopStyle, TelopText } from "../style/types";
-import { fontSpecOf, getDefaultMeasurer, type FontMetrics, type Measurer } from "./measure";
-import { BREAK_FALLBACK, BREAK_PREFERRED, computeBreaks, segmentRuns, type Cluster } from "./segment";
+import { type FontMetrics, fontSpecOf, getDefaultMeasurer, type Measurer } from "./measure";
+import { BREAK_FALLBACK, BREAK_PREFERRED, type Cluster, computeBreaks, segmentRuns } from "./segment";
 
 export interface ResolvedRun {
   text: string;
@@ -110,7 +110,8 @@ export function layoutTelop(options: TelopLayoutOptions, measurer: Measurer = ge
   if (overflow !== "shrink" || maxWidth === undefined) return build(prepared, 1);
 
   const fits = (layout: Layout) =>
-    layout.lines.every((line) => line.width <= maxWidth + EPSILON) && (maxLines === undefined || layout.lines.length <= maxLines);
+    layout.lines.every((line) => line.width <= maxWidth + EPSILON) &&
+    (maxLines === undefined || layout.lines.length <= maxLines);
   const full = build(prepared, 1);
   if (fits(full)) return full;
 
@@ -229,8 +230,7 @@ function build(prepared: Prepared, fontScale: number): Layout {
       lineWidth += extra * gaps;
     }
 
-    const x =
-      align === "center" ? (boxWidth - lineWidth) / 2 : align === "right" ? boxWidth - lineWidth : 0;
+    const x = align === "center" ? (boxWidth - lineWidth) / 2 : align === "right" ? boxWidth - lineWidth : 0;
 
     // A blank line still takes the height of the style it was typed in.
     const sampleIndex = range.start < range.end ? range.start : Math.min(range.end, clusters.length - 1);
@@ -277,7 +277,18 @@ function build(prepared: Prepared, fontScale: number): Layout {
       pen += (width[k]! + spacing[k]!) * squeeze + (gapFilter(k) ? extra : 0);
     }
 
-    lines.push({ index: lineIndex, start, end: glyphs.length, x, top, height, baseline, width: lineWidth, ascent, descent });
+    lines.push({
+      index: lineIndex,
+      start,
+      end: glyphs.length,
+      x,
+      top,
+      height,
+      baseline,
+      width: lineWidth,
+      ascent,
+      descent,
+    });
     top += height;
   });
 
@@ -316,7 +327,12 @@ function breakLines(
     }
 
     const shift = i > lineStart ? kern[i]! : 0;
-    if (maxWidth !== undefined && cluster.kind === "char" && i > lineStart && lineWidth + shift + width[i]! > maxWidth + EPSILON) {
+    if (
+      maxWidth !== undefined &&
+      cluster.kind === "char" &&
+      i > lineStart &&
+      lineWidth + shift + width[i]! > maxWidth + EPSILON
+    ) {
       if (kinsoku?.hanging.includes(cluster.text) && clusters[i - 1]!.kind === "char") {
         ranges.push({ start: lineStart, end: i + 1, forced: false });
         startLine(i + 1);

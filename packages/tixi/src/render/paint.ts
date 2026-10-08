@@ -25,7 +25,8 @@ export function paintScope(paint: Paint): PaintScope | null {
 
 export function paintKey(paint: Paint): string {
   if (typeof paint !== "object") return colorToCss(paint);
-  if (paint.type === "pattern") return `pattern#${objectId(paint.source)}:${paint.repetition}:${paint.scale}:${paint.offset}`;
+  if (paint.type === "pattern")
+    return `pattern#${objectId(paint.source)}:${paint.repetition}:${paint.scale}:${paint.offset}`;
   return JSON.stringify(paint);
 }
 

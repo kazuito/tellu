@@ -15,7 +15,10 @@ export function applyLayerPatch(layers: readonly Layer[], patch: LayerPatch): La
 }
 
 /** Combines an outer override with an inner one; the inner one wins. */
-export function mergeOverrides(outer: StyleOverride | undefined, inner: StyleOverride | undefined): StyleOverride | undefined {
+export function mergeOverrides(
+  outer: StyleOverride | undefined,
+  inner: StyleOverride | undefined,
+): StyleOverride | undefined {
   if (!outer) return inner;
   if (!inner) return outer;
   const merged: StyleOverride = { ...outer, ...stripUndefined(inner) };

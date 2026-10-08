@@ -33,7 +33,10 @@ describe("planGroups", () => {
   });
 
   test("skips hidden layers", () => {
-    const layout = layoutTelop({ text: "あ", style: { layers: [stroke(4, "black", { visible: false }), fill("white")] } }, fakeMeasurer);
+    const layout = layoutTelop(
+      { text: "あ", style: { layers: [stroke(4, "black", { visible: false }), fill("white")] } },
+      fakeMeasurer,
+    );
     expect(planGroups(layout).map((group) => group.slot)).toEqual([1]);
   });
 });

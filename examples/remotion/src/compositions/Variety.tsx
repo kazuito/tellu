@@ -53,7 +53,10 @@ const PopIn = () => {
 
 const Punchline = () => {
   const frame = useCurrentFrame();
-  const impact = interpolate(frame, [0, 6], [2.2, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.back(2)) });
+  const impact = interpolate(frame, [0, 6], [2.2, 1], {
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(2)),
+  });
   const shake = interpolate(frame, [0, 24], [18, 0], { extrapolateRight: "clamp" });
   return (
     <Telop
@@ -80,7 +83,10 @@ const Note = () => {
       style={{ position: "absolute", left: 1840, top: 1010 }}
       glyphTransform={(glyph) => {
         const t = frame - glyph.visibleIndex * 1.5;
-        return { opacity: interpolate(t, [0, 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }), y: Math.sin(t / 6) * 4 };
+        return {
+          opacity: interpolate(t, [0, 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+          y: Math.sin(t / 6) * 4,
+        };
       }}
     />
   );

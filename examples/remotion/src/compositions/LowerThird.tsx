@@ -11,7 +11,11 @@ export const LowerThird = () => {
   const { durationInFrames } = useVideoConfig();
   const ease = Easing.out(Easing.cubic);
   const enter = (start: number) =>
-    interpolate(frame, [start, start + 16], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease });
+    interpolate(frame, [start, start + 16], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: ease,
+    });
   const exit = interpolate(frame, [durationInFrames - 14, durationInFrames], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",

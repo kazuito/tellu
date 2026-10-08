@@ -1,12 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { layoutTelop, type Layout } from "../src/layout/layout";
+import { type Layout, layoutTelop } from "../src/layout/layout";
 import type { TelopLayoutOptions } from "../src/style/types";
 import { fakeMeasurer } from "./fakeMeasurer";
 
 const style = { fontSize: 10, lineHeight: 1 };
-const layout = (options: TelopLayoutOptions) => layoutTelop({ ...options, style: { ...style, ...options.style } }, fakeMeasurer);
+const layout = (options: TelopLayoutOptions) =>
+  layoutTelop({ ...options, style: { ...style, ...options.style } }, fakeMeasurer);
 const lineTexts = (result: Layout) =>
-  result.lines.map((line) => result.glyphs.slice(line.start, line.end).map((glyph) => glyph.text).join(""));
+  result.lines.map((line) =>
+    result.glyphs
+      .slice(line.start, line.end)
+      .map((glyph) => glyph.text)
+      .join(""),
+  );
 
 describe("line breaking", () => {
   test("keeps a single line without maxWidth", () => {

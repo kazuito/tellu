@@ -1,5 +1,5 @@
+import { type Canvas2D, context2d, createCanvas } from "../canvas";
 import type { TelopStyle } from "../style/types";
-import { context2d, createCanvas, type Canvas2D } from "../canvas";
 
 export interface FontSpec {
   family: TelopStyle["fontFamily"];

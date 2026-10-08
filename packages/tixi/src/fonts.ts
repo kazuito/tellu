@@ -38,10 +38,14 @@ export function fontsReady(options: Pick<TelopLayoutOptions, "text" | "style">):
 }
 
 /** Loads every font face the telop needs. Resolves when they can be measured. */
-export async function loadFonts(options: Pick<TelopLayoutOptions, "text" | "style"> | readonly FontRequest[]): Promise<void> {
+export async function loadFonts(
+  options: Pick<TelopLayoutOptions, "text" | "style"> | readonly FontRequest[],
+): Promise<void> {
   const fonts = fontFaceSet();
   if (!fonts) return;
-  const requests = Array.isArray(options) ? (options as readonly FontRequest[]) : fontRequests(options as TelopLayoutOptions);
+  const requests = Array.isArray(options)
+    ? (options as readonly FontRequest[])
+    : fontRequests(options as TelopLayoutOptions);
   await Promise.all(requests.map(({ font, text }) => fonts.load(font, text)));
 }
 
