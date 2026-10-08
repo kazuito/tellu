@@ -7,7 +7,7 @@ This file provides guidance to AI Agents when working with code in this reposito
 Bun workspaces monorepo for `tixi`, a telop (caption) rendering library on PixiJS v8, built mainly for Remotion.
 
 - `packages/tixi`: the library. It has three entries: `tixi` (core), `tixi/react` and `tixi/remotion`.
-- `examples/remotion`: Remotion sample project with the compositions `Showcase`, `Variety`, `Subtitles` and `LowerThird`.
+- `examples/remotion`: Remotion sample project. Each real-world scene (`Variety`, `Subtitles`, `LowerThird`, `News`, `Quiz`, `Recipe`, `Sale`, `GameStream`, `Cinema`, `Credits`) is its own composition and `Showcase` plays them in sequence; `Shorts` is a separate vertical (1080×1920) composition.
 - `examples/playground`: browser demo of every feature, served by Bun's HTML dev server.
 
 ## Commands
@@ -29,7 +29,7 @@ bun run lint:fix    # biome check --write
 - Single test file: `cd packages/tixi && bun test test/layout.test.ts`.
 - Single test by name: add `-t "<name>"`.
 - Render the Remotion sample: `cd examples/remotion && bun run render` (writes `out/showcase.mp4`).
-- Representative stills: `bun run stills` (writes `out/stills/*.png`). Inspecting stills is the practical way to check rendering changes visually.
+- Representative stills: `bun run stills` (writes `out/stills/*.png`); `bun run stills News Quiz` limits it to those compositions. Inspecting stills is the practical way to check rendering changes visually.
 
 TypeScript is v7 (native). tsdown warns that its API is experimental; that warning is expected.
 

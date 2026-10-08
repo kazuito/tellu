@@ -1,14 +1,19 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { continueRender, delayRender } from "remotion";
 
 export const FONTS = {
   gothic: "Noto Sans JP",
   heavy: "Dela Gothic One",
   rounded: "Zen Maru Gothic",
+  serif: "Noto Serif JP",
+  pop: "RocknRoll One",
+  brush: "Reggae One",
+  latin: "Montserrat",
 } as const;
 
 const STYLESHEET =
-  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;900&family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@900&display=block";
+  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;900&family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@900" +
+  "&family=Noto+Serif+JP:wght@500;900&family=RocknRoll+One&family=Reggae+One&family=Montserrat:wght@900&display=block";
 
 let stylesheet: Promise<void> | undefined;
 
