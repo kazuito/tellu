@@ -20,7 +20,11 @@ bun run typecheck   # tsc --noEmit in every workspace
 bun run build       # tsdown -> packages/tixi/dist (also rewrites `exports` in its package.json)
 bun run dev         # playground at http://localhost:3000
 bun run studio      # Remotion Studio
+bun run lint        # biome check (lint + format + import order)
+bun run lint:fix    # biome check --write
 ```
+
+- Git hooks (lefthook, installed by `bun install` via `prepare`): pre-commit runs Biome with fixes on staged files and the typecheck; pre-push runs `biome ci`, the typecheck and the tests. Config is in `lefthook.yml`, and `lefthook-local.yml` is for personal overrides.
 
 - Single test file: `cd packages/tixi && bun test test/layout.test.ts`.
 - Single test by name: add `-t "<name>"`.

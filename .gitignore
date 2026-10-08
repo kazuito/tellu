@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # examples
 examples/remotion/out
+
+# lefthook
+lefthook-local.yml

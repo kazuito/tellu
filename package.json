@@ -11,6 +11,13 @@
     "test": "bun run --filter tixi test",
     "typecheck": "bun run --filter '*' typecheck",
     "dev": "bun run --filter tixi-playground dev",
-    "studio": "bun run --filter tixi-remotion-example studio"
+    "studio": "bun run --filter tixi-remotion-example studio",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "lefthook": "2.2.1"
   }
 }
