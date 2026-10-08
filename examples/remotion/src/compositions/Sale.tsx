@@ -71,7 +71,7 @@ const Product = () => {
         fontFamily: FONTS.rounded,
         fontWeight: 900,
         fontSize: 96,
-        layers: [stroke(16, "#ffffff"), stroke(8, "#7a3e00"), fill("#7a3e00")],
+        layers: [stroke(10, "#ffffff"), fill("#7a3e00")],
       }}
       anchor="top"
       style={{ position: "absolute", left: 960, top: 110 }}
