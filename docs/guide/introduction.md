@@ -19,7 +19,7 @@ export default {
       shadow({ color: "rgba(0,0,0,0.5)", offset: [7, 9], blur: 6, stroke: 20 }),
       stroke(20, "#1b2a7a"),
       stroke(11, "#ffffff"),
-      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
     ],
   },
 };

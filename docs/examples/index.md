@@ -24,7 +24,7 @@ export default {
       }),
       stroke(22, "#14206b"),
       stroke(12, "#ffffff"),
-      fill(linearGradient(["#fffbd1", "#ffe14d", "#ff9d00"])),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
     ],
   },
 };

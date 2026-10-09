@@ -183,7 +183,7 @@ const style = (join: CanvasLineJoin) => ({
   fontFamily: "Montserrat",
   fontWeight: 900,
   fontSize: 72,
-  layers: [stroke(14, "#ffcf3d", { join }), fill("#1b2a7a")],
+  layers: [stroke(14, "#ffd000", { join }), fill("#1b2a7a")],
 });
 
 export default {

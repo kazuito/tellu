@@ -13,7 +13,7 @@ export const variety: Style = {
     shadow({ color: "rgba(0,0,0,0.45)", offset: [10, 12], blur: 8, stroke: 30 }),
     stroke(30, "#14206b"),
     stroke(16, "#ffffff"),
-    fill(linearGradient(["#fffbd1", "#ffe14d", "#ff9d00"], { scope: "line" })),
+    fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"], { scope: "line" })),
   ],
 };
 

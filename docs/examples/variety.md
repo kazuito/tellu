@@ -19,7 +19,7 @@ export default {
       fontSize: 104,
       layers: {
         edge: { paint: "#8a0036" },
-        face: { paint: linearGradient(["#ffffff", "#ffb3d1", "#ff2e7e"]) },
+        face: { paint: linearGradient(["#ff8cc6", "#ff2e7e", "#d4005c"]) },
       },
     },
   }),
@@ -37,7 +37,7 @@ export default {
       }),
       stroke(22, "#14206b", { id: "edge" }),
       stroke(12, "#ffffff"),
-      fill(linearGradient(["#fffbd1", "#ffe14d", "#ff9d00"]), { id: "face" }),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"]), { id: "face" }),
     ],
   },
 };

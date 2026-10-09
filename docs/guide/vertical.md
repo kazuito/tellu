@@ -15,7 +15,7 @@ export default {
     red: {
       layers: {
         3: {
-          paint: linearGradient(["#ffe0e0", "#ff3b30"], { scope: "glyph" }),
+          paint: linearGradient(["#ff8a80", "#e60012"], { scope: "glyph" }),
         },
       },
     },
@@ -35,7 +35,7 @@ export default {
       }),
       stroke(20, "#1b2a7a"),
       stroke(10, "#ffffff"),
-      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
     ],
   },
   background: { paint: "rgba(0, 20, 40, 0.6)", radius: 12 },

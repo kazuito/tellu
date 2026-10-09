@@ -57,7 +57,7 @@ export default {
     em: {
       fontSize: 88,
       layers: {
-        3: { paint: linearGradient(["#ffffff", "#ffb3d1", "#ff2e7e"]) },
+        3: { paint: linearGradient(["#ff8cc6", "#ff2e7e", "#d4005c"]) },
       },
     },
   }),
@@ -74,7 +74,7 @@ export default {
       }),
       stroke(20, "#14206b"),
       stroke(11, "#ffffff"),
-      fill(linearGradient(["#fffbd1", "#ffe14d", "#ff9d00"])),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
     ],
   },
 };

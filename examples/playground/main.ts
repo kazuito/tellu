@@ -102,7 +102,7 @@ const variety: TextNodeProps = {
       shadow({ color: "rgba(0,0,0,0.55)", offset: [8, 10], blur: 6, stroke: 22 }),
       stroke(22, "#1b2a7a"),
       stroke(12, "#ffffff"),
-      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"], { angle: 180, scope: "line" })),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"], { angle: 180, scope: "line" })),
     ],
   },
 };
@@ -120,7 +120,7 @@ await demo("Rich text via markup", {
   text: parseMarkup("今日は<em>最高</em>の<b>1日</b>だった", {
     em: {
       fontSize: 120,
-      layers: { 3: { paint: linearGradient(["#ffd1e8", "#ff2e7e"], { scope: "glyph" }) }, 1: { paint: "#5a0026" } },
+      layers: { 3: { paint: linearGradient(["#ff8cc6", "#e0005f"], { scope: "glyph" }) }, 1: { paint: "#5a0026" } },
     },
     b: { fontFamily: "Dela Gothic One", fontWeight: 400, baselineShift: 6 },
   }),
@@ -245,7 +245,7 @@ const stripes = document.createElement("canvas");
 stripes.width = stripes.height = 24;
 {
   const ctx = stripes.getContext("2d")!;
-  ctx.fillStyle = "#ffcf3d";
+  ctx.fillStyle = "#ffd000";
   ctx.fillRect(0, 0, 24, 24);
   ctx.strokeStyle = "#ff5d8f";
   ctx.lineWidth = 8;
@@ -388,7 +388,7 @@ await compareWithCss(
 await demo("Vertical telop: layers, gradient per line, plate", {
   text: parseMarkup("<em>第3話</em><br/>消えた<red>ラーメン</red>の謎", {
     em: { fontSize: 44, layers: { 3: { paint: "#ffe600" } } },
-    red: { layers: { 3: { paint: linearGradient(["#ffe0e0", "#ff3b30"], { angle: 180, scope: "glyph" }) } } },
+    red: { layers: { 3: { paint: linearGradient(["#ff8a80", "#e60012"], { angle: 180, scope: "glyph" }) } } },
   }),
   writingMode: "vertical-rl",
   style: {
@@ -400,7 +400,7 @@ await demo("Vertical telop: layers, gradient per line, plate", {
       shadow({ color: "rgba(0,0,0,0.55)", offset: [8, 10], blur: 6, stroke: 20 }),
       stroke(20, "#1b2a7a"),
       stroke(10, "#ffffff"),
-      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"], { angle: 180, scope: "line" })),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"], { angle: 180, scope: "line" })),
     ],
   },
   background: { paint: "rgba(0, 20, 40, 0.6)", radius: 12 },

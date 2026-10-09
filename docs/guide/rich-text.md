@@ -26,7 +26,7 @@ export default {
       shadow({ offset: [6, 8], blur: 5, stroke: 20 }),
       stroke(20, "#1b2a7a"),
       stroke(11, "#ffffff"),
-      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
     ],
   },
 };
@@ -49,7 +49,7 @@ const style = {
     shadow({ stroke: 20 }),           // 0
     stroke(20, "#1b2a7a", { id: "edge" }), // 1, also "edge"
     stroke(11, "#ffffff"),            // 2
-    fill("#ffcf3d"),                  // 3
+    fill("#ffd000"),                  // 3
   ],
 };
 
@@ -80,7 +80,7 @@ export default {
       layers: {
         1: { paint: "#5a0026" },
         3: {
-          paint: linearGradient(["#ffd1e8", "#ff2e7e"], { scope: "glyph" }),
+          paint: linearGradient(["#ff8cc6", "#e0005f"], { scope: "glyph" }),
         },
       },
     },
@@ -94,7 +94,7 @@ export default {
       shadow({ offset: [6, 8], blur: 5, stroke: 20 }),
       stroke(20, "#1b2a7a"),
       stroke(11, "#ffffff"),
-      fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+      fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
     ],
   },
 };

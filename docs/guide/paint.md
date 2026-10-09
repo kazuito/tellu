@@ -6,7 +6,7 @@ description: Solid colors, linear and radial gradients, and image patterns, plus
 
 Every layer's `paint` is one of:
 
-- a **color**: any CSS color string (`"#ffcf3d"`, `"rgba(0,0,0,0.5)"`, `"tomato"`) or a number (`0xffcf3d`);
+- a **color**: any CSS color string (`"#ffd000"`, `"rgba(0,0,0,0.5)"`, `"tomato"`) or a number (`0xffd000`);
 - a **linear gradient**, made with `linearGradient()`;
 - a **radial gradient**, made with `radialGradient()`;
 - a **pattern** that tiles an image or canvas.
@@ -32,7 +32,7 @@ const style = (paint: ReturnType<typeof linearGradient>) => ({
 export default {
   "evenly spaced": {
     text: "グラデ",
-    style: style(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"])),
+    style: style(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"])),
   },
   "angle: 90": {
     text: "グラデ",
@@ -127,7 +127,7 @@ import { fill, shadow, stroke, type PatternPaint } from "tellu";
 
 const tile = new OffscreenCanvas(24, 24);
 const ctx = tile.getContext("2d")!;
-ctx.fillStyle = "#ffcf3d";
+ctx.fillStyle = "#ffd000";
 ctx.fillRect(0, 0, 24, 24);
 ctx.strokeStyle = "#ff5d8f";
 ctx.lineWidth = 8;

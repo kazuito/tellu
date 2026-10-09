@@ -36,7 +36,7 @@ const style = {
     shadow({ offset: [8, 10], blur: 6, stroke: 22 }),
     stroke(22, "#1b2a7a"),
     stroke(12, "#ffffff"),
-    fill(linearGradient(["#fff7a8", "#ffcf3d", "#ff8a00"], { scope: "line" })),
+    fill(linearGradient(["#ffd000", "#ff8a00", "#ff4d00"], { scope: "line" })),
   ],
 };
 
