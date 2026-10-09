@@ -102,7 +102,7 @@ In [vertical text](./vertical#fitting) the roles swap: `maxHeight` is the line l
 
 ## Limiting lines
 
-`maxLines` without `shrink` simply **truncates**: lines after the limit are dropped. With `shrink`, it is a constraint the font scale must satisfy instead.
+`maxLines` without `shrink` simply **truncates**: lines after the limit are dropped. With `shrink`, it is a constraint the font scale must satisfy instead. If the text doesn't fit `maxLines` even at `minScale`, it is set at `minScale` and truncated after `maxLines`, so the caption never grows past the lines you allowed.
 
 ::: tip Pick the right tool
 - A name in a fixed bar: `wrap: "none"` + `overflow: "squeeze"`

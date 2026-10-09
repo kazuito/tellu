@@ -136,7 +136,7 @@ export function layoutText(options: LayoutOptions, measurer: Measurer = getDefau
 
   const { maxLines, overflow = "visible" } = options;
   const [lineLimit, blockLimit] = limits(options);
-  if (overflow !== "shrink" || (lineLimit === undefined && blockLimit === undefined)) return build(prepared, 1);
+  if (overflow !== "shrink" || (lineLimit === undefined && blockLimit === undefined)) return build(prepared, 1, true);
 
   const fits = (layout: Layout) => {
     const blockSize = vertical ? layout.width : layout.height;
@@ -146,16 +146,20 @@ export function layoutText(options: LayoutOptions, measurer: Measurer = getDefau
       (maxLines === undefined || layout.lines.length <= maxLines)
     );
   };
-  const full = build(prepared, 1);
+  const full = build(prepared, 1, false);
   if (fits(full)) return full;
 
   const minScale = options.minScale ?? 0.3;
-  let best = build(prepared, minScale);
+  const smallest = build(prepared, minScale, false);
+  // Even the smallest scale overflows: keep it, cut to `maxLines` like the other overflow modes.
+  if (!fits(smallest)) return maxLines === undefined ? smallest : build(prepared, minScale, true);
+
+  let best = smallest;
   let low = minScale;
   let high = 1;
   for (let i = 0; i < 16 && high - low > 0.001; i++) {
     const mid = (low + high) / 2;
-    const candidate = build(prepared, mid);
+    const candidate = build(prepared, mid, false);
     if (fits(candidate)) {
       best = candidate;
       low = mid;
@@ -275,7 +279,8 @@ interface LineMetrics {
   descent: number;
 }
 
-function build(prepared: Prepared, fontScale: number): Layout {
+/** @param truncate Drop the lines after `maxLines`. */
+function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout {
   const { options, vertical, runs, clusters, orientations, breaks, advances, metrics, shifts, kinsoku } = prepared;
   const { maxLines, align = "start", overflow = "visible" } = options;
   const writingMode = options.writingMode ?? "horizontal-tb";
@@ -296,7 +301,7 @@ function build(prepared: Prepared, fontScale: number): Layout {
   });
 
   let ranges = breakLines(clusters, breaks, advance, kern, spacing, wrap ? lineLimit : undefined, kinsoku);
-  if (maxLines !== undefined && overflow !== "shrink") ranges = ranges.slice(0, maxLines);
+  if (maxLines !== undefined && truncate) ranges = ranges.slice(0, maxLines);
 
   const contentEnds = ranges.map((range) => {
     let end = range.end;

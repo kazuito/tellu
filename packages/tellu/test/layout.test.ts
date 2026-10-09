@@ -185,6 +185,16 @@ describe("overflow", () => {
     expect(result.fontScale).toBeLessThan(1);
   });
 
+  test("shrink cuts to maxLines when even minScale does not fit", () => {
+    const result = layout({ text: "あ".repeat(40), maxWidth: 20, maxLines: 2, overflow: "shrink", minScale: 0.5 });
+    expect(result.fontScale).toBe(0.5);
+    expect(lineTexts(result)).toEqual(["ああああ", "ああああ"]);
+  });
+
+  test("shrink without a box still applies maxLines", () => {
+    expect(lineTexts(layout({ text: "あ\nい\nう", maxLines: 2, overflow: "shrink" }))).toEqual(["あ", "い"]);
+  });
+
   test("squeeze compresses overflowing lines horizontally", () => {
     const result = layout({ text: "あいうえ\nあ", maxWidth: 20, wrap: "none", overflow: "squeeze" });
     expect(result.lines[0]!.inlineSize).toBe(20);

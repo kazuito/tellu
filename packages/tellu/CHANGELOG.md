@@ -16,7 +16,7 @@ The first public release.
 - Rich text: runs that override the style or patch single layers by index or `id`, and `parseMarkup()` to build runs from `<tag>` markup.
 - Typography: letter spacing, kerning, line height, baseline shift, and condensed or expanded glyphs (長体 / 平体, `scaleX` / `scaleY`) whose outlines keep an even width.
 - Line breaking: automatic wrapping with Japanese kinsoku rules, hanging punctuation and optional phrase breaking (`lineBreak: "phrase"`), plus `align` (including `"justify"`) and `maxLines`.
-- Fitting: `overflow: "shrink"` scales the font to fit, and `overflow: "squeeze"` compresses overflowing lines, both bounded by `minScale`.
+- Fitting: `overflow: "shrink"` scales the font to fit, and `overflow: "squeeze"` compresses overflowing lines, both bounded by `minScale`. Text that doesn't fit `maxLines` even at `minScale` is truncated after `maxLines`.
 - Vertical writing (縦書き): `writingMode: "vertical-rl"` and `"vertical-lr"`, `textOrientation`, and 縦中横 with `textCombineUpright`.
 - Background plates (座布団) with `background`, drawn behind the whole block or behind each line.
 - Per-glyph animation with `glyphTransform` (position, scale, rotation, skew, opacity, visibility), which moves cached sprites instead of re-rasterizing.
