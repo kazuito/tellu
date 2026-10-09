@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-09
+
 The first public release.
 
 ### Added
@@ -27,4 +29,5 @@ The first public release.
 - `tellu/react`: `<Text>`, `TextRendererProvider` and `useTextRenderer()`.
 - `tellu/remotion`: `<Text>`, which holds each frame with `delayRender` until the renderer, the fonts and the drawing are ready.
 
-[Unreleased]: https://github.com/kazuito/tellu/commits/main
+[Unreleased]: https://github.com/kazuito/tellu/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/kazuito/tellu/releases/tag/v0.1.1

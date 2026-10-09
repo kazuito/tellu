@@ -1,10 +1,17 @@
 {
   "name": "tellu",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Advanced telop (caption) rendering on PixiJS — multi-layer strokes, shadows, gradients, rich text and Japanese line breaking.",
   "type": "module",
   "license": "MIT",
   "author": "kazuito",
+  "homepage": "https://tellujs.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kazuito/tellu.git",
+    "directory": "packages/tellu"
+  },
+  "bugs": "https://github.com/kazuito/tellu/issues",
   "sideEffects": false,
   "files": [
     "dist",
