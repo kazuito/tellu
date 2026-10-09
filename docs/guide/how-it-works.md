@@ -17,7 +17,7 @@ Layout is pure TypeScript with no DOM or PixiJS, and it takes an injected [`Meas
 
 1. **Runs** are resolved: each run's style override is applied to the base style.
 2. **Segmentation** splits text into grapheme clusters with `Intl.Segmenter`, then marks where lines may break. Kinsoku rules veto some breaks, and in `"phrase"` mode breaks inside a phrase are demoted to fallbacks.
-3. **Measurement** finds each glyph's advance. Kerning comes from measuring growing prefixes of each run, and is stored separately from each glyph's own advance. That way it shifts the *next* glyph and is dropped at the start of a line.
+3. **Measurement** finds each glyph's advance. Kerning comes from measuring growing prefixes of each run, so it matches how the browser shapes the text in context. Prefixes restart every 64 characters (re-measuring the 16 before), which keeps long runs linear in cost. Kerning is stored separately from each glyph's own advance. That way it shifts the *next* glyph and is dropped at the start of a line.
 4. **Line breaking** is greedy: fill a line until the next glyph overflows, then break at the last allowed position, hanging punctuation where permitted.
 5. **Alignment**, justification and `squeeze` place each glyph on its line. `shrink` reruns this step with a binary-searched font scale.
 

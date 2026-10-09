@@ -180,10 +180,16 @@ interface Advances {
   kern: Float64Array;
 }
 
+/** Longest text measured at once to find kerning. Longer runs restart the measurement. */
+const KERN_WINDOW = 64;
+/** Clusters before a restart that are measured again, so shaping still sees its neighbours. */
+const KERN_CONTEXT = 16;
+
 /**
  * Kerning-aware advances. Measuring growing prefixes of each run yields the kerning between
- * neighbours, which shifts the following glyph (it is not part of that glyph's own advance).
- * In vertical text only neighbouring sideways glyphs kern.
+ * neighbours as the browser shapes them in context, which shifts the following glyph (it is not
+ * part of that glyph's own advance). Prefixes restart every `KERN_WINDOW` clusters so long runs
+ * cost linear time. In vertical text only neighbouring sideways glyphs kern.
  */
 function measureAdvances(
   clusters: readonly Cluster[],
@@ -193,23 +199,32 @@ function measureAdvances(
 ): Advances {
   const own = new Float64Array(clusters.length);
   const kern = new Float64Array(clusters.length);
-  let runIndex = -1;
+  const kerns = (index: number) => {
+    const cluster = clusters[index]!;
+    return cluster.kind !== "newline" && (!orientations || orientations[index] === "sideways");
+  };
   let segmentStart = 0;
+  /** First cluster of the measured prefix. */
+  let base = 0;
+  /** Width of the prefix up to the previous cluster. */
   let previous = 0;
   clusters.forEach((cluster, index) => {
-    const kerns = cluster.kind !== "newline" && (!orientations || orientations[index] === "sideways");
-    if (cluster.runIndex !== runIndex || !kerns) {
-      runIndex = cluster.runIndex;
-      segmentStart = kerns ? cluster.start : cluster.end;
-      previous = 0;
-    }
     if (cluster.kind === "newline") return;
-    const run = runs[runIndex]!;
+    const run = runs[cluster.runIndex]!;
     const font = fontSpecOf(run.style);
     own[index] = measurer.measureText(cluster.text, font);
-    if (!kerns) return;
-    const prefix = measurer.measureText(run.text.slice(segmentStart, cluster.end), font);
-    kern[index] = cluster.start === segmentStart ? 0 : prefix - previous - own[index]!;
+    const before = clusters[index - 1];
+    if (!before || before.runIndex !== cluster.runIndex || !kerns(index - 1) || !kerns(index)) {
+      segmentStart = base = index;
+      previous = own[index]!;
+      return;
+    }
+    if (index - base >= KERN_WINDOW) {
+      base = Math.max(segmentStart, index - KERN_CONTEXT);
+      previous = measurer.measureText(run.text.slice(clusters[base]!.start, before.end), font);
+    }
+    const prefix = measurer.measureText(run.text.slice(clusters[base]!.start, cluster.end), font);
+    kern[index] = prefix - previous - own[index]!;
     previous = prefix;
   });
   return { own, kern };

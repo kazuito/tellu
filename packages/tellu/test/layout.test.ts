@@ -98,6 +98,23 @@ describe("kerning", () => {
     expect(result.glyphs[2]!.x).toBe(0);
     expect(result.lines[1]!.inlineSize).toBe(20);
   });
+
+  test("measures long runs in bounded windows without losing kerning", () => {
+    const measured: string[] = [];
+    const counting = {
+      ...kerningMeasurer,
+      measureText(text: string, font: Parameters<typeof fakeMeasurer.measureText>[1]) {
+        measured.push(text);
+        return kerningMeasurer.measureText(text, font);
+      },
+    };
+    const text = `${"あ".repeat(63)}。「${"あ".repeat(935)}`;
+    const result = layoutText({ text, style }, counting);
+    expect(Math.max(...measured.map((part) => part.length))).toBeLessThanOrEqual(64);
+    expect(measured.reduce((sum, part) => sum + part.length, 0)).toBeLessThan(text.length * 64);
+    expect(result.glyphs[64]!.x - result.glyphs[63]!.x).toBe(6);
+    expect(result.lines[0]!.inlineSize).toBe(text.length * 10 - 4);
+  });
 });
 
 describe("alignment", () => {
