@@ -48,8 +48,6 @@ export default defineConfig({
           "Every page is also available as Markdown by appending `.md` to its URL.",
       }),
     ],
-    resolve: { conditions: ["tellu-source"] },
-    ssr: { resolve: { conditions: ["tellu-source"] } },
     server: { port: 3400 },
   },
   themeConfig: {

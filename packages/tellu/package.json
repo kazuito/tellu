@@ -29,8 +29,10 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "dev": "tsdown --watch --no-clean",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
     "pixi.js": "^8.21.0",
@@ -55,26 +57,9 @@
     "typescript": "^7.0.2"
   },
   "exports": {
-    ".": {
-      "tellu-source": "./src/index.ts",
-      "default": "./dist/index.js"
-    },
-    "./react": {
-      "tellu-source": "./src/react/index.ts",
-      "default": "./dist/react.js"
-    },
-    "./remotion": {
-      "tellu-source": "./src/remotion/index.ts",
-      "default": "./dist/remotion.js"
-    },
+    ".": "./dist/index.js",
+    "./react": "./dist/react.js",
+    "./remotion": "./dist/remotion.js",
     "./package.json": "./package.json"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": "./dist/index.js",
-      "./react": "./dist/react.js",
-      "./remotion": "./dist/remotion.js",
-      "./package.json": "./package.json"
-    }
   }
 }

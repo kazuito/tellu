@@ -209,4 +209,4 @@ bun run studio     # Remotion Studio at http://localhost:3200
 bun run docs:dev   # docs at http://localhost:3400/
 ```
 
-Examples resolve `tellu` to `src/` through the `tellu-source` export condition, so they run without a build; the published package resolves to `dist/`.
+The examples and docs use the built `dist/` through the workspace link, like any other consumer. `dev`, `studio` and `docs:dev` rebuild it on change.

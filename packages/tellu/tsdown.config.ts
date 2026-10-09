@@ -9,8 +9,4 @@ export default defineConfig({
   format: ["esm"],
   platform: "browser",
   dts: true,
-  exports: {
-    // Workspace consumers that enable this condition use the TypeScript source directly.
-    devExports: "tellu-source",
-  },
 });

@@ -1,5 +1,5 @@
 /**
- * Type-checks every ```ts demo fence against the library source, so examples break loudly when the API changes.
+ * Type-checks every ```ts demo fence against the built library, so examples break loudly when the API changes.
  * Errors are reported at their line in the Markdown file.
  */
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";

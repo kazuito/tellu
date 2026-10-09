@@ -17,11 +17,11 @@ Run these from the repo root:
 
 ```sh
 bun run test        # library unit tests (bun test in packages/tellu)
-bun run typecheck   # tsc --noEmit in every workspace
-bun run build       # tsdown -> packages/tellu/dist (also rewrites `exports` in its package.json)
-bun run dev         # playground at http://localhost:3100
-bun run studio      # Remotion Studio at http://localhost:3200
-bun run docs:dev    # docs site at http://localhost:3400/
+bun run typecheck   # build, then tsc --noEmit in every workspace
+bun run build       # tsdown -> packages/tellu/dist
+bun run dev         # playground at http://localhost:3100 (rebuilds tellu on change)
+bun run studio      # Remotion Studio at http://localhost:3200 (rebuilds tellu on change)
+bun run docs:dev    # docs site at http://localhost:3400/ (rebuilds tellu on change)
 bun run docs:check  # docs examples typecheck + every public export documented + examples formatted
 bun run docs:format # format the docs' example code (Biome, 80 columns)
 bun run docs:build  # docs/.vitepress/dist, including llms.txt and a .md per page
@@ -33,21 +33,20 @@ bun run lint:fix    # biome check --write
 
 - Single test file: `cd packages/tellu && bun test test/layout.test.ts`.
 - Single test by name: add `-t "<name>"`.
-- Render the Remotion sample: `cd examples/remotion && bun run render` (writes `out/showcase.mp4`).
+- Render the Remotion sample: `bun run build && cd examples/remotion && bun run render` (writes `out/showcase.mp4`).
 - Representative stills: `bun run stills` (writes `out/stills/*.png`); `bun run stills News Quiz` limits it to those compositions. Inspecting stills is the practical way to check rendering changes visually.
 - Visual regression check: `bun run stills --baseline` on the code to compare against (e.g. with your changes stashed), then `bun run stills --diff` on your changes. It lists the stills that differ, writes their pixel diffs to `out/stills-diff/` and exits 1. Baselines live in the gitignored `out/` and depend on the machine, so compare on one machine. Run it for any change that should not alter rendering.
 
 TypeScript is v7 (native). tsdown warns that its API is experimental; that warning is expected.
 
-## Workspace resolution (`tellu-source` condition)
+## Workspace resolution
 
-tsdown uses `exports.devExports: "tellu-source"`. Each export in `packages/tellu/package.json` therefore maps `tellu-source` to `src/*.ts` and `default` to `dist/*.js`.
+The examples and docs depend on `"tellu": "workspace:*"` and import the built `packages/tellu/dist`, exactly like the published package (`exports` points only at `dist/`).
 
-- **Don't hand-edit that `exports` field.** `bun run build` regenerates it.
-- The examples enable the condition, so they use library source without a build:
-  - Bun: `bun --conditions=tellu-source` (but Bun's HTML dev server, used by the playground, ignores the condition for the browser bundle and serves `dist/`: run `bun run build` after library changes, then restart `bun run dev`)
-  - Webpack: `resolve.conditionNames` in `remotion.config.ts`
-  - TypeScript: `customConditions` in each example's tsconfig
+- `bun run typecheck` and `bun run docs:check` build first; `bun run docs:build` builds tellu before the docs with Bun's dependency-ordered `--filter 'tellu-docs...'`.
+- `dev`, `studio` and `docs:dev` run tellu's `tsdown --watch` alongside the server (`bun run --parallel --filter`), so library changes reach the examples on save.
+- Commands run inside `examples/remotion` (`render`, `stills`) use whatever is in `dist/`: run `bun run build` first.
+- Keep `exports` in `packages/tellu/package.json` in sync with the entries in `tsdown.config.ts`.
 - If a workspace link goes missing (`Cannot find module 'tellu'`), delete every `node_modules` and run `bun install` again.
 
 ## Architecture (packages/tellu/src)
@@ -94,7 +93,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
   - `docs/examples/*.md`: real-world recipes.
   - `README.md` files: keep them short and in sync with the guide's claims.
   - When adding a page, add it to the sidebar in `docs/.vitepress/config.ts` and give it a frontmatter `description` (it becomes the page's line in `llms.txt`).
-- Live examples are fences with the info string `ts demo`. The fence code runs in the browser and is type-checked against the library source by `bun run typecheck` (`docs/scripts/check-snippets.ts`, errors reported at the Markdown line).
+- Live examples are fences with the info string `ts demo`. The fence code runs in the browser and is type-checked against the built library by `bun run typecheck` (`docs/scripts/check-snippets.ts`, errors reported at the Markdown line).
   - The default export is `TextNodeProps`, or `(frame: number) => TextNodeProps` for animation (30 fps).
   - `ts demo compare` exports a `Record<label, TextNodeProps>`, drawn side by side.
   - Attributes: `backdrop=checker|night|street|studio|light` (default `checker`; use another only when a caption is hard to read on it), `loop=<frames>`, `still=<frame shown when paused>`.

@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --conditions=tellu-source --port=3100 index.html",
+    "dev": "bun --port=3100 index.html",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

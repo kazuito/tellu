@@ -4,7 +4,6 @@
     "target": "ESNext",
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "customConditions": ["tellu-source"],
     "types": ["bun"],
     "strict": true,
     "skipLibCheck": true,

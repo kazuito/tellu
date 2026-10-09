@@ -3,7 +3,6 @@
     "target": "ES2022",
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "customConditions": ["tellu-source"],
     "jsx": "react-jsx",
     "types": ["bun"],
     "strict": true,
@@ -11,5 +10,5 @@
     "noEmit": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src", "scripts", "remotion.config.ts", "webpack-override.ts"]
+  "include": ["src", "scripts", "remotion.config.ts"]
 }

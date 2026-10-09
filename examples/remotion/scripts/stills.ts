@@ -5,7 +5,6 @@ import { bundle } from "@remotion/bundler";
 import { type ChromiumOptions, openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { webpackOverride } from "../webpack-override";
 
 // Renders representative frames of each composition into out/stills for a quick visual check.
 //
@@ -45,7 +44,7 @@ if (mode === "diff" && !existsSync(baselineDir)) {
 
 // PixiJS needs WebGL in headless Chrome.
 const chromiumOptions: ChromiumOptions = { gl: "angle" };
-const serveUrl = await bundle({ entryPoint: path.join(root, "src/index.ts"), webpackOverride });
+const serveUrl = await bundle({ entryPoint: path.join(root, "src/index.ts") });
 const browser = await openBrowser("chrome", { chromiumOptions });
 
 const stills: string[] = [];

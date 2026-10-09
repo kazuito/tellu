@@ -7,8 +7,10 @@
 | `LowerThird` | News-style name plate with a gradient background, staggered reveal and a long title shrunk to fit |
 | `Showcase` | All of the above in sequence |
 
+Run `bun run studio` at the repo root to open Remotion Studio while tellu rebuilds on change. The commands below use the built `tellu`, so run `bun run build` at the root first.
+
 ```sh
-bun run studio
+bun run dev      # Remotion Studio, without rebuilding tellu
 bun run render   # out/showcase.mp4
 bun run stills              # out/stills/*.png
 bun run stills --baseline   # out/stills-baseline/*.png, the reference for --diff
@@ -17,5 +19,5 @@ bun run stills --diff       # render, then compare against the baseline (diffs i
 
 Notes:
 
-- `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` (PixiJS needs WebGL in headless Chrome) and the `tellu-source` webpack condition.
+- `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` (PixiJS needs WebGL in headless Chrome).
 - `src/fonts.tsx` gates the compositions until the Google Fonts stylesheet has declared its `@font-face` rules; each `<Text>` then loads only the subsets its text uses.
