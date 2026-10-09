@@ -1,6 +1,6 @@
 {
   "name": "tellu",
-  "version": "0.1.1",
+  "version": "0.0.2",
   "description": "Advanced telop (caption) rendering on PixiJS — multi-layer strokes, shadows, gradients, rich text and Japanese line breaking.",
   "type": "module",
   "license": "MIT",
