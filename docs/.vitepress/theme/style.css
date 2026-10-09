@@ -219,3 +219,7 @@
   border-top: none;
   text-align: center;
 }
+
+.markdown-copy-buttons .markdown-copy-buttons-inner .download-btn {
+  display: none;
+}
