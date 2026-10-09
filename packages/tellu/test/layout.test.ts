@@ -255,6 +255,83 @@ describe("alignment", () => {
   });
 });
 
+describe("wrap: balance", () => {
+  test("evens out the lines of a paragraph", () => {
+    expect(lineTexts(layout({ text: "あいうえおかきくけこさし", maxWidth: 100 }))).toEqual([
+      "あいうえおかきくけこ",
+      "さし",
+    ]);
+    expect(lineTexts(layout({ text: "あいうえおかきくけこさし", maxWidth: 100, wrap: "balance" }))).toEqual([
+      "あいうえおか",
+      "きくけこさし",
+    ]);
+    expect(lineTexts(layout({ text: "aaa bbb ccc ddd", maxWidth: 50, wrap: "balance" }))).toEqual([
+      "aaa bbb ",
+      "ccc ddd",
+    ]);
+  });
+
+  test("balances each paragraph and keeps its forced break", () => {
+    const result = layout({ text: "あいうえおかきくけこさし\nあ", maxWidth: 100, wrap: "balance", align: "justify" });
+    expect(lineTexts(result)).toEqual(["あいうえおか", "きくけこさし", "あ"]);
+    expect(result.lines.map((line) => line.inlineSize)).toEqual([100, 60, 10]);
+  });
+
+  test("aligns against the full line length", () => {
+    const result = layout({ text: "あいうえおかきくけこさし", maxWidth: 100, wrap: "balance", align: "center" });
+    expect(result.width).toBe(100);
+    expect(result.lines[0]!.inlineStart).toBe(20);
+  });
+
+  test("acts like auto without a line length", () => {
+    expect(lineTexts(layout({ text: "あいう\nえ", wrap: "balance" }))).toEqual(["あいう", "え"]);
+  });
+});
+
+describe("wrap: pretty", () => {
+  test("gives a lone character and its punctuation company (泣き別れ)", () => {
+    expect(lineTexts(layout({ text: "あいうえおかきくけこさ。", maxWidth: 100, wrap: "pretty" }))).toEqual([
+      "あいうえおかきくけ",
+      "こさ。",
+    ]);
+  });
+
+  test("gives a lone word company", () => {
+    expect(lineTexts(layout({ text: "aaa bbb ccc ddd", maxWidth: 50, wrap: "pretty" }))).toEqual([
+      "aaa bbb ",
+      "ccc ddd",
+    ]);
+  });
+
+  test("gives a lone phrase company", () => {
+    const text = "今日は晴れているので公園へ散歩に行きます";
+    expect(lineTexts(layout({ text, maxWidth: 160, lineBreak: "phrase" }))).toEqual([
+      "今日は晴れているので公園へ散歩に",
+      "行きます",
+    ]);
+    expect(lineTexts(layout({ text, maxWidth: 160, lineBreak: "phrase", wrap: "pretty" }))).toEqual([
+      "今日は晴れているので公園へ",
+      "散歩に行きます",
+    ]);
+  });
+
+  test("keeps the lines when the last one already has two units or nothing fits", () => {
+    expect(lineTexts(layout({ text: "あいうえおかきくけこさし", maxWidth: 100, wrap: "pretty" }))).toEqual([
+      "あいうえおかきくけこ",
+      "さし",
+    ]);
+    expect(lineTexts(layout({ text: "a b cccccccccc", maxWidth: 50, wrap: "pretty" }))).toEqual(["a b ", "cccccccccc"]);
+  });
+
+  test("works per paragraph", () => {
+    expect(lineTexts(layout({ text: "あいうえおかきくけこさ。\nあ", maxWidth: 100, wrap: "pretty" }))).toEqual([
+      "あいうえおかきくけ",
+      "こさ。",
+      "あ",
+    ]);
+  });
+});
+
 describe("justify-all", () => {
   test("spreads a single line to the line length (字取り)", () => {
     const result = layout({ text: "あいう", maxWidth: 50, align: "justify-all" });

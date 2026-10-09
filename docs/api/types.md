@@ -39,7 +39,7 @@ interface TextNodeProps extends LayoutOptions {
 | `writingMode` | [`WritingMode`](#writingmode) | `"horizontal-tb"` | |
 | `maxWidth` | `number` | | Layout box width. In horizontal text it is the line length and enables wrapping; in vertical text it only bounds `shrink` |
 | `maxHeight` | `number` | | Layout box height. In vertical text it is the line length and enables wrapping; in horizontal text it only bounds `shrink` |
-| `wrap` | `"auto" \| "none"` | `"auto"` | `"none"` keeps only explicit line breaks |
+| `wrap` | [`TextWrap`](#textwrap) | `"auto"` | How lines wrap at the line length. Without one, every mode keeps only explicit line breaks |
 | `align` | [`TextAlign`](#textalign) | `"start"` | |
 | `overflow` | [`Overflow`](#overflow) | `"visible"` | |
 | `minScale` | `number` | `0.3` | Smallest scale `shrink` / `squeeze` may apply |
@@ -97,6 +97,19 @@ type LineBreak = "char" | "phrase";
 
 - `char`: break between any CJK characters.
 - `phrase`: keep Japanese phrases (文節) together, using `Intl.Segmenter`.
+
+### `TextWrap`
+
+```ts
+type TextWrap = "auto" | "none" | "balance" | "pretty";
+```
+
+- `auto`: fill each line before breaking.
+- `none`: break only at `\n`.
+- `balance`: make the lines of each paragraph about equally long.
+- `pretty`: avoid a last line with a single word, phrase or character (泣き別れ).
+
+Paragraphs are separated by `\n`. `balance` and `pretty` change only where lines break; alignment and justification still use the full line length. [Guide](/guide/line-breaking#balanced-lines).
 
 ### `PunctuationTrim`
 

@@ -189,6 +189,14 @@ export type Overflow = "visible" | "shrink" | "squeeze";
 export type LineBreak = "char" | "phrase";
 
 /**
+ * - `auto`: fill each line before breaking
+ * - `none`: break only at `\n`
+ * - `balance`: make the lines of each paragraph about equally long
+ * - `pretty`: avoid a last line with a single word, phrase or character (泣き別れ)
+ */
+export type TextWrap = "auto" | "none" | "balance" | "pretty";
+
+/**
  * Trims the blank half of fullwidth punctuation at the edges of lines (約物の半角取り).
  * - `start`: opening brackets at the start of a line
  * - `end`: closing brackets, 、 and 。 at the end of a line. One that only fits trimmed stays on the line.
@@ -279,8 +287,14 @@ export interface LayoutOptions {
    * in horizontal text it only bounds `overflow: "shrink"`.
    */
   maxHeight?: number;
-  /** Default: `"auto"` when the line length (`maxWidth`, or `maxHeight` in vertical text) is set. */
-  wrap?: "auto" | "none";
+  /**
+   * How lines wrap at the line length (`maxWidth`, or `maxHeight` in vertical text). Default: `"auto"`.
+   * - `auto`: fill each line before breaking
+   * - `none`: break only at `\n`
+   * - `balance`: make the lines of each paragraph about equally long
+   * - `pretty`: avoid a last line with a single word, phrase or character
+   */
+  wrap?: TextWrap;
   /** Default: `"start"`. */
   align?: TextAlign;
   /** Default: `"visible"`. */

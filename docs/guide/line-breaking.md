@@ -1,5 +1,5 @@
 ---
-description: Wrapping to a width, alignment and justification, Japanese kinsoku rules (禁則処理), hanging punctuation (ぶら下げ), punctuation trimming at line edges (約物の半角取り), space between Japanese and Latin text (和欧間アキ) and phrase-aware line breaking (文節改行).
+description: Wrapping to a width, balanced lines and short last lines (泣き別れ), alignment and justification, Japanese kinsoku rules (禁則処理), hanging punctuation (ぶら下げ), punctuation trimming at line edges (約物の半角取り), space between Japanese and Latin text (和欧間アキ) and phrase-aware line breaking (文節改行).
 ---
 
 # Line breaking
@@ -28,6 +28,39 @@ export default {
 The faint plate on this page's demos marks the layout box. Japanese and Chinese text may break between any two characters, while Latin text breaks at spaces and after hyphens. Leading spaces on a wrapped line are dropped.
 
 `wrap: "none"` keeps only the explicit `\n` line breaks while `maxWidth` still sets the box. Use it with [`overflow`](./fitting) to fit one line into a fixed width.
+
+## Balanced lines
+
+By default (`wrap: "auto"`), each line is filled before the next one starts, which can leave a caption with a long first line and a few characters on the second. Two more modes change where lines break:
+
+- `wrap: "balance"` makes the lines of each paragraph about equally long, by wrapping at the shortest width that keeps the same number of lines.
+- `wrap: "pretty"` only acts when the last line of a paragraph holds a single word, phrase or character with its punctuation (泣き別れ). It moves the break before it earlier so the last line gets company.
+
+```ts demo compare
+import { fill, stroke, type TextWrap } from "tellu";
+
+const props = (wrap: TextWrap) => ({
+  text: "改行の位置しだいで字幕の読みやすさが変わる。",
+  maxWidth: 580,
+  wrap,
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 28,
+    lineHeight: 1.4,
+    layers: [stroke(6, "#111"), fill("#fff")],
+  },
+  background: { paint: "rgba(255,255,255,0.1)", padding: 0 },
+});
+
+export default {
+  'wrap: "auto"': props("auto"),
+  'wrap: "balance"': props("balance"),
+  'wrap: "pretty"': props("pretty"),
+};
+```
+
+Both work per paragraph (text between `\n`), and with `lineBreak: "phrase"` they keep phrases together. The layout box keeps the full `maxWidth`, so `align` and `justify` still use it: a balanced, justified paragraph spreads its lines to `maxWidth`. Without a line length they do nothing.
 
 ## Alignment
 

@@ -341,7 +341,8 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
   const { maxLines, align = "start", overflow = "visible", punctuationTrim = "none", autospace = false } = options;
   const writingMode = options.writingMode ?? "horizontal-tb";
   const [lineLimit] = limits(options);
-  const wrap = lineLimit !== undefined && (options.wrap ?? "auto") === "auto";
+  const wrapMode = options.wrap ?? "auto";
+  const wrap = lineLimit !== undefined && wrapMode !== "none";
   const trimStart = punctuationTrim === "start" || punctuationTrim === "both";
   const trimEnd = punctuationTrim === "end" || punctuationTrim === "both";
 
@@ -384,13 +385,12 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
     }
   });
 
-  let ranges = breakLines(
-    clusters,
-    breaks,
-    { advance, kern, spacing, lead, trail },
-    wrap ? lineLimit : undefined,
-    kinsoku,
-  );
+  const sizes: InlineSizes = { advance, kern, spacing, lead, trail };
+  const breakRange: BreakRange = (maxLength, from, to) =>
+    breakLines(clusters, breaks, sizes, maxLength, kinsoku, from, to);
+  let ranges = breakRange(wrap ? lineLimit : undefined, 0, clusters.length);
+  if (wrap && wrapMode === "balance") ranges = balanceLines(ranges, lineLimit, breakRange);
+  if (wrap && wrapMode === "pretty") ranges = avoidShortLastLines(ranges, lineLimit, breakRange, clusters, breaks);
   if (maxLines !== undefined && truncate) ranges = ranges.slice(0, maxLines);
 
   /** Length of a glyph's cell along the line, after trimming punctuation at the line's edges. */
@@ -621,26 +621,32 @@ interface InlineSizes {
   trail: Float64Array;
 }
 
+/** Breaks the clusters `[from, to)` into lines no longer than `maxLength`. */
+type BreakRange = (maxLength: number | undefined, from: number, to: number) => LineRange[];
+
+/** Greedy line breaking of the clusters `[from, to)`. */
 function breakLines(
   clusters: readonly Cluster[],
   breaks: Uint8Array,
   { advance, kern, spacing, lead, trail }: InlineSizes,
   maxLength: number | undefined,
   kinsoku: KinsokuRules | null,
+  from: number,
+  to: number,
 ): LineRange[] {
   const ranges: LineRange[] = [];
-  let lineStart = 0;
+  let lineStart = from;
   let lineLength = 0;
-  let i = 0;
+  let i = from;
 
   const startLine = (start: number) => {
     lineStart = start;
-    while (lineStart < clusters.length && clusters[lineStart]!.kind === "space") lineStart++;
+    while (lineStart < to && clusters[lineStart]!.kind === "space") lineStart++;
     lineLength = 0;
     i = lineStart;
   };
 
-  while (i < clusters.length) {
+  while (i < to) {
     const cluster = clusters[i]!;
     if (cluster.kind === "newline") {
       ranges.push({ start: lineStart, end: i, forced: true });
@@ -691,8 +697,77 @@ function breakLines(
     lineLength += shift + advance[i]! + spacing[i]!;
     i++;
   }
-  ranges.push({ start: lineStart, end: clusters.length, forced: false });
+  ranges.push({ start: lineStart, end: to, forced: false });
   return ranges;
+}
+
+/** Groups lines into paragraphs, each ended by a forced break or the end of the text. */
+function paragraphs(ranges: readonly LineRange[]): LineRange[][] {
+  const result: LineRange[][] = [[]];
+  ranges.forEach((range, index) => {
+    result.at(-1)!.push(range);
+    if (range.forced && index < ranges.length - 1) result.push([]);
+  });
+  return result;
+}
+
+/** Rewraps each paragraph at the shortest line length that keeps its number of lines. */
+function balanceLines(ranges: readonly LineRange[], maxLength: number, breakRange: BreakRange): LineRange[] {
+  return paragraphs(ranges).flatMap((lines) => {
+    if (lines.length < 2) return lines;
+    const from = lines[0]!.start;
+    const last = lines.at(-1)!;
+    let best = lines;
+    let low = 0;
+    let high = maxLength;
+    for (let i = 0; i < 16 && high - low > 0.5; i++) {
+      const mid = (low + high) / 2;
+      const candidate = breakRange(mid, from, last.end);
+      if (candidate.length <= lines.length) {
+        best = candidate;
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+    best.at(-1)!.forced = last.forced;
+    return best;
+  });
+}
+
+/**
+ * Moves the break before the last line of each paragraph earlier when that line holds a single unit
+ * (a word, a phrase, or a character with its punctuation), using the latest break that gives it two.
+ */
+function avoidShortLastLines(
+  ranges: readonly LineRange[],
+  maxLength: number,
+  breakRange: BreakRange,
+  clusters: readonly Cluster[],
+  breaks: Uint8Array,
+): LineRange[] {
+  const units = (start: number, end: number) => {
+    let count = 1;
+    for (let k = start + 1; k < end; k++) if (breaks[k] === BREAK_PREFERRED) count++;
+    return count;
+  };
+  return paragraphs(ranges).flatMap((lines) => {
+    if (lines.length < 2) return lines;
+    const previous = lines.at(-2)!;
+    const last = lines.at(-1)!;
+    let contentEnd = last.end;
+    while (contentEnd > last.start && clusters[contentEnd - 1]!.kind === "space") contentEnd--;
+    if (contentEnd === last.start || units(last.start, contentEnd) > 1) return lines;
+    for (let j = previous.end - 1; j > previous.start; j--) {
+      if (breaks[j] !== BREAK_PREFERRED) continue;
+      const rest = breakRange(maxLength, j, last.end);
+      if (rest.length > 1) break;
+      if (units(j, contentEnd) < 2) continue;
+      rest[0]!.forced = last.forced;
+      return [...lines.slice(0, -2), { ...previous, end: j }, rest[0]!];
+    }
+    return lines;
+  });
 }
 
 /** Last allowed break in `(lineStart, overflow]`, preferring phrase boundaries; breaks anywhere as a last resort. */
