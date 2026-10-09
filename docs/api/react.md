@@ -32,7 +32,7 @@ Every [`TextNodeProps`](./types#textnodeprops) option except `style`, plus:
 | `measurer` | `Measurer` | Canvas 2D | |
 | `className` | `string` | | On the wrapper |
 | `style` | `CSSProperties` | | On the wrapper |
-| `onDraw` | `(event: TextDrawEvent) => void` | | After every draw |
+| `onDraw` | `(event: TextDrawEvent) => void` | | After each draw. Renders that change nothing the caption paints skip the draw |
 | `onPendingChange` | `(pending: boolean) => void` | | While fonts or the renderer load |
 | `onError` | `(error: unknown) => void` | | Without it, draw errors throw |
 

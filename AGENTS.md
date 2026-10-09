@@ -68,6 +68,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
    - `planGroups` groups sprites by **layer slot** (index) plus an effects signature (offset, blur, opacity, blend mode, filters). Groups render in slot order, so all outlines sit below all fills.
    - Inside a group, sprites use `blendMode: "max"`. Every group container always gets an `AlphaFilter` to isolate it, so overlapping semi-transparent outlines don't compound.
    - `TextNode.refresh()` compares a `stableKey` of the props minus `glyphTransform`. Only when that key changes does it rebuild. Otherwise it just reapplies glyph transforms to existing sprites, which keeps per-frame animation cheap.
+   - `TextNode.revision` increments on a rebuild or when glyph transforms change a sprite. React `<Text>` skips `renderer.draw` when the node, revision, renderer, canvas and resolution match its last draw.
    - `stableKey` hashes plain data structurally and class instances (filters, images) by identity.
 4. **Output**: `TextRenderer` is one shared offscreen WebGL renderer (`preserveDrawingBuffer: true`).
    - `draw()` renders a node synchronously, then `drawImage`s the result into the target 2D canvas, sized to the node's ink bounds.

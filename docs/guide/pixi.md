@@ -57,3 +57,5 @@ app.ticker.add(({ lastTime }) => {
 ## Fonts changed after creation
 
 If a web font finishes loading after the node was built, call `node.invalidate()`. It clears cached measurements and textures and rebuilds.
+
+To draw only when something changed, compare `node.revision` with its value at your last draw. It increments on every rebuild and whenever glyph transforms produce new output.

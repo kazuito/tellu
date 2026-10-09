@@ -13,6 +13,8 @@ On every update, a node compares a **structural key** of its props, minus `glyph
 - **Same key**: only glyph transforms are reapplied. This costs microseconds.
 - **Different key**: full layout and composition. Bitmaps for unchanged glyph × layer pairs still come from the cache.
 
+`<Text>` also skips drawing when a render changes nothing it paints: same props, and glyph transforms with the same output as last time. A static caption in a Remotion composition is drawn once, not on every frame.
+
 Plain data (strings, numbers, arrays, objects) is compared **by value**, so rebuilding identical style objects every render is fine. Class instances, such as PixiJS filters, images and canvases, are compared **by identity**.
 
 ## Do

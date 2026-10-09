@@ -58,6 +58,7 @@ Guide: [PixiJS scene](/guide/pixi).
 | `update(props: Partial<TextNodeProps>): this` | Merges props and refreshes |
 | `refresh(): void` | Rebuilds if anything but `glyphTransform` changed, then reapplies glyph transforms |
 | `invalidate(): void` | Clears cached measurements and bitmaps, then rebuilds. Use it after fonts change |
+| `revision: number` | Increments whenever what the node paints changes: a rebuild, or glyph transforms with new output. Compare it to skip redundant draws |
 | `resolution: number` | Get, or set to re-rasterize at a new pixel density |
 | `layout: Layout` | The current [layout](./layout#layout) |
 | `layoutBounds: Rectangle` | `(0, 0, layout.width, layout.height)` |

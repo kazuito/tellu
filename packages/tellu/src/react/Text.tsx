@@ -94,6 +94,13 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
   const fontEpoch = useSyncExternalStore(subscribeFontEpoch, getFontEpoch, getFontEpoch);
   const drawnEpoch = useRef(fontEpoch);
   const pendingRef = useRef<boolean | null>(null);
+  const lastDraw = useRef<{
+    node: TextNode;
+    revision: number;
+    renderer: TextRenderer;
+    canvas: HTMLCanvasElement;
+    resolution: number;
+  } | null>(null);
   const callbacks = useRef({ onDraw, onPendingChange, onError });
   callbacks.current = { onDraw, onPendingChange, onError };
 
@@ -121,15 +128,26 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
         node.props = nodeProps;
       }
       drawnEpoch.current = fontEpoch;
-      const result = renderer.draw(node, canvas, { resolution: pixelRatio });
-      const { layout } = node;
-      wrapper.style.width = `${layout.width}px`;
-      wrapper.style.height = `${layout.height}px`;
-      canvas.style.left = `${result.x}px`;
-      canvas.style.top = `${result.y}px`;
-      canvas.style.width = `${result.width}px`;
-      canvas.style.height = `${result.height}px`;
-      callbacks.current.onDraw?.({ ...result, layout, node });
+      const last = lastDraw.current;
+      const unchanged =
+        last !== null &&
+        last.node === node &&
+        last.revision === node.revision &&
+        last.renderer === renderer &&
+        last.canvas === canvas &&
+        last.resolution === pixelRatio;
+      if (!unchanged) {
+        const result = renderer.draw(node, canvas, { resolution: pixelRatio });
+        lastDraw.current = { node, revision: node.revision, renderer, canvas, resolution: pixelRatio };
+        const { layout } = node;
+        wrapper.style.width = `${layout.width}px`;
+        wrapper.style.height = `${layout.height}px`;
+        canvas.style.left = `${result.x}px`;
+        canvas.style.top = `${result.y}px`;
+        canvas.style.width = `${result.width}px`;
+        canvas.style.height = `${result.height}px`;
+        callbacks.current.onDraw?.({ ...result, layout, node });
+      }
       // A font that is still loading will bump the epoch and redraw; stay pending until then.
       setPending(typeof document !== "undefined" && document.fonts?.status === "loading");
     } catch (error) {

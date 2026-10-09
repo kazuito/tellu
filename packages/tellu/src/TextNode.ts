@@ -40,6 +40,7 @@ export class TextNode extends Container {
   private glyphSprites: GlyphSprite[] = [];
   private builtKey = "";
   private transformed = false;
+  private _revision = 0;
   private readonly measurer: Measurer;
   private readonly rasterizer = new GlyphRasterizer();
   private readonly textures = new TextureCache();
@@ -78,6 +79,11 @@ export class TextNode extends Container {
   set resolution(resolution: number) {
     this._resolution = resolution;
     this.refresh();
+  }
+
+  /** Increments whenever what this node paints changes: a rebuild, or glyph transforms with new output. */
+  get revision(): number {
+    return this._revision;
   }
 
   get layout(): Layout {
@@ -126,6 +132,7 @@ export class TextNode extends Container {
       this.build();
       this.builtKey = key;
       this.transformed = true;
+      this._revision++;
     }
     this.applyGlyphTransforms();
   }
@@ -233,16 +240,11 @@ export class TextNode extends Container {
     const layout = this.layout;
     const transforms: (GlyphTransform | null)[] = this.contexts.map((context) => fn?.(context) || null);
 
+    let changed = false;
     for (const { sprite, glyph: index, baseX, baseY } of this.glyphSprites) {
       const t = transforms[index];
       if (!t) {
-        sprite.pivot.set(0, 0);
-        sprite.position.set(baseX, baseY);
-        sprite.scale.set(1, 1);
-        sprite.rotation = 0;
-        sprite.skew.set(0, 0);
-        sprite.alpha = 1;
-        sprite.visible = true;
+        changed = placeSprite(sprite, [0, 0, baseX, baseY, 1, 1, 0, 0, 0, 1], true) || changed;
         continue;
       }
       const { box } = layout.glyphs[index]!;
@@ -250,14 +252,21 @@ export class TextNode extends Container {
       const px = box.x + ox * box.width;
       const py = box.y + oy * box.height;
       const scale = t.scale ?? 1;
-      sprite.pivot.set(px - baseX, py - baseY);
-      sprite.position.set(px + (t.x ?? 0), py + (t.y ?? 0));
-      sprite.scale.set(scale * (t.scaleX ?? 1), scale * (t.scaleY ?? 1));
-      sprite.rotation = (t.rotation ?? 0) * DEG;
-      sprite.skew.set((t.skewX ?? 0) * DEG, (t.skewY ?? 0) * DEG);
-      sprite.alpha = t.opacity ?? 1;
-      sprite.visible = t.visible ?? true;
+      const placement: SpritePlacement = [
+        px - baseX,
+        py - baseY,
+        px + (t.x ?? 0),
+        py + (t.y ?? 0),
+        scale * (t.scaleX ?? 1),
+        scale * (t.scaleY ?? 1),
+        (t.rotation ?? 0) * DEG,
+        (t.skewX ?? 0) * DEG,
+        (t.skewY ?? 0) * DEG,
+        t.opacity ?? 1,
+      ];
+      changed = placeSprite(sprite, placement, t.visible ?? true) || changed;
     }
+    if (changed) this._revision++;
     this.transformed = !!fn;
   }
 
@@ -267,6 +276,45 @@ export class TextNode extends Container {
     this.rasterizer.clear();
     super.destroy(typeof options === "boolean" ? options : { ...options, children: true });
   }
+}
+
+type SpritePlacement = [
+  pivotX: number,
+  pivotY: number,
+  x: number,
+  y: number,
+  scaleX: number,
+  scaleY: number,
+  rotation: number,
+  skewX: number,
+  skewY: number,
+  alpha: number,
+];
+
+/** Applies a glyph transform to its sprite. Returns whether anything changed. */
+function placeSprite(sprite: Sprite, placement: SpritePlacement, visible: boolean): boolean {
+  const [pivotX, pivotY, x, y, scaleX, scaleY, rotation, skewX, skewY, alpha] = placement;
+  const changed =
+    sprite.pivot.x !== pivotX ||
+    sprite.pivot.y !== pivotY ||
+    sprite.position.x !== x ||
+    sprite.position.y !== y ||
+    sprite.scale.x !== scaleX ||
+    sprite.scale.y !== scaleY ||
+    sprite.rotation !== rotation ||
+    sprite.skew.x !== skewX ||
+    sprite.skew.y !== skewY ||
+    sprite.alpha !== alpha ||
+    sprite.visible !== visible;
+  if (!changed) return false;
+  sprite.pivot.set(pivotX, pivotY);
+  sprite.position.set(x, y);
+  sprite.scale.set(scaleX, scaleY);
+  sprite.rotation = rotation;
+  sprite.skew.set(skewX, skewY);
+  sprite.alpha = alpha;
+  sprite.visible = visible;
+  return true;
 }
 
 function snap(value: number): [pixel: number, fraction: number] {
