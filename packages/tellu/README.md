@@ -17,7 +17,7 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 bun add tellu pixi.js
 ```
 
-**[Documentation](https://kazuito.github.io/tellu/)**: guides, live examples and the API reference ([`llms.txt`](https://kazuito.github.io/tellu/llms.txt) for AI assistants).
+**[Documentation](https://tellujs.vercel.app/)**: guides, live examples and the API reference ([`llms.txt`](https://tellujs.vercel.app/llms.txt) for AI assistants).
 
 ## Usage
 
@@ -65,7 +65,7 @@ export const Caption = () => {
 Config.setChromiumOpenGlRenderer("angle");
 ```
 
-tellu loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](../../examples/remotion/src/fonts.tsx)). `<Text>` also re-measures whenever the document finishes loading fonts later.
+tellu loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](https://github.com/kazuito/tellu/blob/main/examples/remotion/src/fonts.tsx)). `<Text>` also re-measures whenever the document finishes loading fonts later.
 
 ### Vanilla
 
@@ -197,4 +197,16 @@ Everything else works the same way: layers, rich text, kinsoku, `shrink` / `sque
 
 ## Development
 
-This package lives in the [tellu monorepo](../../README.md). Workspace consumers resolve `tellu` to `src/` through the `tellu-source` export condition, so examples run without a build.
+The [repository](https://github.com/kazuito/tellu) is a Bun workspace: the library in `packages/tellu`, a Remotion sample in `examples/remotion`, a browser playground in `examples/playground` and the docs site in `docs`.
+
+```sh
+bun install
+bun run test       # library unit tests
+bun run typecheck  # every workspace
+bun run build      # packages/tellu/dist
+bun run dev        # playground at http://localhost:3100
+bun run studio     # Remotion Studio at http://localhost:3200
+bun run docs:dev   # docs at http://localhost:3400/
+```
+
+Examples resolve `tellu` to `src/` through the `tellu-source` export condition, so they run without a build; the published package resolves to `dist/`.
