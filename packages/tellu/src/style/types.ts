@@ -186,6 +186,14 @@ export type Overflow = "visible" | "shrink" | "squeeze";
  */
 export type LineBreak = "char" | "phrase";
 
+/**
+ * Trims the blank half of fullwidth punctuation at the edges of lines (約物の半角取り).
+ * - `start`: opening brackets at the start of a line
+ * - `end`: closing brackets, 、 and 。 at the end of a line. One that only fits trimmed stays on the line.
+ * - `both`: both
+ */
+export type PunctuationTrim = "none" | "start" | "end" | "both";
+
 export interface KinsokuRules {
   /** Characters that must not start a line (行頭禁則). */
   lineStart: string;
@@ -282,6 +290,13 @@ export interface LayoutOptions {
   kinsoku?: boolean | Partial<KinsokuRules>;
   /** Default: `"char"`. */
   lineBreak?: LineBreak;
+  /** Default: `"none"`. */
+  punctuationTrim?: PunctuationTrim;
+  /**
+   * Space between kana or kanji and Latin letters or digits (和欧間アキ). `true` is a quarter em of the
+   * smaller font. Default: `false`.
+   */
+  autospace?: boolean | Length;
   /** Locale for segmentation. Default: `"ja"`. */
   locale?: string;
 }

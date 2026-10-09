@@ -25,6 +25,10 @@ const CJK =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Bopomofo}\u3000-〿ー！-｠￠-￦]|\p{Extended_Pictographic}/u;
 /** Kana, kanji and fullwidth punctuation, set on an em square. The ideographic space is left out. */
 const SQUARE = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}、-〿・ー！-｠￠-￦]/u;
+const IDEOGRAPHIC = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー]/u;
+const ALPHANUMERIC = /^[\p{L}\p{N}]/u;
+const OPENING = "「『（［｛〔〈《【〘〖〝‘“｟";
+const CLOSING = "」』）］｝〕〉》】〙〗〟’”｠、。，．";
 const HIRAGANA_ONLY = /^[\p{Script=Hiragana}ー]+$/u;
 const NOT_HIRAGANA = /[^\p{Script=Hiragana}ー]/u;
 const HYPHENS = "-‐‒–";
@@ -61,6 +65,26 @@ export function segmentRuns(texts: readonly string[], locale: string): Cluster[]
 /** Whether a cluster is a Japanese or Chinese character set on an em square (what `tsume` tightens). */
 export function isSquare(cluster: Cluster): boolean {
   return cluster.kind === "char" && !cluster.combined && SQUARE.test(cluster.text);
+}
+
+/** Kana or kanji. */
+export function isIdeographic(cluster: Cluster): boolean {
+  return cluster.kind === "char" && !cluster.combined && IDEOGRAPHIC.test(cluster.text);
+}
+
+/** Latin, Greek, Cyrillic or other letters and digits that are not fullwidth. */
+export function isAlphanumeric(cluster: Cluster): boolean {
+  return cluster.kind === "char" && !cluster.combined && ALPHANUMERIC.test(cluster.text) && !CJK.test(cluster.text);
+}
+
+/** Fullwidth opening brackets, whose first half is blank. */
+export function isOpening(cluster: Cluster): boolean {
+  return cluster.kind === "char" && !cluster.combined && OPENING.includes(cluster.text);
+}
+
+/** Fullwidth closing brackets, 、 and 。, whose second half is blank. */
+export function isClosing(cluster: Cluster): boolean {
+  return cluster.kind === "char" && !cluster.combined && CLOSING.includes(cluster.text);
 }
 
 export interface BreakOptions {

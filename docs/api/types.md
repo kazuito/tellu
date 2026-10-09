@@ -46,6 +46,8 @@ interface TextNodeProps extends LayoutOptions {
 | `maxLines` | `number` | | Truncates, or bounds `shrink` |
 | `kinsoku` | `boolean \| Partial<`[`KinsokuRules`](#kinsokurules)`>` | `true` | |
 | `lineBreak` | [`LineBreak`](#linebreak) | `"char"` | |
+| `punctuationTrim` | [`PunctuationTrim`](#punctuationtrim) | `"none"` | Trims the blank half of fullwidth punctuation at line edges (約物の半角取り) |
+| `autospace` | `boolean \| `[`Length`](#length) | `false` | Space between kana or kanji and Latin letters or digits (和欧間アキ). `true` is a quarter em of the smaller font |
 | `locale` | `string` | `"ja"` | Segmentation locale |
 
 Guides: [Line breaking](/guide/line-breaking), [Fitting text](/guide/fitting), [Vertical writing](/guide/vertical).
@@ -84,6 +86,18 @@ type LineBreak = "char" | "phrase";
 
 - `char`: break between any CJK characters.
 - `phrase`: keep Japanese phrases (文節) together, using `Intl.Segmenter`.
+
+### `PunctuationTrim`
+
+```ts
+type PunctuationTrim = "none" | "start" | "end" | "both";
+```
+
+Trims the blank half of fullwidth punctuation at the edges of lines (約物の半角取り). [Guide](/guide/line-breaking#punctuation-at-line-edges-約物の半角取り).
+
+- `start`: opening brackets at the start of a line.
+- `end`: closing brackets, 、 and 。 at the end of a line. One that only fits trimmed stays on the line.
+- `both`: both.
 
 ### `KinsokuRules`
 

@@ -2,7 +2,19 @@ import { resolveKinsoku, resolveLength, resolveLineHeight, resolveStyle } from "
 import { applyOverride } from "../style/merge";
 import type { Box, KinsokuRules, LayoutOptions, TextContent, TextStyle, WritingMode } from "../style/types";
 import { type FontMetrics, fontSpecOf, getDefaultMeasurer, type Measurer } from "./measure";
-import { BREAK_FALLBACK, BREAK_PREFERRED, type Cluster, computeBreaks, isSquare, segmentRuns } from "./segment";
+import {
+  BREAK_FALLBACK,
+  BREAK_NONE,
+  BREAK_PREFERRED,
+  type Cluster,
+  computeBreaks,
+  isAlphanumeric,
+  isClosing,
+  isIdeographic,
+  isOpening,
+  isSquare,
+  segmentRuns,
+} from "./segment";
 import { combineUpright, isVertical, type VerticalOrientation, verticalOrientation, verticalShift } from "./vertical";
 
 export interface ResolvedRun {
@@ -326,10 +338,12 @@ interface LineMetrics {
 function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout {
   const { options, vertical, runs, clusters, orientations, breaks, advances, metrics, shifts, tsume, kinsoku } =
     prepared;
-  const { maxLines, align = "start", overflow = "visible" } = options;
+  const { maxLines, align = "start", overflow = "visible", punctuationTrim = "none", autospace = false } = options;
   const writingMode = options.writingMode ?? "horizontal-tb";
   const [lineLimit] = limits(options);
   const wrap = lineLimit !== undefined && (options.wrap ?? "auto") === "auto";
+  const trimStart = punctuationTrim === "start" || punctuationTrim === "both";
+  const trimEnd = punctuationTrim === "end" || punctuationTrim === "both";
 
   // Everything up to placing glyphs runs along the line ("inline") and across lines ("block").
   const advance = new Float64Array(clusters.length);
@@ -337,20 +351,51 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
   const offset = new Float64Array(clusters.length);
   const kern = new Float64Array(clusters.length);
   const spacing = new Float64Array(clusters.length);
+  /** Trimmed when the cluster starts a line. */
+  const lead = new Float64Array(clusters.length);
+  /** Trimmed when the cluster ends a line. */
+  const trail = new Float64Array(clusters.length);
   clusters.forEach((cluster, index) => {
     const style = runs[cluster.runIndex]!.style;
     const inlineScale = (vertical ? style.scaleY : style.scaleX) * fontScale;
-    const upright = vertical && orientations![index] !== "sideways";
-    const cut = (tsume[index * 2]! + tsume[index * 2 + 1]!) * inlineScale;
-    advance[index] = (upright ? style.fontSize : advances.own[index]!) * inlineScale - cut;
+    const orientation = orientations?.[index];
+    const own = orientation && orientation !== "sideways" ? style.fontSize : advances.own[index]!;
+    advance[index] = (own - tsume[index * 2]! - tsume[index * 2 + 1]!) * inlineScale;
     offset[index] = tsume[index * 2]! * inlineScale;
     kern[index] = advances.kern[index]! * inlineScale;
     spacing[index] = resolveLength(style.letterSpacing, style.fontSize) * fontScale;
+
+    // Fullwidth punctuation only; upright brackets in vertical text keep their horizontal shape.
+    const trimmable = own >= 0.75 * style.fontSize && orientation !== "upright";
+    if (trimmable && trimStart && isOpening(cluster)) {
+      lead[index] = Math.max(0, own / 2 - tsume[index * 2]!) * inlineScale;
+    }
+    if (trimmable && trimEnd && isClosing(cluster)) {
+      trail[index] = Math.max(0, own / 2 - tsume[index * 2 + 1]!) * inlineScale;
+    }
+
+    const before = clusters[index - 1];
+    if (autospace !== false && before && isIdeographic(before) !== isIdeographic(cluster)) {
+      const pair = [before, cluster];
+      if (pair.some(isIdeographic) && pair.some(isAlphanumeric)) {
+        const em = Math.min(style.fontSize, runs[before.runIndex]!.style.fontSize);
+        kern[index]! += resolveLength(autospace === true ? { em: 0.25 } : autospace, em) * fontScale;
+      }
+    }
   });
 
-  let ranges = breakLines(clusters, breaks, advance, kern, spacing, wrap ? lineLimit : undefined, kinsoku);
+  let ranges = breakLines(
+    clusters,
+    breaks,
+    { advance, kern, spacing, lead, trail },
+    wrap ? lineLimit : undefined,
+    kinsoku,
+  );
   if (maxLines !== undefined && truncate) ranges = ranges.slice(0, maxLines);
 
+  /** Length of a glyph's cell along the line, after trimming punctuation at the line's edges. */
+  const cellAt = (k: number, lineStart: number, contentEnd: number) =>
+    advance[k]! - (k === lineStart ? lead[k]! : 0) - (k === contentEnd - 1 ? trail[k]! : 0);
   const contentEnds = ranges.map((range) => {
     let end = range.end;
     while (end > range.start && clusters[end - 1]!.kind === "space") end--;
@@ -360,7 +405,8 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
     const contentEnd = contentEnds[lineIndex]!;
     let length = 0;
     for (let k = range.start; k < contentEnd; k++) {
-      length += (k > range.start ? kern[k]! : 0) + advance[k]! + (k < contentEnd - 1 ? spacing[k]! : 0);
+      length +=
+        (k > range.start ? kern[k]! : 0) + cellAt(k, range.start, contentEnd) + (k < contentEnd - 1 ? spacing[k]! : 0);
     }
     return length;
   });
@@ -447,6 +493,8 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
       const fontSize = style.fontSize * fontScale;
       const shift = shiftAt(k);
       if (k > range.start) pen += kern[k]! * squeeze;
+      const before = offset[k]! + (k === range.start ? lead[k]! : 0);
+      const cell = cellAt(k, range.start, contentEnd);
       const glyph: LayoutGlyph = {
         index: glyphs.length,
         text: cluster.text,
@@ -454,10 +502,10 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         lineIndex,
         indexInLine: k - range.start,
         isWhitespace: cluster.kind !== "char",
-        x: pen - offset[k]! * squeeze,
+        x: pen - before * squeeze,
         y: baseline - shift,
         rotation: 0,
-        advance: advance[k]! * squeeze,
+        advance: cell * squeeze,
         fontSize,
         scaleX: style.scaleX * squeeze,
         scaleY: style.scaleY,
@@ -474,7 +522,7 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
           squeeze,
           center: baseline + shift,
           cell: pen,
-          top: pen - offset[k]! * squeeze,
+          top: pen - before * squeeze,
           ownAdvance: advances.own[k]! * fontScale,
           shiftX: shifts[k * 2]! * fontScale,
           shiftY: shifts[k * 2 + 1]! * fontScale,
@@ -488,7 +536,7 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         };
       }
       glyphs.push(glyph);
-      pen += (advance[k]! + spacing[k]!) * squeeze + (gapFilter(k) ? extra : 0);
+      pen += (cell + spacing[k]!) * squeeze + (gapFilter(k) ? extra : 0);
     }
 
     lines.push({
@@ -559,12 +607,23 @@ function placeVertical(glyph: LayoutGlyph, placement: VerticalPlacement): void {
   glyph.scaleX = scaleX;
 }
 
+/** Inline sizes of each cluster at one font scale. */
+interface InlineSizes {
+  advance: Float64Array;
+  /** Shifts the cluster after the previous one; dropped at the start of a line. */
+  kern: Float64Array;
+  /** Added after the cluster, except at the end of a line. */
+  spacing: Float64Array;
+  /** Trimmed when the cluster starts a line. */
+  lead: Float64Array;
+  /** Trimmed when the cluster ends a line. */
+  trail: Float64Array;
+}
+
 function breakLines(
   clusters: readonly Cluster[],
   breaks: Uint8Array,
-  advance: Float64Array,
-  kern: Float64Array,
-  spacing: Float64Array,
+  { advance, kern, spacing, lead, trail }: InlineSizes,
   maxLength: number | undefined,
   kinsoku: KinsokuRules | null,
 ): LineRange[] {
@@ -590,13 +649,27 @@ function breakLines(
       continue;
     }
 
-    const shift = i > lineStart ? kern[i]! : 0;
+    const shift = i > lineStart ? kern[i]! : -lead[i]!;
     if (
       maxLength !== undefined &&
       cluster.kind === "char" &&
       i > lineStart &&
       lineLength + shift + advance[i]! > maxLength + EPSILON
     ) {
+      // Closing punctuation that fits with its blank half trimmed ends the line here, if a break may follow.
+      if (lineLength + shift + advance[i]! - trail[i]! <= maxLength + EPSILON) {
+        const next = clusters[i + 1];
+        if (!next || next.kind === "newline") {
+          lineLength += shift + advance[i]! + spacing[i]!;
+          i++;
+          continue;
+        }
+        if (next.kind === "space" || breaks[i + 1] !== BREAK_NONE) {
+          ranges.push({ start: lineStart, end: i + 1, forced: false });
+          startLine(i + 1);
+          continue;
+        }
+      }
       if (!cluster.combined && kinsoku?.hanging.includes(cluster.text) && clusters[i - 1]!.kind === "char") {
         // The line ends after this glyph anyway: keep going so the newline or the end closes it.
         if (i + 1 === clusters.length || clusters[i + 1]!.kind === "newline") {

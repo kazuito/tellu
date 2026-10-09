@@ -115,6 +115,77 @@ describe("tsume", () => {
   });
 });
 
+describe("punctuation trim", () => {
+  test("start trims the blank half before an opening bracket at the start of each line", () => {
+    const result = layout({ text: "「あ」\nあいう「えお", maxWidth: 30, punctuationTrim: "start" });
+    expect(lineTexts(result)).toEqual(["「あ」", "あいう", "「えお"]);
+    expect(result.glyphs[0]!.x).toBe(-5);
+    expect(result.glyphs[0]!.advance).toBe(5);
+    expect(result.glyphs[1]!.x).toBe(5);
+    expect(result.lines[0]!.inlineSize).toBe(25);
+    expect(result.glyphs[6]!.x).toBe(-5);
+  });
+
+  test("end trims the blank half after closing punctuation at the end of each line", () => {
+    const result = layout({ text: "あ」\nい。", maxWidth: 30, align: "end", punctuationTrim: "end" });
+    expect(result.lines.map((line) => line.inlineSize)).toEqual([15, 15]);
+    expect(result.lines[0]!.inlineStart).toBe(15);
+    expect(result.glyphs[1]!.advance).toBe(5);
+  });
+
+  test("leaves punctuation inside a line alone", () => {
+    const result = layout({ text: "「あ」い", punctuationTrim: "end" });
+    expect(result.lines[0]!.inlineSize).toBe(40);
+  });
+
+  test("end keeps closing punctuation on a line it fits trimmed", () => {
+    expect(lineTexts(layout({ text: "あい」う", maxWidth: 25 }))).toEqual(["あ", "い」", "う"]);
+    const result = layout({ text: "あい」う", maxWidth: 25, punctuationTrim: "end" });
+    expect(lineTexts(result)).toEqual(["あい」", "う"]);
+    expect(result.lines[0]!.inlineSize).toBe(25);
+  });
+
+  test("does not break before a character that must not start a line", () => {
+    const result = layout({ text: "あい」。え", maxWidth: 25, punctuationTrim: "end" });
+    expect(lineTexts(result)).toEqual(["あ", "い」。", "え"]);
+    expect(lineTexts(layout({ text: "あい」\nえ", maxWidth: 25, punctuationTrim: "end" }))).toEqual(["あい」", "え"]);
+  });
+
+  test("does not trim space that tsume already removed", () => {
+    const result = layoutText({ text: "「あ", style: { ...style, tsume: 1 }, punctuationTrim: "start" }, inkMeasurer);
+    expect(result.glyphs[0]!.x).toBe(-5);
+    expect(result.glyphs[0]!.advance).toBe(4);
+  });
+});
+
+describe("autospace", () => {
+  test("adds a quarter em between kana or kanji and latin letters or digits", () => {
+    const result = layout({ text: "あAい1", autospace: true });
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 12.5, 20, 32.5]);
+  });
+
+  test("takes px or em lengths", () => {
+    expect(layout({ text: "あA", autospace: 4 }).glyphs[1]!.x).toBe(14);
+    expect(layout({ text: "あA", autospace: { em: 0.5 } }).glyphs[1]!.x).toBe(15);
+  });
+
+  test("uses the smaller font", () => {
+    expect(layout({ text: ["あ", { text: "A", style: { fontSize: 20 } }], autospace: true }).glyphs[1]!.x).toBe(12.5);
+  });
+
+  test("skips spaces, punctuation and fullwidth letters", () => {
+    expect(layout({ text: "あ A", autospace: true }).glyphs[2]!.x).toBe(12.5);
+    expect(layout({ text: "、A", autospace: true }).glyphs[1]!.x).toBe(10);
+    expect(layout({ text: "あＡ", autospace: true }).glyphs[1]!.x).toBe(10);
+  });
+
+  test("is dropped at the start of a line", () => {
+    const result = layout({ text: "あいAB", maxWidth: 20, autospace: true });
+    expect(lineTexts(result)).toEqual(["あい", "AB"]);
+    expect(result.glyphs[2]!.x).toBe(0);
+  });
+});
+
 describe("kerning", () => {
   const kerningMeasurer = {
     ...fakeMeasurer,

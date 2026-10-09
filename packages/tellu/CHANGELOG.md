@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth punctuation, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.
+- `punctuationTrim` option (約物の半角取り): trims the blank half of fullwidth opening brackets at the start of a line (`"start"`), of closing brackets, 、 and 。 at the end of a line (`"end"`), or both. With `"end"`, closing punctuation that fits once trimmed stays on its line.
+- `autospace` option (和欧間アキ): adds space between kana or kanji and Latin letters or digits, a quarter em with `true` or any `Length`.
 
 ### Fixed
 

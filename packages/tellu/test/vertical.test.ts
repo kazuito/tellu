@@ -206,3 +206,27 @@ describe("tsume in vertical text", () => {
     expect(result.glyphs[0]!.advance).toBeCloseTo(8);
   });
 });
+
+describe("punctuation and spacing in vertical text", () => {
+  test("trims closing punctuation at the end of a column", () => {
+    const result = vertical({ text: "あ。\n」い", punctuationTrim: "both" });
+    expect(result.lines[0]!.inlineSize).toBe(15);
+    expect(result.lines[1]!.inlineSize).toBe(20);
+  });
+
+  test("trims sideways opening brackets but not upright ones", () => {
+    expect(vertical({ text: "「あ", punctuationTrim: "start" }).lines[0]!.inlineSize).toBe(15);
+    expect(vertical({ text: "〝あ", punctuationTrim: "start" }).lines[0]!.inlineSize).toBe(20);
+  });
+
+  test("autospace separates upright kana from sideways latin, except at a column start", () => {
+    expect(vertical({ text: "あA", autospace: true }).glyphs[1]!.y).toBe(12.5);
+    const wrapped = vertical({ text: "あA", autospace: true, maxHeight: 10 });
+    expect(lineTexts(wrapped)).toEqual(["あ", "A"]);
+    expect(wrapped.glyphs[1]!.y).toBe(0);
+  });
+
+  test("autospace skips 縦中横", () => {
+    expect(vertical({ text: "第12回", autospace: true }).lines[0]!.inlineSize).toBe(30);
+  });
+});

@@ -1,5 +1,5 @@
 ---
-description: Wrapping to a width, alignment and justification, Japanese kinsoku rules (禁則処理), hanging punctuation (ぶら下げ) and phrase-aware line breaking (文節改行).
+description: Wrapping to a width, alignment and justification, Japanese kinsoku rules (禁則処理), hanging punctuation (ぶら下げ), punctuation trimming at line edges (約物の半角取り), space between Japanese and Latin text (和欧間アキ) and phrase-aware line breaking (文節改行).
 ---
 
 # Line breaking
@@ -105,6 +105,70 @@ Pass an object to change any of the four character sets. Sets you don't list kee
 ```
 
 `defaultKinsoku` is exported if you want to build on the defaults. `kinsoku: false` turns all the rules off.
+
+## Punctuation at line edges (約物の半角取り)
+
+Fullwidth brackets and 、。 take a whole em, half of it blank. At the edge of a line that blank half makes the text look indented, or off-center in a centered caption. `punctuationTrim` removes it:
+
+- `"start"`: before opening brackets such as 「 and （ at the start of a line.
+- `"end"`: after closing brackets, 、 and 。 at the end of a line.
+- `"both"`: both.
+- `"none"` (the default): keeps the full em.
+
+```ts demo compare
+import { fill, type PunctuationTrim, stroke } from "tellu";
+
+const props = (punctuationTrim: PunctuationTrim) => ({
+  text: "「えっ、本当に？」\n「本当です。」",
+  align: "center" as const,
+  punctuationTrim,
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 40,
+    lineHeight: 1.4,
+    layers: [stroke(6, "#111"), fill("#fff")],
+  },
+  background: {
+    paint: "rgba(255,255,255,0.1)",
+    padding: 0,
+    mode: "line" as const,
+  },
+});
+
+export default {
+  'punctuationTrim: "none"': props("none"),
+  'punctuationTrim: "both"': props("both"),
+};
+```
+
+With `"end"` (or `"both"`), closing punctuation that only fits within `maxWidth` once trimmed stays on its line instead of being pushed to the next one or hung past the edge. Punctuation in the middle of a line keeps its full width; adjacent pairs such as `」「` are already closed up by the font. Only fullwidth punctuation is trimmed, and [`tsume`](./typography#tsume-文字ツメ) counts toward the trimmed half.
+
+## Space between Japanese and Latin text (和欧間アキ)
+
+`autospace` adds space wherever kana or kanji meet Latin letters or digits, as Japanese typesetting does between scripts. `true` adds a quarter em of the smaller font; a px number or `{ em }` sets the amount. The default is `false`.
+
+```ts demo compare
+import { fill, stroke } from "tellu";
+
+const props = (autospace: boolean) => ({
+  text: "最新のiPhoneで4K動画を撮影",
+  autospace,
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 40,
+    layers: [stroke(6, "#111"), fill("#fff")],
+  },
+});
+
+export default {
+  "autospace: false": props(false),
+  "autospace: true": props(true),
+};
+```
+
+No space is added where there already is one, next to punctuation or fullwidth letters, or at the start of a line, and 縦中横 in [vertical text](./vertical) is left alone.
 
 ## Phrase breaking (文節改行)
 
