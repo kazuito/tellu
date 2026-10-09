@@ -20,7 +20,7 @@
     "docs:format": "bun run --filter tellu-docs format",
     "lint": "biome check",
     "lint:fix": "biome check --write",
-    "prepare": "lefthook install"
+    "prepare": "test ! -e .git || lefthook install"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
