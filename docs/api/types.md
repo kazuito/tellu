@@ -1,5 +1,5 @@
 ---
-description: Type reference for TextNodeProps, LayoutOptions, TextStyle, Layer, Paint, PlateStyle, runs, kinsoku rules, GlyphContext and GlyphTransform.
+description: Type reference for TextNodeProps, LayoutOptions, writing modes, TextStyle, Layer, Paint, PlateStyle, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
 ---
 
 # Types
@@ -36,9 +36,11 @@ interface TextNodeProps extends LayoutOptions {
 | --- | --- | --- | --- |
 | `text` | [`TextContent`](#textcontent) | | Required |
 | `style` | `Partial<`[`TextStyle`](#textstyle)`>` | [`defaultStyle`](./helpers#defaultstyle) | |
-| `maxWidth` | `number` | | Layout box width. Enables wrapping unless `wrap` is `"none"` |
+| `writingMode` | [`WritingMode`](#writingmode) | `"horizontal-tb"` | |
+| `maxWidth` | `number` | | Layout box width. In horizontal text it is the line length and enables wrapping; in vertical text it only bounds `shrink` |
+| `maxHeight` | `number` | | Layout box height. In vertical text it is the line length and enables wrapping; in horizontal text it only bounds `shrink` |
 | `wrap` | `"auto" \| "none"` | `"auto"` | `"none"` keeps only explicit line breaks |
-| `align` | [`TextAlign`](#textalign) | `"left"` | |
+| `align` | [`TextAlign`](#textalign) | `"start"` | |
 | `overflow` | [`Overflow`](#overflow) | `"visible"` | |
 | `minScale` | `number` | `0.3` | Smallest scale `shrink` / `squeeze` may apply |
 | `maxLines` | `number` | | Truncates, or bounds `shrink` |
@@ -46,13 +48,23 @@ interface TextNodeProps extends LayoutOptions {
 | `lineBreak` | [`LineBreak`](#linebreak) | `"char"` | |
 | `locale` | `string` | `"ja"` | Segmentation locale |
 
-Guides: [Line breaking](/guide/line-breaking), [Fitting text](/guide/fitting).
+Guides: [Line breaking](/guide/line-breaking), [Fitting text](/guide/fitting), [Vertical writing](/guide/vertical).
+
+### `WritingMode`
+
+```ts
+type WritingMode = "horizontal-tb" | "vertical-rl" | "vertical-lr";
+```
+
+As in CSS `writing-mode`: `vertical-rl` stacks lines right → left (縦書き), `vertical-lr` left → right.
 
 ### `TextAlign`
 
 ```ts
-type TextAlign = "left" | "center" | "right" | "justify";
+type TextAlign = "start" | "center" | "end" | "justify" | "left" | "right" | "top" | "bottom";
 ```
+
+Position of each line along the line direction. `start` / `end` follow the writing mode; `left` / `top` mean `start` and `right` / `bottom` mean `end` in either direction.
 
 ### `Overflow`
 
@@ -60,9 +72,9 @@ type TextAlign = "left" | "center" | "right" | "justify";
 type Overflow = "visible" | "shrink" | "squeeze";
 ```
 
-- `visible`: lines may overflow `maxWidth`.
-- `shrink`: the font scales down until the text fits `maxWidth` (and `maxLines`).
-- `squeeze`: overflowing lines are condensed horizontally (長体で収める).
+- `visible`: lines may overflow the line length.
+- `shrink`: the font scales down until the text fits `maxWidth`, `maxHeight` and `maxLines`.
+- `squeeze`: overflowing lines are condensed along the line (長体で収める).
 
 ### `LineBreak`
 
@@ -99,10 +111,28 @@ Defaults: [`defaultKinsoku`](./helpers#defaultkinsoku).
 | `scaleY` | `number` | `1` | Vertical glyph scale |
 | `lineHeight` | [`LineHeight`](#lineheight) | `1.2` | |
 | `kerning` | `boolean` | `true` | |
-| `baselineShift` | [`Length`](#length) | `0` | Raises glyphs |
+| `baselineShift` | [`Length`](#length) | `0` | Raises glyphs (moves them right in vertical text) |
+| `textOrientation` | [`TextOrientation`](#textorientation) | `"mixed"` | Vertical text only |
+| `textCombineUpright` | [`TextCombineUpright`](#textcombineupright) | `"digits 2"` | Vertical text only: 縦中横 |
 | `layers` | `readonly `[`Layer`](#layer)`[]` | `[{ paint: "#ffffff" }]` | Bottom → top |
 
 Guide: [Typography](/guide/typography).
+
+### `TextOrientation`
+
+```ts
+type TextOrientation = "mixed" | "upright" | "sideways";
+```
+
+Glyph orientation in vertical text, as in CSS `text-orientation`. [Guide](/guide/vertical#glyph-orientation).
+
+### `TextCombineUpright`
+
+```ts
+type TextCombineUpright = "none" | "all" | "digits" | "digits 2" | "digits 3" | "digits 4";
+```
+
+縦中横 in vertical text, as in CSS `text-combine-upright`: `all` combines each run of this style, and `digits N` combines runs of at most N (default 2) ASCII digits.
 
 ### `FontWeight`
 
@@ -273,7 +303,7 @@ Guide: [Patching layers](/guide/rich-text#patching-layers).
 | Property | Type | Default | |
 | --- | --- | --- | --- |
 | `paint` | `Paint` | | Required |
-| `padding` | `number \| readonly [x, y]` | `[24, 12]` | |
+| `padding` | `number \| readonly [x, y]` | 24 along the lines, 12 across | `[24, 12]` in horizontal text, `[12, 24]` in vertical |
 | `radius` | `number` | `0` | Clamped to half the plate size |
 | `stroke` | `{ width: number; paint: Paint }` | | |
 | `mode` | `"block" \| "line"` | `"block"` | One plate, or one per line |
@@ -304,7 +334,7 @@ type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefin
 | `runIndex` | |
 | `tags` | Markup tags of its run |
 | `isWhitespace` | |
-| `x`, `y`, `width`, `height` | Glyph box in layout coordinates |
+| `x`, `y`, `width`, `height` | The glyph's cell in layout coordinates: its advance along the line × the font's extent across it |
 
 ### `GlyphTransform`
 
@@ -320,3 +350,18 @@ type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefin
 | `origin` | `[0.5, 0.5]` | Relative to the glyph box |
 
 Guide: [Glyph transforms](/guide/animation).
+
+## Geometry
+
+### `Box`
+
+```ts
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+```
+
+A rectangle in layout coordinates, used by [`LayoutGlyph`](./layout#layoutglyph) and [`LayoutLine`](./layout#layoutline).

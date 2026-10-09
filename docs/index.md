@@ -29,7 +29,7 @@ features:
     link: /guide/paint
   - icon: 🈁
     title: Japanese typesetting
-    details: Kinsoku rules, hanging punctuation, phrase-aware breaking, and condensed glyphs (長体) whose outlines stay even.
+    details: Vertical writing (縦書き) with 縦中横, kinsoku rules, hanging punctuation, phrase-aware breaking, and condensed glyphs (長体) whose outlines stay even.
     link: /guide/line-breaking
   - icon: ✍️
     title: Rich text

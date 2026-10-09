@@ -39,7 +39,7 @@ export default defineConfig({
         domain: origin,
         description: "Telop (caption) rendering for the web on PixiJS, made for Remotion",
         details:
-          "tixi draws captions CSS can't: unlimited outline layers, shadows, gradients, rich text, Japanese kinsoku line breaking, " +
+          "tixi draws captions CSS can't: unlimited outline layers, shadows, gradients, rich text, Japanese kinsoku line breaking, vertical writing, " +
           "condensed glyphs with uniform outlines, background plates and per-glyph animation. " +
           "Every page is also available as Markdown by appending `.md` to its URL.",
       }),
@@ -81,6 +81,7 @@ export default defineConfig({
           items: [
             { text: "Line breaking", link: "/guide/line-breaking" },
             { text: "Fitting text", link: "/guide/fitting" },
+            { text: "Vertical writing", link: "/guide/vertical" },
           ],
         },
         {

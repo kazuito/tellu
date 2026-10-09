@@ -1,12 +1,16 @@
 ---
-description: Known limitations of tixi, covering horizontal text only, no ligatures, how overlapping outlines of different colors combine, and font declaration requirements.
+description: Known limitations of tixi, covering approximated vertical forms, no ruby, no ligatures, how overlapping outlines of different colors combine, and font declaration requirements.
 ---
 
 # Limitations
 
-## Horizontal text only
+## Vertical forms are approximated
 
-tixi lays out horizontal text. Vertical writing (縦書き) is planned.
+Canvas 2D can't request a font's vertical glyph alternates (the OpenType `vert` feature). In [vertical text](./vertical), tixi rotates brackets and dashes and moves punctuation and small kana by their ink. That is close to Chrome's CSS rendering for typical Japanese fonts, but glyphs whose vertical forms differ more keep their horizontal shapes.
+
+## No ruby
+
+Ruby (furigana) isn't supported yet. A workaround is a separate small caption placed above (or beside) the base text.
 
 ## No ligatures
 

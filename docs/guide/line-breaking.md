@@ -6,7 +6,7 @@ description: Wrapping to a width, alignment and justification, Japanese kinsoku 
 
 ## Wrapping
 
-Set `maxWidth` and text wraps to fit it. `maxWidth` also becomes the width of the layout box. Without it, a caption is exactly as wide as its longest line.
+Set `maxWidth` and text wraps to fit it. `maxWidth` also becomes the width of the layout box. Without it, a caption is exactly as wide as its longest line. (In [vertical text](./vertical), `maxHeight` plays this role.)
 
 ```ts demo
 import { fill, stroke } from "tixi";
@@ -31,7 +31,7 @@ The faint plate on this page's demos marks the layout box. Japanese and Chinese 
 
 ## Alignment
 
-`align` places each line in the layout box: `"left"` (the default), `"center"`, `"right"` or `"justify"`.
+`align` places each line in the layout box: `"start"` (the default), `"center"`, `"end"` or `"justify"`. `"start"` and `"end"` follow the writing direction, and `"left"` / `"right"` are accepted as aliases for them.
 
 ```ts demo compare
 import { fill, stroke, type TextAlign } from "tixi";
@@ -51,9 +51,9 @@ const props = (align: TextAlign) => ({
 });
 
 export default {
-  left: props("left"),
+  start: props("start"),
   center: props("center"),
-  right: props("right"),
+  end: props("end"),
   justify: props("justify"),
 };
 ```

@@ -16,7 +16,9 @@ Everything in `style` other than `layers` controls the type itself.
 | `scaleX` / `scaleY` | `1` | Condensed / expanded glyphs |
 | `lineHeight` | `1.2` | A multiple of the font size, or `{ px }` |
 | `kerning` | `true` | |
-| `baselineShift` | `0` | px, or `{ em }`. Positive values raise the text |
+| `baselineShift` | `0` | px, or `{ em }`. Positive values raise the text (move it right in vertical text) |
+| `textOrientation` | `"mixed"` | Vertical text only. See [Vertical writing](./vertical#glyph-orientation) |
+| `textCombineUpright` | `"digits 2"` | Vertical text only: 縦中横. See [Vertical writing](./vertical#縦中横-tate-chu-yoko) |
 
 ## Letter spacing
 

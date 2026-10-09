@@ -1,5 +1,5 @@
 ---
-description: Make text fit a fixed box by shrinking the font size or condensing overflowing lines (長体で収める), and cap the number of lines with maxLines.
+description: Make text fit a fixed box by shrinking the font size or condensing overflowing lines (長体で収める), with maxWidth, maxHeight and maxLines.
 ---
 
 # Fitting text
@@ -13,7 +13,7 @@ Captions often have a fixed slot: a lower-third bar, a 2-line subtitle area, a p
 | `overflow` | Behavior |
 | --- | --- |
 | `"visible"` (default) | Lines may run past `maxWidth` |
-| `"shrink"` | The whole caption is scaled down until every line fits `maxWidth` (and `maxLines`) |
+| `"shrink"` | The whole caption is scaled down until every line fits `maxWidth`, and the block fits `maxHeight` and `maxLines` |
 | `"squeeze"` | Each line that overflows is condensed horizontally to fit (長体で収める) |
 
 ```ts demo compare
@@ -70,6 +70,31 @@ export default {
 ### Squeeze
 
 `"squeeze"` condenses only the lines that overflow, and the rest keep their natural width. Glyphs are condensed like [`scaleX`](./typography#condensed-and-expanded-glyphs), with outlines that stay even. It is the standard way to fit names and titles into a fixed bar.
+
+### Fitting a box
+
+`maxHeight` bounds the height of the whole caption, but only for `shrink`: it never wraps or truncates horizontal text. Together with `maxWidth`, it makes `shrink` fit a box of any shape:
+
+```ts demo
+import { fill, stroke } from "tixi";
+
+export default {
+  text: "どれだけ長い文章でも、指定した幅と高さの枠に収まるまでフォントサイズを小さくします",
+  maxWidth: 420,
+  maxHeight: 130,
+  overflow: "shrink",
+  align: "center",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 56,
+    layers: [stroke(7, "#111"), fill("#fff")],
+  },
+  background: { paint: "rgba(255,255,255,0.1)", padding: 0 },
+};
+```
+
+In [vertical text](./vertical#fitting) the roles swap: `maxHeight` is the line length and `maxWidth` bounds the stack of lines.
 
 ### Minimum scale
 

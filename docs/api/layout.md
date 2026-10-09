@@ -26,8 +26,9 @@ layout.fontScale;    // < 1 when overflow: "shrink" scaled the font
 
 | Field | |
 | --- | --- |
-| `width`, `height` | Layout box size. `width` is `maxWidth` when given |
-| `lines` | [`LayoutLine`](#layoutline)`[]` |
+| `writingMode` | [`WritingMode`](./types#writingmode) |
+| `width`, `height` | Layout box size. The line length is `maxWidth` (`maxHeight` in vertical text) when given |
+| `lines` | [`LayoutLine`](#layoutline)`[]`, top → bottom, or right → left (`vertical-rl`) / left → right (`vertical-lr`) |
 | `glyphs` | [`LayoutGlyph`](#layoutglyph)`[]` |
 | `runs` | [`ResolvedRun`](#resolvedrun)`[]` |
 | `fontScale` | Scale applied by `overflow: "shrink"` (`1` otherwise) |
@@ -38,23 +39,26 @@ layout.fontScale;    // < 1 when overflow: "shrink" scaled the font
 | --- | --- |
 | `index` | |
 | `start`, `end` | Glyph index range `[start, end)` |
-| `x` | Left edge of the content after alignment |
-| `top`, `height` | Line box |
-| `baseline` | Baseline y |
-| `width` | Content width, excluding trailing whitespace |
-| `ascent`, `descent` | Tallest font extents on the line |
+| `inlineStart` | Offset of the content along the line after alignment: x in horizontal text, y in vertical text |
+| `inlineSize` | Length of the content along the line, excluding trailing whitespace |
+| `blockStart` | Where the line box starts across the lines: its top in horizontal text, its left edge in vertical text |
+| `blockSize` | Thickness of the line box (the line height) |
+| `baseline` | y in horizontal text, x of the central baseline in vertical text |
+| `ascent`, `descent` | Font extents from the baseline: up / down in horizontal text, right / left in vertical text |
+| `contentBox` | [`Box`](./types#box): the content's length along the line × `ascent + descent` across it |
 
 ### `LayoutGlyph`
 
 | Field | |
 | --- | --- |
 | `index`, `text`, `runIndex`, `lineIndex`, `indexInLine`, `isWhitespace` | |
-| `x` | Left edge of the glyph's advance |
-| `y` | Baseline, including baseline shift |
-| `advance` | Advance width including scaling, excluding letter spacing |
+| `x`, `y` | Where the glyph is drawn from: the start of its baseline, before `rotation` (baseline shift included) |
+| `rotation` | `0`, or `90` for glyphs set sideways in vertical text |
+| `advance` | Advance along the line, including scaling, excluding letter spacing |
 | `fontSize` | After `shrink` |
-| `scaleX`, `scaleY` | Including `squeeze` |
-| `ascent`, `descent` | Scaled font extents |
+| `scaleX`, `scaleY` | Scale on screen, including `squeeze` and 縦中横 condensing |
+| `ascent`, `descent` | Scaled font extents in the glyph's own orientation |
+| `box` | [`Box`](./types#box): the glyph's cell, its advance along the line × the font's extent across it |
 
 ### `ResolvedRun`
 
@@ -81,6 +85,8 @@ interface Measurer {
   /** Advance width of `text` in px, without letter spacing or scaling. */
   measureText(text: string, font: FontSpec): number;
   fontMetrics(font: FontSpec): FontMetrics;
+  /** Places vertical punctuation and small kana by their ink. Without it they are moved by a fixed amount. */
+  inkBounds?(text: string, font: FontSpec): InkBounds;
 }
 ```
 
@@ -116,8 +122,25 @@ interface FontSpec {
 interface FontMetrics {
   ascent: number;
   descent: number;
+  /** Alphabetic baseline → ideographic baseline (the em box bottom vertical text is centered on). */
+  ideographicDescent?: number;
 }
 ```
+
+Without `ideographicDescent`, the em box is split in the ratio of `ascent` to `descent`.
+
+### `InkBounds`
+
+```ts
+interface InkBounds {
+  left: number;
+  top: number; // negative above the baseline
+  right: number;
+  bottom: number;
+}
+```
+
+Ink extents of a glyph relative to its baseline origin, in px. Returned by `Measurer.inkBounds()`.
 
 ### `fontSpecOf()`
 

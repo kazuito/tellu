@@ -109,7 +109,7 @@ export default {
 | Option | Default | |
 | --- | --- | --- |
 | `paint` | | Any [paint](./paint). Gradients span the plate (or each line plate) |
-| `padding` | `[24, 12]` | `[x, y]` or one number for both |
+| `padding` | `[24, 12]` | `[x, y]` or one number for both. In vertical text the default is `[12, 24]` |
 | `radius` | `0` | Corner radius, clamped to half the plate's size |
 | `stroke` | | `{ width, paint }` |
 | `mode` | `"block"` | `"line"` draws one plate per line |

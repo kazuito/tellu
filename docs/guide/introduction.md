@@ -39,6 +39,7 @@ CSS gets you one `-webkit-text-stroke` and a few `text-shadow`s. Real captions n
 | Neighbouring outlines that merge instead of overlapping fills | Not possible | Built in |
 | Condensed glyphs (長体) with an even outline | `scale()` distorts the stroke | `scaleX: 0.8` |
 | Japanese line breaking (禁則処理) and hanging punctuation | Partly, depends on the browser | Built in, deterministic |
+| Vertical captions (縦書き) with 縦中横, all of the above included | `writing-mode`, without most of the above | `writingMode: "vertical-rl"` |
 | Shrink to fit a box, frame-accurate | JavaScript measuring loops | `overflow: "shrink"` |
 | Per-glyph animation without re-layout | One `<span>` per glyph | `glyphTransform` |
 

@@ -8,9 +8,9 @@ These docs are published in formats that AI assistants and coding agents can rea
 
 | URL | Contents |
 | --- | --- |
-| [`/llms.txt`](/llms.txt){target="_self"} | An index of every page, with a one-line description of each |
-| [`/llms-full.txt`](/llms-full.txt){target="_self"} | The entire documentation in a single Markdown file |
-| Any page + `.md` | That page as Markdown, e.g. [`/guide/layers.md`](/guide/layers.md){target="_self"} |
+| [`/llms.txt`](./llms.txt){target="_self"} | An index of every page, with a one-line description of each |
+| [`/llms-full.txt`](./llms-full.txt){target="_self"} | The entire documentation in a single Markdown file |
+| Any page + `.md` | That page as Markdown, e.g. `/guide/layers.md` |
 
 Every example is plain TypeScript inside the Markdown, so the code an agent reads is exactly the code that renders on this site.
 
