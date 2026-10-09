@@ -9,7 +9,7 @@ Bun workspaces monorepo for `tellu`, a telop (caption) rendering library on Pixi
 - `packages/tellu`: the library. It has three entries: `tellu` (core), `tellu/react` and `tellu/remotion`.
 - `examples/remotion`: Remotion sample project. Each real-world scene (`Variety`, `Subtitles`, `LowerThird`, `News`, `Quiz`, `Recipe`, `Sale`, `GameStream`, `Cinema`, `Documentary`, `Credits`) is its own composition and `Showcase` plays them in sequence; `Shorts` is a separate vertical (1080×1920) composition.
 - `examples/playground`: browser demo of every feature, served by Bun's HTML dev server.
-- `docs`: the documentation site (VitePress, English only), deployed to GitHub Pages. See [Documentation](#documentation).
+- `docs`: the documentation site (VitePress, English only), deployed on Vercel. See [Documentation](#documentation).
 
 ## Commands
 
@@ -21,7 +21,7 @@ bun run typecheck   # tsc --noEmit in every workspace
 bun run build       # tsdown -> packages/tellu/dist (also rewrites `exports` in its package.json)
 bun run dev         # playground at http://localhost:3100
 bun run studio      # Remotion Studio at http://localhost:3200
-bun run docs:dev    # docs site at http://localhost:3400/tellu/
+bun run docs:dev    # docs site at http://localhost:3400/
 bun run docs:check  # docs examples typecheck + every public export documented + examples formatted
 bun run docs:format # format the docs' example code (Biome, 80 columns)
 bun run docs:build  # docs/.vitepress/dist, including llms.txt and a .md per page

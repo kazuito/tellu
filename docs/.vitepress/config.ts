@@ -4,8 +4,12 @@ import llmstxt, { copyOrDownloadAsMarkdownButtons } from "vitepress-plugin-llms"
 import { demoMarkdown, demoPlugin } from "./demos/plugin";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const base = process.env.DOCS_BASE ?? "/tellu/";
-const origin = process.env.DOCS_ORIGIN ?? "https://kazuito.github.io";
+const base = process.env.DOCS_BASE ?? "/";
+const origin =
+  process.env.DOCS_ORIGIN ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3400");
 const repository = "https://github.com/kazuito/tellu";
 
 export default defineConfig({

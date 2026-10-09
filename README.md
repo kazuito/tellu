@@ -16,7 +16,7 @@ bun run typecheck  # every workspace
 bun run build      # packages/tellu/dist
 bun run dev        # playground at http://localhost:3100
 bun run studio     # Remotion Studio at http://localhost:3200
-bun run docs:dev   # docs at http://localhost:3400/tellu/
+bun run docs:dev   # docs at http://localhost:3400/
 ```
 
 Render the Remotion sample:
