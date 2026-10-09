@@ -1,20 +1,20 @@
 ---
-description: Overview of tixi's three entry points (tixi, tixi/react and tixi/remotion) and an index of every export.
+description: Overview of tellu's three entry points (tellu, tellu/react and tellu/remotion) and an index of every export.
 ---
 
 # API reference
 
-tixi ships three entry points:
+tellu ships three entry points:
 
 ```ts
-import { createCanvasText, fill, stroke, TextNode } from "tixi"; // core, framework-free
-import { Text } from "tixi/react"; // React component
-import { Text } from "tixi/remotion"; // React component wired to Remotion's delayRender
+import { createCanvasText, fill, stroke, TextNode } from "tellu"; // core, framework-free
+import { Text } from "tellu/react"; // React component
+import { Text } from "tellu/remotion"; // React component wired to Remotion's delayRender
 ```
 
-`pixi.js` v8 is a peer dependency of all three. `react` is needed for `tixi/react`, and both `react` and `remotion` for `tixi/remotion`.
+`pixi.js` v8 is a peer dependency of all three. `react` is needed for `tellu/react`, and both `react` and `remotion` for `tellu/remotion`.
 
-## `tixi`
+## `tellu`
 
 | Export | |
 | --- | --- |
@@ -37,29 +37,29 @@ import { Text } from "tixi/remotion"; // React component wired to Remotion's del
 | [`fontSpecOf()`](./layout#fontspecof) · [`fontToCss()`](./layout#fonttocss) | Font descriptors |
 | **Types** | [Props, styles, layers, paints, glyphs…](./types) |
 
-## `tixi/react`
+## `tellu/react`
 
 | Export | |
 | --- | --- |
 | [`Text`](./react#text) | Draws a caption into its own canvas |
 | [`TextRendererProvider`](./react#textrendererprovider) · [`useTextRenderer()`](./react#usetextrenderer) | Choose the renderer for a subtree |
 
-## `tixi/remotion`
+## `tellu/remotion`
 
 | Export | |
 | --- | --- |
 | [`Text`](./remotion#text) | `<Text>` that holds frames with `delayRender` until drawn |
 
-The rest of `tixi/react`'s exports are re-exported from `tixi/remotion` for convenience.
+The rest of `tellu/react`'s exports are re-exported from `tellu/remotion` for convenience.
 
 <llm-only>
 
 ## Rules for code generation
 
-- In Remotion projects, import `Text` from `tixi/remotion`, not `tixi/react`. Only the Remotion one holds frame capture with `delayRender`.
+- In Remotion projects, import `Text` from `tellu/remotion`, not `tellu/react`. Only the Remotion one holds frame capture with `delayRender`.
 - `<Text>` takes the caption style as `textStyle`. Its `style` prop is the wrapper element's CSS.
 - Remotion renders need `Config.setChromiumOpenGlRenderer("angle")` (or `--gl=angle`), because PixiJS needs WebGL.
-- Font stylesheets must be loaded before `<Text>` mounts or `createCanvasText()` runs. tixi can only load faces from `@font-face` rules that already exist, and falls back silently otherwise.
+- Font stylesheets must be loaded before `<Text>` mounts or `createCanvasText()` runs. tellu can only load faces from `@font-face` rules that already exist, and falls back silently otherwise.
 - `style.layers` is ordered bottom → top. Outlines must get narrower toward the top, and the fill is usually last.
 - Animate with `glyphTransform`. Create PixiJS filters and pattern images once, outside render functions, because they are compared by identity.
 

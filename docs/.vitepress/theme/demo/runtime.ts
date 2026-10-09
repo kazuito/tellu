@@ -1,4 +1,4 @@
-import { type CanvasText, createCanvasText, type TextNodeProps } from "tixi";
+import { type CanvasText, createCanvasText, type TextNodeProps } from "tellu";
 
 export type DemoExport = TextNodeProps | ((frame: number) => TextNodeProps) | Readonly<Record<string, TextNodeProps>>;
 
@@ -13,7 +13,7 @@ const FONT_STYLESHEET =
 let stylesheet: Promise<void> | undefined;
 
 /**
- * tixi only sees `@font-face` rules that are already declared, so demos wait for the stylesheet.
+ * tellu only sees `@font-face` rules that are already declared, so demos wait for the stylesheet.
  * It is added on the first demo instead of in `<head>` to keep pages without demos light.
  */
 export function loadFontStylesheet(): Promise<void> {

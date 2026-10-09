@@ -1,4 +1,4 @@
-# tixi
+# tellu
 
 Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Made for [Remotion](https://remotion.dev) and anything else that needs captions CSS can't draw:
 
@@ -14,18 +14,18 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 - Per-glyph transforms for animation (position, scale, rotation, skew, opacity)
 
 ```sh
-bun add tixi pixi.js
+bun add tellu pixi.js
 ```
 
-**[Documentation](https://kazuito.github.io/tixi/)**: guides, live examples and the API reference ([`llms.txt`](https://kazuito.github.io/tixi/llms.txt) for AI assistants).
+**[Documentation](https://kazuito.github.io/tellu/)**: guides, live examples and the API reference ([`llms.txt`](https://kazuito.github.io/tellu/llms.txt) for AI assistants).
 
 ## Usage
 
 ### React / Remotion
 
 ```tsx
-import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
-import { Text } from "tixi/remotion"; // or "tixi/react" outside Remotion
+import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
+import { Text } from "tellu/remotion"; // or "tellu/react" outside Remotion
 
 const style = {
   fontFamily: "Noto Sans JP",
@@ -58,19 +58,19 @@ export const Caption = () => {
 
 `<Text>` renders a block the size of the layout box; outlines, shadows and transformed glyphs may paint outside of it. `anchor` picks which point of the box sits at the element's position.
 
-`tixi/remotion` holds the frame with `delayRender` until the renderer is ready, the fonts are loaded and the frame is drawn. Render with ANGLE so headless Chrome has WebGL:
+`tellu/remotion` holds the frame with `delayRender` until the renderer is ready, the fonts are loaded and the frame is drawn. Render with ANGLE so headless Chrome has WebGL:
 
 ```ts
 // remotion.config.ts
 Config.setChromiumOpenGlRenderer("angle");
 ```
 
-tixi loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](../../examples/remotion/src/fonts.tsx)). `<Text>` also re-measures whenever the document finishes loading fonts later.
+tellu loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](../../examples/remotion/src/fonts.tsx)). `<Text>` also re-measures whenever the document finishes loading fonts later.
 
 ### Vanilla
 
 ```ts
-import { createCanvasText, fill, stroke } from "tixi";
+import { createCanvasText, fill, stroke } from "tellu";
 
 const canvasText = await createCanvasText(canvas, {
   text: "こんにちは",
@@ -84,7 +84,7 @@ The canvas is resized to the text's ink bounds; `canvasText.lastDraw.x / y` is i
 ### Inside a PixiJS scene
 
 ```ts
-import { loadFonts, TextNode } from "tixi";
+import { loadFonts, TextNode } from "tellu";
 
 await loadFonts(props);
 const node = new TextNode(props, { resolution: app.renderer.resolution });
@@ -197,4 +197,4 @@ Everything else works the same way: layers, rich text, kinsoku, `shrink` / `sque
 
 ## Development
 
-This package lives in the [tixi monorepo](../../README.md). Workspace consumers resolve `tixi` to `src/` through the `tixi-source` export condition, so examples run without a build.
+This package lives in the [tellu monorepo](../../README.md). Workspace consumers resolve `tellu` to `src/` through the `tellu-source` export condition, so examples run without a build.

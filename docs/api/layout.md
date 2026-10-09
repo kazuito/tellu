@@ -15,7 +15,7 @@ function layoutText(options: LayoutOptions, measurer?: Measurer): Layout;
 Lays out text without rendering it, using the same algorithm `TextNode` uses. Pass a custom [`Measurer`](#measurer) to lay out outside the browser, for example in tests or on a server with your own font metrics.
 
 ```ts
-import { layoutText } from "tixi";
+import { layoutText } from "tellu";
 
 const layout = layoutText({ text: "長いテロップを折り返す", maxWidth: 400, style: { fontSize: 48 } });
 layout.lines.length; // number of lines
@@ -90,7 +90,7 @@ interface Measurer {
 }
 ```
 
-The text measurement backend used by layout. tixi measures each glyph and growing prefixes of each run, from which it derives kerning.
+The text measurement backend used by layout. tellu measures each glyph and growing prefixes of each run, from which it derives kerning.
 
 ### `CanvasMeasurer`
 

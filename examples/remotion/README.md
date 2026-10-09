@@ -1,4 +1,4 @@
-# tixi × Remotion
+# tellu × Remotion
 
 | Composition | Shows |
 | --- | --- |
@@ -15,5 +15,5 @@ bun run stills   # out/stills/*.png
 
 Notes:
 
-- `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` (PixiJS needs WebGL in headless Chrome) and the `tixi-source` webpack condition.
+- `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` (PixiJS needs WebGL in headless Chrome) and the `tellu-source` webpack condition.
 - `src/fonts.tsx` gates the compositions until the Google Fonts stylesheet has declared its `@font-face` rules; each `<Text>` then loads only the subsets its text uses.

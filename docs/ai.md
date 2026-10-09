@@ -16,7 +16,7 @@ Every example is plain TypeScript inside the Markdown, so the code an agent read
 
 ## Using them
 
-- **Chat assistants**: paste the `llms-full.txt` URL, or its contents, into the conversation before asking for help with tixi.
+- **Chat assistants**: paste the `llms-full.txt` URL, or its contents, into the conversation before asking for help with tellu.
 - **Coding agents**: point the agent at `llms.txt`. It lists every page, and the agent can fetch only the `.md` pages it needs.
 - **Per page**: each page has a **Copy page** button under its title, with options to view the Markdown or open the page in ChatGPT or Claude.
 
@@ -24,7 +24,7 @@ Every example is plain TypeScript inside the Markdown, so the code an agent read
 
 A few rules prevent most mistakes:
 
-1. In Remotion, import `Text` from `tixi/remotion`.
+1. In Remotion, import `Text` from `tellu/remotion`.
 2. `<Text>` takes the caption style as `textStyle`. `style` is the wrapper's CSS.
 3. Render Remotion with `--gl=angle` (`Config.setChromiumOpenGlRenderer("angle")`).
 4. Load the font stylesheet before any caption is drawn. See [Fonts](/guide/fonts).

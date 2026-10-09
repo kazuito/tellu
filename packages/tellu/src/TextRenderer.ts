@@ -108,7 +108,7 @@ export class TextRenderer {
     if (target.width !== pixelWidth) target.width = pixelWidth;
     if (target.height !== pixelHeight) target.height = pixelHeight;
     const ctx = target.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
-    if (!ctx) throw new Error("tixi: the target canvas has no 2D context");
+    if (!ctx) throw new Error("tellu: the target canvas has no 2D context");
     ctx.clearRect(0, 0, pixelWidth, pixelHeight);
     ctx.drawImage(
       this.renderer.canvas as CanvasImageSource,

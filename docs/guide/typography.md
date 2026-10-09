@@ -25,7 +25,7 @@ Everything in `style` other than `layers` controls the type itself.
 `letterSpacing` adds space after each character, in px or relative to the font size with `{ em }`. Em units keep the rhythm when the font size changes, for example under [`overflow: "shrink"`](./fitting).
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const style = (letterSpacing: number | { em: number }) => ({
   fontFamily: "Noto Sans JP",
@@ -47,7 +47,7 @@ export default {
 Japanese typesetting squeezes glyphs horizontally (長体, condensed) or vertically (平体, flattened) to fit a design. `scaleX` and `scaleY` do this **without distorting the outlines**: a 16 px outline stays 16 px on every side.
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const style = (scaleX: number, scaleY = 1) => ({
   fontFamily: "Noto Sans JP",
@@ -65,14 +65,14 @@ export default {
 };
 ```
 
-Scaling a canvas or CSS element squashes the outline along with the glyph. tixi scales the glyph shape and then grows the outline from a distance field, so the width stays even.
+Scaling a canvas or CSS element squashes the outline along with the glyph. tellu scales the glyph shape and then grows the outline from a distance field, so the width stays even.
 
 ## Line height
 
 `lineHeight` is a multiple of the font size (`1.2` by default) or an absolute `{ px }`. Each line takes the tallest line height among its runs, and the text sits centred in that line box.
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const props = (lineHeight: number | { px: number }) => ({
   text: "一行目\n二行目",
@@ -96,10 +96,10 @@ export default {
 
 ## Kerning
 
-tixi applies the font's kerning by default. Each glyph is still drawn separately, so it can be outlined and animated on its own. Set `kerning: false` for even, monospaced-feeling spacing:
+tellu applies the font's kerning by default. Each glyph is still drawn separately, so it can be outlined and animated on its own. Set `kerning: false` for even, monospaced-feeling spacing:
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const style = (kerning: boolean) => ({
   fontFamily: "Montserrat",
@@ -120,7 +120,7 @@ export default {
 `baselineShift` raises a run (or lowers it, if negative) relative to the baseline. It is most useful in [rich text](./rich-text) for small annotations:
 
 ```ts demo
-import { fill, parseMarkup, stroke } from "tixi";
+import { fill, parseMarkup, stroke } from "tellu";
 
 export default {
   text: parseMarkup("新商品<note>※個人の感想です</note>", {
@@ -145,7 +145,7 @@ export default {
 Fonts can change mid-caption through rich text. Lines align on a shared baseline, so mixing families and sizes just works:
 
 ```ts demo
-import { fill, parseMarkup, stroke } from "tixi";
+import { fill, parseMarkup, stroke } from "tellu";
 
 export default {
   text: parseMarkup("<tag>【速報】</tag>新商品<big>ついに</big>発売", {

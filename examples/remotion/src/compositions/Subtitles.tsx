@@ -1,6 +1,6 @@
 import { AbsoluteFill, interpolate, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, shadow, stroke } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, shadow, stroke } from "tellu";
+import { Text } from "tellu/remotion";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
 import { speakerColors, subtitle } from "../styles";
@@ -19,7 +19,7 @@ interface Line {
 export const SCRIPT: Line[] = [
   { speaker: "A", name: "ずんだ", text: "テロップって、CSSだけだと限界あるよね", start: 0.2, end: 2.6 },
   { speaker: "B", name: "めたん", text: "縁取りを何重にも重ねたり、ぼかした影を付けたり", start: 2.8, end: 5.4 },
-  { speaker: "A", name: "ずんだ", text: "それ全部、tixiならレイヤーを並べるだけ！", start: 5.6, end: 8.0 },
+  { speaker: "A", name: "ずんだ", text: "それ全部、telluならレイヤーを並べるだけ！", start: 5.6, end: 8.0 },
   {
     speaker: "B",
     name: "めたん",

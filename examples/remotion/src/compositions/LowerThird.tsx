@@ -1,6 +1,6 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { linearGradient } from "tixi";
-import { Text } from "tixi/remotion";
+import { linearGradient } from "tellu";
+import { Text } from "tellu/remotion";
 import { Background } from "../components/Background";
 import { lowerThirdName, lowerThirdTitle } from "../styles";
 

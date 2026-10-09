@@ -1,10 +1,10 @@
 ---
 layout: home
-title: tixi
+title: tellu
 titleTemplate: Captions CSS can't draw
 
 hero:
-  name: tixi
+  name: tellu
   text: Captions CSS can't draw
   tagline: Broadcast-style telops for the web. Layered outlines, gradients, rich text and Japanese line breaking, rendered on PixiJS and made for Remotion.
   actions:
@@ -50,7 +50,7 @@ features:
 ## Everything here renders live
 
 ```ts demo backdrop=scene
-import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
+import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
   text: parseMarkup("縁取りも<em>グラデ</em>も、全部コードで。", {
@@ -81,7 +81,7 @@ export default {
 ```
 
 ```sh
-bun add tixi pixi.js
+bun add tellu pixi.js
 ```
 
 [Read the guide →](/guide/introduction)

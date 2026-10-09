@@ -11,6 +11,6 @@ export default defineConfig({
   dts: true,
   exports: {
     // Workspace consumers that enable this condition use the TypeScript source directly.
-    devExports: "tixi-source",
+    devExports: "tellu-source",
   },
 });

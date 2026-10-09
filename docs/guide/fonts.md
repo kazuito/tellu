@@ -1,17 +1,17 @@
 ---
-description: How tixi loads web fonts, why the stylesheet must be declared before drawing, and the gating pattern for Remotion, React and plain canvases.
+description: How tellu loads web fonts, why the stylesheet must be declared before drawing, and the gating pattern for Remotion, React and plain canvases.
 ---
 
 # Fonts
 
-Captions live and die by their typeface, and fonts are the most common source of "it looked right in the preview" bugs. This page explains what tixi does for you and the one thing it can't.
+Captions live and die by their typeface, and fonts are the most common source of "it looked right in the preview" bugs. This page explains what tellu does for you and the one thing it can't.
 
-## What tixi does
+## What tellu does
 
-Before drawing, tixi works out every font a caption uses and which characters each font draws:
+Before drawing, tellu works out every font a caption uses and which characters each font draws:
 
 ```ts
-import { fontRequests } from "tixi";
+import { fontRequests } from "tellu";
 
 fontRequests({
   text: [{ text: "速報", style: { fontFamily: "Dela Gothic One", fontWeight: 400 } }, " 新商品"],
@@ -76,7 +76,7 @@ export const FontGate = ({ children }: { children: ReactNode }) => {
 };
 ```
 
-Wrap each composition in `<FontGate>`. Releasing the gate's handle in an effect *after* the children mount matters. Each `<Text>` from `tixi/remotion` places its own `delayRender` while it loads the font subsets it needs. Releasing the gate first would leave a gap in which Remotion could capture an empty frame.
+Wrap each composition in `<FontGate>`. Releasing the gate's handle in an effect *after* the children mount matters. Each `<Text>` from `tellu/remotion` places its own `delayRender` while it loads the font subsets it needs. Releasing the gate first would leave a gap in which Remotion could capture an empty frame.
 
 If you load fonts with `@remotion/google-fonts` or `@remotion/fonts`, the `@font-face` rules are added for you. Just make sure that happens before `<Text>` mounts.
 
@@ -103,7 +103,7 @@ const caption = await createCanvasText(canvas, props); // loads the needed subse
 Telops are usually set in heavy weights, and a few faces cover most looks. All the fonts on this site come from Google Fonts:
 
 ```ts demo compare
-import { fill, stroke, type TextNodeProps } from "tixi";
+import { fill, stroke, type TextNodeProps } from "tellu";
 
 const sample = (fontFamily: string, fontWeight = 400): TextNodeProps => ({
   text: "速報テロップ",
@@ -128,7 +128,7 @@ export default {
 `fontFamily` takes a CSS family list (`"Noto Sans JP, sans-serif"`) or an array (`["Noto Sans JP", "sans-serif"]`). Names are quoted for you, and generic families like `sans-serif` are left as they are.
 
 ::: tip `display=block`
-The examples request Google Fonts with `display=block`, so DOM text never flashes a fallback face. tixi itself waits for the faces it needs either way.
+The examples request Google Fonts with `display=block`, so DOM text never flashes a fallback face. tellu itself waits for the faces it needs either way.
 :::
 
 ## Troubleshooting

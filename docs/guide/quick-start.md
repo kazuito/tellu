@@ -1,29 +1,29 @@
 ---
-description: Install tixi and draw a first caption with Remotion, React, a plain canvas or a PixiJS scene.
+description: Install tellu and draw a first caption with Remotion, React, a plain canvas or a PixiJS scene.
 ---
 
 # Quick start
 
 ## Install
 
-tixi needs PixiJS v8 as a peer dependency. React and Remotion are optional peers, needed only for their entry points.
+tellu needs PixiJS v8 as a peer dependency. React and Remotion are optional peers, needed only for their entry points.
 
 ::: code-group
 
 ```sh [bun]
-bun add tixi pixi.js
+bun add tellu pixi.js
 ```
 
 ```sh [npm]
-npm install tixi pixi.js
+npm install tellu pixi.js
 ```
 
 ```sh [pnpm]
-pnpm add tixi pixi.js
+pnpm add tellu pixi.js
 ```
 
 ```sh [yarn]
-yarn add tixi pixi.js
+yarn add tellu pixi.js
 ```
 
 :::
@@ -33,7 +33,7 @@ yarn add tixi pixi.js
 Every example on this site exports the same thing: the props of a caption. Here is a white caption with a black outline:
 
 ```ts demo
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "はじめてのテロップ",
@@ -53,8 +53,8 @@ Pass the same props to whichever API fits your app:
 ::: code-group
 
 ```tsx [Remotion]
-import { fill, stroke } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, stroke } from "tellu";
+import { Text } from "tellu/remotion";
 
 export const Caption = () => (
   <Text
@@ -72,8 +72,8 @@ export const Caption = () => (
 ```
 
 ```tsx [React]
-import { fill, stroke } from "tixi";
-import { Text } from "tixi/react";
+import { fill, stroke } from "tellu";
+import { Text } from "tellu/react";
 
 export const Caption = () => (
   <Text
@@ -89,7 +89,7 @@ export const Caption = () => (
 ```
 
 ```ts [Canvas]
-import { createCanvasText, fill, stroke } from "tixi";
+import { createCanvasText, fill, stroke } from "tellu";
 
 const canvas = document.querySelector("canvas")!;
 const caption = await createCanvasText(canvas, {
@@ -106,7 +106,7 @@ caption.update({ text: "更新も同期的" });
 ```
 
 ```ts [PixiJS]
-import { fill, loadFonts, stroke, TextNode, type TextNodeProps } from "tixi";
+import { fill, loadFonts, stroke, TextNode, type TextNodeProps } from "tellu";
 
 const props: TextNodeProps = {
   text: "はじめてのテロップ",
@@ -131,7 +131,7 @@ In `<Text>`, `textStyle` is the caption's style and `style` is the CSS of the wr
 
 ## Load your fonts first
 
-tixi measures text with the browser's fonts. A web font must be **declared** (its stylesheet loaded) before the text is drawn, or tixi silently measures a fallback font. Once the `@font-face` rules exist, tixi loads exactly the faces and `unicode-range` subsets each caption needs.
+tellu measures text with the browser's fonts. A web font must be **declared** (its stylesheet loaded) before the text is drawn, or tellu silently measures a fallback font. Once the `@font-face` rules exist, tellu loads exactly the faces and `unicode-range` subsets each caption needs.
 
 The [Fonts](./fonts) guide shows the pattern for each environment. Read it before shipping anything.
 

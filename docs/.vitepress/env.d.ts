@@ -5,7 +5,7 @@ declare module "*.vue" {
   export default component;
 }
 
-declare module "virtual:tixi-demos" {
+declare module "virtual:tellu-demos" {
   import type { DemoExport } from "./theme/demo/runtime";
 
   const demos: Record<string, () => Promise<{ default: DemoExport }>>;

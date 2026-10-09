@@ -11,7 +11,7 @@ Restrained, legible captions for news, documentaries and interviews.
 White on a tight black outline with a soft shadow, readable over any footage.
 
 ```ts demo backdrop=street
-import { fill, shadow, stroke } from "tixi";
+import { fill, shadow, stroke } from "tellu";
 
 export default {
   text: "「こんな雨は初めて」\n「傘がまったく役に立たない」",
@@ -35,7 +35,7 @@ export default {
 The label is a plain plate. The headline must fit the bar whatever its length, so it shrinks on one line.
 
 ```ts demo compare backdrop=street
-import { fill } from "tixi";
+import { fill } from "tellu";
 
 const label = {
   fontFamily: "Noto Sans JP",
@@ -66,13 +66,13 @@ export default {
 Name and title in one caption: a run for the smaller title line, and one gradient plate behind both.
 
 ```ts demo backdrop=street
-import { fill, linearGradient } from "tixi";
+import { fill, linearGradient } from "tellu";
 
 export default {
   text: [
     "山田 太郎",
     {
-      text: "\ntixi 開発者",
+      text: "\ntellu 開発者",
       style: {
         fontSize: 26,
         fontWeight: 700,
@@ -102,7 +102,7 @@ export default {
 The fill color tells you who is speaking, and a pill label names them.
 
 ```ts demo compare backdrop=night
-import { fill, shadow, stroke } from "tixi";
+import { fill, shadow, stroke } from "tellu";
 
 const line = (text: string, color: string) => ({
   text,
@@ -126,12 +126,12 @@ export default {
 
 ## Karaoke subtitles
 
-A karaoke wipe colors the text left to right as it is spoken. Stack two identical captions and reveal the colored one with `clip-path`. tixi lays both out identically, so they line up to the pixel:
+A karaoke wipe colors the text left to right as it is spoken. Stack two identical captions and reveal the colored one with `clip-path`. tellu lays both out identically, so they line up to the pixel:
 
 ```tsx
 import { interpolate, useCurrentFrame } from "remotion";
-import { fill, shadow, stroke } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, shadow, stroke } from "tellu";
+import { Text } from "tellu/remotion";
 
 const base = {
   fontFamily: "Noto Sans JP",
@@ -162,4 +162,4 @@ export const KaraokeLine = ({ text, duration }: { text: string; duration: number
 };
 ```
 
-The colored copy changes only its fill. Because `clip-path` is CSS, the wipe costs nothing per frame on the tixi side.
+The colored copy changes only its fill. Because `clip-path` is CSS, the wipe costs nothing per frame on the tellu side.

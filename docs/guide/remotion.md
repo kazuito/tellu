@@ -1,17 +1,17 @@
 ---
-description: Render tixi captions in Remotion videos with <Text> from tixi/remotion, covering delayRender integration, ANGLE for WebGL, font gating, positioning and frame-driven animation.
+description: Render tellu captions in Remotion videos with <Text> from tellu/remotion, covering delayRender integration, ANGLE for WebGL, font gating, positioning and frame-driven animation.
 ---
 
 # Remotion
 
-`tixi/remotion` exports `<Text>`, which holds Remotion's frame capture until the caption is fully drawn. You never get a frame with a missing or half-loaded caption.
+`tellu/remotion` exports `<Text>`, which holds Remotion's frame capture until the caption is fully drawn. You never get a frame with a missing or half-loaded caption.
 
 ## Setup
 
 **1. Install**
 
 ```sh
-bun add tixi pixi.js
+bun add tellu pixi.js
 ```
 
 **2. Enable WebGL in headless Chrome.** PixiJS needs WebGL, and Remotion's default renderer doesn't provide it:
@@ -31,8 +31,8 @@ For `renderMedia()` / `renderStill()` from `@remotion/renderer`, pass `chromiumO
 
 ```tsx
 import { AbsoluteFill } from "remotion";
-import { fill, linearGradient, shadow, stroke } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, linearGradient, shadow, stroke } from "tellu";
+import { Text } from "tellu/remotion";
 
 const variety = {
   fontFamily: "Noto Sans JP",
@@ -120,4 +120,4 @@ If later props need new fonts, it holds the frame again. Errors (for example, no
 - **Studio vs render.** If a caption looks right in Studio but wrong in the render, check `setChromiumOpenGlRenderer("angle")` first, then the font gate.
 - **Vertical video.** Nothing changes. Position with `anchor` and lay out with `maxWidth` against your composition size.
 
-See the [`tixi/remotion` reference](/api/remotion) for every prop.
+See the [`tellu/remotion` reference](/api/remotion) for every prop.

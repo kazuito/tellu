@@ -4,7 +4,7 @@ description: Make text fit a fixed box by shrinking the font size or condensing 
 
 # Fitting text
 
-Captions often have a fixed slot: a lower-third bar, a 2-line subtitle area, a price tag. tixi can make text fit instead of overflowing.
+Captions often have a fixed slot: a lower-third bar, a 2-line subtitle area, a price tag. tellu can make text fit instead of overflowing.
 
 ## Overflow
 
@@ -17,7 +17,7 @@ Captions often have a fixed slot: a lower-third bar, a 2-line subtitle area, a p
 | `"squeeze"` | Each line that overflows is condensed horizontally to fit (長体で収める) |
 
 ```ts demo compare
-import { fill, type Overflow, stroke } from "tixi";
+import { fill, type Overflow, stroke } from "tellu";
 
 const props = (overflow: Overflow) => ({
   text: "とても長いタイトルでも一行に収める",
@@ -49,7 +49,7 @@ export default {
 Combined with wrapping and `maxLines`, it fits text into a box of N lines:
 
 ```ts demo
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "長い説明文でも二行以内に収まるように、フォントサイズを自動で小さくして調整します",
@@ -76,7 +76,7 @@ export default {
 `maxHeight` bounds the height of the whole caption, but only for `shrink`: it never wraps or truncates horizontal text. Together with `maxWidth`, it makes `shrink` fit a box of any shape:
 
 ```ts demo
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "どれだけ長い文章でも、指定した幅と高さの枠に収まるまでフォントサイズを小さくします",

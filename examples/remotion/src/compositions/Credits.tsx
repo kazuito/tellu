@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { AbsoluteFill, Sequence, useCurrentFrame } from "remotion";
-import { fill, glow, type TextStyle } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, glow, type TextStyle } from "tellu";
+import { Text } from "tellu/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -18,7 +18,7 @@ const STAFF = [
   { role: "動画編集", names: ["Remotion"] },
   { role: "フォント", names: ["Noto Sans JP", "Noto Serif JP", "Dela Gothic One", "Zen Maru Gothic", "Montserrat"] },
   { role: "音楽", names: ["テロップ・オーケストラ"] },
-  { role: "制作", names: ["tixi project"] },
+  { role: "制作", names: ["tellu project"] },
 ];
 
 const role: Partial<TextStyle> = {

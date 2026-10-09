@@ -1,12 +1,12 @@
 /**
- * Fails when a public export of `tixi`, `tixi/react` or `tixi/remotion` has no entry in the API reference.
+ * Fails when a public export of `tellu`, `tellu/react` or `tellu/remotion` has no entry in the API reference.
  * Core exports need a heading in docs/api; the React and Remotion entries need a mention on their own page.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 const docs = join(import.meta.dir, "..");
-const src = join(docs, "../packages/tixi/src");
+const src = join(docs, "../packages/tellu/src");
 const api = join(docs, "api");
 
 function exportedNames(file: string): string[] {
@@ -44,13 +44,13 @@ const mentions = (text: string, name: string) => new RegExp(`\`${name}(?:\\(|<|\
 const missing = [
   ...exportedNames(join(src, "index.ts"))
     .filter((name) => !mentions(headings, name))
-    .map((name) => `tixi: ${name} (add a heading in docs/api)`),
+    .map((name) => `tellu: ${name} (add a heading in docs/api)`),
   ...exportedNames(join(src, "react/index.ts"))
     .filter((name) => !mentions(read("react.md"), name))
-    .map((name) => `tixi/react: ${name} (document it in docs/api/react.md)`),
+    .map((name) => `tellu/react: ${name} (document it in docs/api/react.md)`),
   ...exportedNames(join(src, "remotion/index.ts"))
     .filter((name) => !mentions(read("remotion.md"), name))
-    .map((name) => `tixi/remotion: ${name} (document it in docs/api/remotion.md)`),
+    .map((name) => `tellu/remotion: ${name} (document it in docs/api/remotion.md)`),
 ];
 
 if (missing.length > 0) {

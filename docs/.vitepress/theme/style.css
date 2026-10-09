@@ -9,7 +9,7 @@
   --vp-home-hero-image-background-image: radial-gradient(circle at 50% 50%, rgba(255, 170, 40, 0.35), transparent 65%);
   --vp-home-hero-image-filter: blur(48px);
 
-  --tixi-stage-radius: 12px;
+  --tellu-stage-radius: 12px;
 }
 
 .dark {
@@ -21,45 +21,45 @@
 
 /* Demos: a stage with the live rendering, then the code that produced it. */
 
-.tixi-demo {
+.tellu-demo {
   margin: 20px 0;
 }
 
-.tixi-demo-stage {
+.tellu-demo-stage {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 140px;
   padding: 32px 24px;
-  border-radius: var(--tixi-stage-radius);
+  border-radius: var(--tellu-stage-radius);
   overflow: hidden;
   isolation: isolate;
 }
 
-.tixi-demo:has(> div[class*="language-"]) .tixi-demo-stage {
+.tellu-demo:has(> div[class*="language-"]) .tellu-demo-stage {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.vp-doc .tixi-demo > div[class*="language-"] {
+.vp-doc .tellu-demo > div[class*="language-"] {
   margin: 0;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
 @media (max-width: 639px) {
-  .tixi-demo {
+  .tellu-demo {
     margin: 16px -24px;
   }
 
-  .tixi-demo-stage {
+  .tellu-demo-stage {
     border-radius: 0;
     padding: 24px 16px;
   }
 }
 
-.tixi-demo-canvas {
+.tellu-demo-canvas {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -68,13 +68,13 @@
   max-width: 100%;
 }
 
-.tixi-demo-canvas canvas {
+.tellu-demo-canvas canvas {
   display: block;
   max-width: 100%;
   height: auto;
 }
 
-.tixi-demo-canvas figure {
+.tellu-demo-canvas figure {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -83,7 +83,7 @@
   max-width: 100%;
 }
 
-.tixi-demo-canvas figcaption {
+.tellu-demo-canvas figcaption {
   font-family: var(--vp-font-family-mono);
   font-size: 12px;
   line-height: 1;
@@ -93,13 +93,13 @@
   background: rgba(0, 0, 0, 0.35);
 }
 
-.backdrop-light .tixi-demo-canvas figcaption {
+.backdrop-light .tellu-demo-canvas figcaption {
   color: rgba(0, 0, 0, 0.75);
   background: rgba(255, 255, 255, 0.6);
 }
 
-.tixi-demo-hint,
-.tixi-demo-error {
+.tellu-demo-hint,
+.tellu-demo-error {
   position: absolute;
   inset: auto 16px 12px;
   font-size: 12px;
@@ -107,18 +107,18 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
-.tixi-demo-error {
+.tellu-demo-error {
   inset: 50% 16px auto;
   transform: translateY(-50%);
   font-family: var(--vp-font-family-mono);
   color: #ffa8a8;
 }
 
-.backdrop-light .tixi-demo-hint {
+.backdrop-light .tellu-demo-hint {
   color: rgba(0, 0, 0, 0.45);
 }
 
-.tixi-demo-play {
+.tellu-demo-play {
   position: absolute;
   right: 10px;
   bottom: 10px;
@@ -133,12 +133,12 @@
   transition: opacity 0.2s;
 }
 
-.tixi-demo-play:hover,
-.tixi-demo-play:focus-visible {
+.tellu-demo-play:hover,
+.tellu-demo-play:focus-visible {
   opacity: 1;
 }
 
-.tixi-demo-play svg {
+.tellu-demo-play svg {
   width: 14px;
   height: 14px;
   fill: currentColor;
@@ -181,7 +181,7 @@
 
 /* Home */
 
-.tixi-hero-caption {
+.tellu-hero-caption {
   position: relative;
   z-index: 1;
   display: flex;
@@ -191,7 +191,7 @@
   aspect-ratio: 4 / 3;
 }
 
-.tixi-hero-caption canvas {
+.tellu-hero-caption canvas {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;

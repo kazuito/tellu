@@ -1,6 +1,6 @@
 import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, parseMarkup, shadow, stroke, type TextStyle } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, parseMarkup, shadow, stroke, type TextStyle } from "tellu";
+import { Text } from "tellu/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -107,7 +107,7 @@ export const Shorts = () => {
         </Sequence>
       ))}
       <Text
-        text="@tixi_dev"
+        text="@tellu_dev"
         textStyle={{
           fontFamily: FONTS.latin,
           fontWeight: 900,

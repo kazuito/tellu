@@ -4,9 +4,9 @@ This file provides guidance to AI Agents when working with code in this reposito
 
 ## Repository
 
-Bun workspaces monorepo for `tixi`, a telop (caption) rendering library on PixiJS v8, built mainly for Remotion.
+Bun workspaces monorepo for `tellu`, a telop (caption) rendering library on PixiJS v8, built mainly for Remotion.
 
-- `packages/tixi`: the library. It has three entries: `tixi` (core), `tixi/react` and `tixi/remotion`.
+- `packages/tellu`: the library. It has three entries: `tellu` (core), `tellu/react` and `tellu/remotion`.
 - `examples/remotion`: Remotion sample project. Each real-world scene (`Variety`, `Subtitles`, `LowerThird`, `News`, `Quiz`, `Recipe`, `Sale`, `GameStream`, `Cinema`, `Documentary`, `Credits`) is its own composition and `Showcase` plays them in sequence; `Shorts` is a separate vertical (1080×1920) composition.
 - `examples/playground`: browser demo of every feature, served by Bun's HTML dev server.
 - `docs`: the documentation site (VitePress, English only), deployed to GitHub Pages. See [Documentation](#documentation).
@@ -16,12 +16,12 @@ Bun workspaces monorepo for `tixi`, a telop (caption) rendering library on PixiJ
 Run these from the repo root:
 
 ```sh
-bun run test        # library unit tests (bun test in packages/tixi)
+bun run test        # library unit tests (bun test in packages/tellu)
 bun run typecheck   # tsc --noEmit in every workspace
-bun run build       # tsdown -> packages/tixi/dist (also rewrites `exports` in its package.json)
+bun run build       # tsdown -> packages/tellu/dist (also rewrites `exports` in its package.json)
 bun run dev         # playground at http://localhost:3100
 bun run studio      # Remotion Studio at http://localhost:3200
-bun run docs:dev    # docs site at http://localhost:3400/tixi/
+bun run docs:dev    # docs site at http://localhost:3400/tellu/
 bun run docs:check  # docs examples typecheck + every public export documented + examples formatted
 bun run docs:format # format the docs' example code (Biome, 80 columns)
 bun run docs:build  # docs/.vitepress/dist, including llms.txt and a .md per page
@@ -31,25 +31,25 @@ bun run lint:fix    # biome check --write
 
 - Git hooks (lefthook, installed by `bun install` via `prepare`): pre-commit runs Biome with fixes on staged files and the typecheck; pre-push runs `biome ci`, the typecheck and the tests. Config is in `lefthook.yml`, and `lefthook-local.yml` is for personal overrides.
 
-- Single test file: `cd packages/tixi && bun test test/layout.test.ts`.
+- Single test file: `cd packages/tellu && bun test test/layout.test.ts`.
 - Single test by name: add `-t "<name>"`.
 - Render the Remotion sample: `cd examples/remotion && bun run render` (writes `out/showcase.mp4`).
 - Representative stills: `bun run stills` (writes `out/stills/*.png`); `bun run stills News Quiz` limits it to those compositions. Inspecting stills is the practical way to check rendering changes visually.
 
 TypeScript is v7 (native). tsdown warns that its API is experimental; that warning is expected.
 
-## Workspace resolution (`tixi-source` condition)
+## Workspace resolution (`tellu-source` condition)
 
-tsdown uses `exports.devExports: "tixi-source"`. Each export in `packages/tixi/package.json` therefore maps `tixi-source` to `src/*.ts` and `default` to `dist/*.js`.
+tsdown uses `exports.devExports: "tellu-source"`. Each export in `packages/tellu/package.json` therefore maps `tellu-source` to `src/*.ts` and `default` to `dist/*.js`.
 
 - **Don't hand-edit that `exports` field.** `bun run build` regenerates it.
 - The examples enable the condition, so they use library source without a build:
-  - Bun: `bun --conditions=tixi-source` (but Bun's HTML dev server, used by the playground, ignores the condition for the browser bundle and serves `dist/`: run `bun run build` after library changes, then restart `bun run dev`)
+  - Bun: `bun --conditions=tellu-source` (but Bun's HTML dev server, used by the playground, ignores the condition for the browser bundle and serves `dist/`: run `bun run build` after library changes, then restart `bun run dev`)
   - Webpack: `resolve.conditionNames` in `remotion.config.ts`
   - TypeScript: `customConditions` in each example's tsconfig
-- If a workspace link goes missing (`Cannot find module 'tixi'`), delete every `node_modules` and run `bun install` again.
+- If a workspace link goes missing (`Cannot find module 'tellu'`), delete every `node_modules` and run `bun install` again.
 
-## Architecture (packages/tixi/src)
+## Architecture (packages/tellu/src)
 
 The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → compose (PixiJS)**.
 
@@ -82,7 +82,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 
 ## Documentation
 
-**Every change to the public API (anything exported from `tixi`, `tixi/react` or `tixi/remotion`, or any prop, option, default or behavior) must update the docs in the same change.** Then run `bun run docs:check`; it must pass.
+**Every change to the public API (anything exported from `tellu`, `tellu/react` or `tellu/remotion`, or any prop, option, default or behavior) must update the docs in the same change.** Then run `bun run docs:check`; it must pass.
 
 - Where things go:
   - `docs/guide/*.md`: concepts and how-tos, with live examples.
@@ -103,7 +103,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 
 ## Constraints and gotchas
 
-- Fonts: tixi can only load `unicode-range` subsets for `@font-face` rules that are already declared. If text draws before the stylesheet loads, it falls back silently. Apps must gate `<Text>` on the stylesheet; see `FontGate` in `examples/remotion/src/fonts.tsx`, whose `continueRender` runs in an effect after the children mount.
+- Fonts: tellu can only load `unicode-range` subsets for `@font-face` rules that are already declared. If text draws before the stylesheet loads, it falls back silently. Apps must gate `<Text>` on the stylesheet; see `FontGate` in `examples/remotion/src/fonts.tsx`, whose `continueRender` runs in an effect after the children mount.
 - Remotion needs `Config.setChromiumOpenGlRenderer("angle")` because PixiJS needs WebGL in headless Chrome.
 - Known limitations: vertical forms are approximated (Canvas 2D can't apply the `vert` feature), no ruby, no ligatures (glyphs are drawn individually), and overlapping outlines of different colors in the same slot combine per channel with `max`.
 - Pixi, Remotion and React are peer deps that tsdown keeps external. Code under `layout/`, `style/` and `markup.ts` must stay free of Pixi/DOM runtime imports so `bun test` can run it.

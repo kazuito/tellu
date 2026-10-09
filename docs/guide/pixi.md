@@ -8,7 +8,7 @@ description: Put TextNode, a regular PixiJS container, straight into your own Pi
 
 ```ts
 import { Application } from "pixi.js";
-import { fill, loadFonts, stroke, TextNode, type TextNodeProps } from "tixi";
+import { fill, loadFonts, stroke, TextNode, type TextNodeProps } from "tellu";
 
 const app = new Application();
 await app.init({ width: 1280, height: 720, resolution: devicePixelRatio, autoDensity: true });

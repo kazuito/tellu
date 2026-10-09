@@ -4,7 +4,7 @@ description: Keep caption animation cheap by changing only glyphTransform per fr
 
 # Performance
 
-tixi does expensive work (layout and rasterizing) only when it has to, and cheap work (moving sprites) on every frame. These guidelines keep you on the cheap path.
+tellu does expensive work (layout and rasterizing) only when it has to, and cheap work (moving sprites) on every frame. These guidelines keep you on the cheap path.
 
 ## What triggers a rebuild
 

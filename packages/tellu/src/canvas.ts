@@ -11,6 +11,6 @@ export function createCanvas(width: number, height: number): AnyCanvas {
 
 export function context2d(canvas: AnyCanvas): Canvas2D {
   const ctx = canvas.getContext("2d") as Canvas2D | null;
-  if (!ctx) throw new Error("tixi: failed to get a 2D canvas context");
+  if (!ctx) throw new Error("tellu: failed to get a 2D canvas context");
   return ctx;
 }

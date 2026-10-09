@@ -4,13 +4,13 @@ import llmstxt, { copyOrDownloadAsMarkdownButtons } from "vitepress-plugin-llms"
 import { demoMarkdown, demoPlugin } from "./demos/plugin";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const base = process.env.DOCS_BASE ?? "/tixi/";
+const base = process.env.DOCS_BASE ?? "/tellu/";
 const origin = process.env.DOCS_ORIGIN ?? "https://kazuito.github.io";
-const repository = "https://github.com/kazuito/tixi";
+const repository = "https://github.com/kazuito/tellu";
 
 export default defineConfig({
   lang: "en-US",
-  title: "tixi",
+  title: "tellu",
   description:
     "Broadcast-quality captions for the web: layered outlines, gradients, rich text and Japanese line breaking on PixiJS.",
   base,
@@ -23,7 +23,7 @@ export default defineConfig({
     ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
     ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:title", content: "tixi" }],
+    ["meta", { property: "og:title", content: "tellu" }],
   ],
   markdown: {
     config(md) {
@@ -39,13 +39,13 @@ export default defineConfig({
         domain: origin,
         description: "Telop (caption) rendering for the web on PixiJS, made for Remotion",
         details:
-          "tixi draws captions CSS can't: unlimited outline layers, shadows, gradients, rich text, Japanese kinsoku line breaking, vertical writing, " +
+          "tellu draws captions CSS can't: unlimited outline layers, shadows, gradients, rich text, Japanese kinsoku line breaking, vertical writing, " +
           "condensed glyphs with uniform outlines, background plates and per-glyph animation. " +
           "Every page is also available as Markdown by appending `.md` to its URL.",
       }),
     ],
-    resolve: { conditions: ["tixi-source"] },
-    ssr: { resolve: { conditions: ["tixi-source"] } },
+    resolve: { conditions: ["tellu-source"] },
+    ssr: { resolve: { conditions: ["tellu-source"] } },
     server: { port: 3400 },
   },
   themeConfig: {
@@ -127,8 +127,8 @@ export default defineConfig({
             { text: "Style helpers", link: "/api/helpers" },
             { text: "Layout & fonts", link: "/api/layout" },
             { text: "Types", link: "/api/types" },
-            { text: "tixi/react", link: "/api/react" },
-            { text: "tixi/remotion", link: "/api/remotion" },
+            { text: "tellu/react", link: "/api/react" },
+            { text: "tellu/remotion", link: "/api/remotion" },
           ],
         },
       ],

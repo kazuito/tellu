@@ -7,7 +7,7 @@ description: Animate captions glyph by glyph with glyphTransform, covering posit
 `glyphTransform` is a function from each glyph to a transform. Return how a glyph should move, or nothing to leave it alone:
 
 ```ts demo
-import { fill, linearGradient, stroke } from "tixi";
+import { fill, linearGradient, stroke } from "tellu";
 
 export default {
   text: "ガタガタ並ぶ元気な文字！",
@@ -35,7 +35,7 @@ Transforms don't affect layout: neighbours stay where they are, and the [layer c
 To animate, make the transform depend on time. On this site, animated examples export a function of the frame number (30 fps), the way a Remotion component reads `useCurrentFrame()`:
 
 ```ts demo loop=90 still=40
-import { fill, shadow, stroke, type TextNodeProps } from "tixi";
+import { fill, shadow, stroke, type TextNodeProps } from "tellu";
 
 export default (frame: number): TextNodeProps => ({
   text: "ぴょんぴょん跳ねる",
@@ -59,7 +59,7 @@ export default (frame: number): TextNodeProps => ({
 });
 ```
 
-This is cheap. tixi rebuilds only when something *other than* `glyphTransform` changes. Every glyph layer is rasterized once, and each frame just moves the existing sprites. Keep everything else stable between frames (see [Performance](./performance)).
+This is cheap. tellu rebuilds only when something *other than* `glyphTransform` changes. Every glyph layer is rasterized once, and each frame just moves the existing sprites. Keep everything else stable between frames (see [Performance](./performance)).
 
 ## The glyph
 
@@ -96,7 +96,7 @@ The function receives a [`GlyphContext`](/api/types#glyphcontext) for every char
 Reveal one glyph at a time with `visibleIndex`, so spaces and line breaks don't add pauses:
 
 ```ts demo loop=90 still=60
-import { fill, stroke, type TextNodeProps } from "tixi";
+import { fill, stroke, type TextNodeProps } from "tellu";
 
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 
@@ -124,7 +124,13 @@ Hiding glyphs keeps the layout fixed, so lines don't reflow and the caption does
 ### Staggered drop-in
 
 ```ts demo loop=75 still=60
-import { fill, linearGradient, shadow, stroke, type TextNodeProps } from "tixi";
+import {
+  fill,
+  linearGradient,
+  shadow,
+  stroke,
+  type TextNodeProps,
+} from "tellu";
 
 const easeOutBounce = (t: number) => {
   if (t < 1 / 2.75) return 7.5625 * t * t;
@@ -156,7 +162,7 @@ export default (frame: number): TextNodeProps => ({
 [Markup](./rich-text#markup) tags arrive as `glyph.tags`, so the text itself can say what moves:
 
 ```ts demo loop=60 still=10
-import { fill, parseMarkup, stroke, type TextNodeProps } from "tixi";
+import { fill, parseMarkup, stroke, type TextNodeProps } from "tellu";
 
 const noise = (seed: number) => {
   const value = Math.sin(seed * 12.9898) * 43758.5453;
@@ -200,7 +206,7 @@ The markup is parsed once, outside the frame function. It would work inside too,
 ### Wave
 
 ```ts demo loop=60 still=0
-import { fill, linearGradient, stroke, type TextNodeProps } from "tixi";
+import { fill, linearGradient, stroke, type TextNodeProps } from "tellu";
 
 export default (frame: number): TextNodeProps => ({
   text: "WAVE ウェーブ",

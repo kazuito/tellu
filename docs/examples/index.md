@@ -7,7 +7,7 @@ description: A gallery of real-world caption recipes for variety shows, news, su
 Real-world captions, rendered live in your browser. Every example is self-contained: copy the code, change the text, and use it in [Remotion](/guide/remotion), [React](/guide/react), [a canvas](/guide/canvas) or [a PixiJS scene](/guide/pixi).
 
 ```ts demo backdrop=scene
-import { fill, linearGradient, shadow, stroke } from "tixi";
+import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {
   text: "テロップ、全部コードで。",
@@ -42,7 +42,7 @@ export default {
 Examples export `TextNodeProps`, the props of a caption. With `<Text>`, `style` is called `textStyle`:
 
 ```tsx
-import { Text } from "tixi/remotion";
+import { Text } from "tellu/remotion";
 
 const { style, ...props } = example; // an example's default export
 <Text {...props} textStyle={style} anchor="bottom" style={{ position: "absolute", left: 960, top: 980 }} />;
@@ -55,4 +55,4 @@ const frame = useCurrentFrame();
 const { style, ...props } = example(frame);
 ```
 
-The [`examples/remotion`](https://github.com/kazuito/tixi/tree/main/examples/remotion) project in the repository has complete Remotion compositions (variety show, subtitles, news, quiz, film credits and more) plus a vertical Shorts video.
+The [`examples/remotion`](https://github.com/kazuito/tellu/tree/main/examples/remotion) project in the repository has complete Remotion compositions (variety show, subtitles, news, quiz, film credits and more) plus a vertical Shorts video.

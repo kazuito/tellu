@@ -3,7 +3,7 @@
     "target": "ES2022",
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "customConditions": ["tixi-source"],
+    "customConditions": ["tellu-source"],
     "jsx": "react-jsx",
     "types": ["bun"],
     "strict": true,

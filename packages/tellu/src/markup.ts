@@ -31,7 +31,7 @@ export function parseMarkup(markup: string, tags: Readonly<Record<string, StyleO
       push("\n");
     } else if (closing) {
       const open = stack.lastIndexOf(name);
-      if (open === -1) throw new Error(`tixi: unexpected closing tag </${name}>`);
+      if (open === -1) throw new Error(`tellu: unexpected closing tag </${name}>`);
       stack.length = open;
     } else if (!selfClosing) {
       stack.push(name);
@@ -39,6 +39,6 @@ export function parseMarkup(markup: string, tags: Readonly<Record<string, StyleO
   }
   push(markup.slice(cursor));
 
-  if (stack.length > 0) throw new Error(`tixi: unclosed tag <${stack.at(-1)}>`);
+  if (stack.length > 0) throw new Error(`tellu: unclosed tag <${stack.at(-1)}>`);
   return runs;
 }

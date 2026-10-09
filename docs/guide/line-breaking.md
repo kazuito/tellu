@@ -9,7 +9,7 @@ description: Wrapping to a width, alignment and justification, Japanese kinsoku 
 Set `maxWidth` and text wraps to fit it. `maxWidth` also becomes the width of the layout box. Without it, a caption is exactly as wide as its longest line. (In [vertical text](./vertical), `maxHeight` plays this role.)
 
 ```ts demo
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "長いテロップは幅に合わせて自動で折り返されます。Long English text wraps at spaces, too.",
@@ -34,7 +34,7 @@ The faint plate on this page's demos marks the layout box. Japanese and Chinese 
 `align` places each line in the layout box: `"start"` (the default), `"center"`, `"end"` or `"justify"`. `"start"` and `"end"` follow the writing direction, and `"left"` / `"right"` are accepted as aliases for them.
 
 ```ts demo compare
-import { fill, stroke, type TextAlign } from "tixi";
+import { fill, stroke, type TextAlign } from "tellu";
 
 const props = (align: TextAlign) => ({
   text: "字幕は読みやすさが大切です。Captions should read at a glance.",
@@ -62,10 +62,10 @@ export default {
 
 ## Kinsoku (禁則処理)
 
-Japanese typesetting forbids some characters at the start or end of a line. A line must not start with 。、」 or small kana like ッ, and must not end with 「 or （. tixi applies these rules by default and moves the break to the nearest allowed position:
+Japanese typesetting forbids some characters at the start or end of a line. A line must not start with 。、」 or small kana like ッ, and must not end with 「 or （. tellu applies these rules by default and moves the break to the nearest allowed position:
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const props = (kinsoku: boolean) => ({
   text: "今日はとても楽しかった。また明日も遊ぼうね！",
@@ -111,7 +111,7 @@ Pass an object to change any of the four character sets. Sets you don't list kee
 By default, Japanese text breaks between any two characters, so a word can split across lines. `lineBreak: "phrase"` keeps phrases (文節) together and breaks between them, the way captions are usually hand-broken:
 
 ```ts demo compare
-import { fill, type LineBreak, stroke } from "tixi";
+import { fill, type LineBreak, stroke } from "tellu";
 
 const props = (lineBreak: LineBreak) => ({
   text: "日本語の文章を文節単位で折り返すと読みやすくなります",
@@ -133,7 +133,7 @@ export default {
 };
 ```
 
-Phrases are found with `Intl.Segmenter`: hiragana-only words such as particles and okurigana attach to the word before them. It is a heuristic. If a phrase is too long for the line, tixi falls back to breaking inside it rather than overflowing.
+Phrases are found with `Intl.Segmenter`: hiragana-only words such as particles and okurigana attach to the word before them. It is a heuristic. If a phrase is too long for the line, tellu falls back to breaking inside it rather than overflowing.
 
 ::: tip Hand-break important captions
 For on-air captions, an explicit `\n` is still the most reliable break. Use `"phrase"` for generated or user-supplied text.

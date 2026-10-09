@@ -16,7 +16,7 @@ import {
   TextNode,
   type TextNodeProps,
   type TextStyle,
-} from "tixi";
+} from "tellu";
 
 const root = document.getElementById("root")!;
 
@@ -349,12 +349,12 @@ await demo("overflow: squeeze (長体で収める)", {
 const guide = { paint: "rgba(255,255,255,0.08)", padding: 0 } as const;
 const verticalSample = "「ちょっと待って！」\n第12話は2026年の\nRemotionとラーメン〜。";
 
-/** tixi next to the browser's own `writing-mode` rendering of the same text. */
+/** tellu next to the browser's own `writing-mode` rendering of the same text. */
 async function compareWithCss(title: string, props: TextNodeProps, fontSize: number, fontWeight: number) {
   const stage = section(title);
   stage.classList.add("row");
-  const tixi = document.createElement("figure");
-  tixi.innerHTML = "<figcaption>tixi</figcaption>";
+  const tellu = document.createElement("figure");
+  tellu.innerHTML = "<figcaption>tellu</figcaption>";
   const css = document.createElement("figure");
   css.innerHTML = "<figcaption>CSS writing-mode</figcaption>";
   const reference = document.createElement("div");
@@ -369,8 +369,8 @@ async function compareWithCss(title: string, props: TextNodeProps, fontSize: num
   });
   reference.textContent = typeof props.text === "string" ? props.text : "";
   css.append(reference);
-  stage.append(tixi, css);
-  await drawInto(tixi, props);
+  stage.append(tellu, css);
+  await drawInto(tellu, props);
 }
 
 await compareWithCss(
@@ -412,7 +412,7 @@ await compare(
     (["mixed", "upright", "sideways"] as const).map((textOrientation) => [
       textOrientation,
       {
-        text: "tixi v2で縦書きOK",
+        text: "tellu v2で縦書きOK",
         writingMode: "vertical-rl",
         style: { ...simple(44), textOrientation },
         background: guide,

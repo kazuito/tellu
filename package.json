@@ -1,5 +1,5 @@
 {
-  "name": "tixi-monorepo",
+  "name": "tellu-monorepo",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -8,16 +8,16 @@
     "docs"
   ],
   "scripts": {
-    "build": "bun run --filter tixi build",
-    "test": "bun run --filter tixi test",
+    "build": "bun run --filter tellu build",
+    "test": "bun run --filter tellu test",
     "typecheck": "bun run --filter '*' typecheck",
-    "dev": "bun run --filter tixi-playground dev",
-    "studio": "bun run --filter tixi-remotion-example studio",
-    "docs:dev": "bun run --filter tixi-docs dev",
-    "docs:build": "bun run --filter tixi-docs build",
-    "docs:preview": "bun run --filter tixi-docs preview",
-    "docs:check": "bun run --filter tixi-docs check",
-    "docs:format": "bun run --filter tixi-docs format",
+    "dev": "bun run --filter tellu-playground dev",
+    "studio": "bun run --filter tellu-remotion-example studio",
+    "docs:dev": "bun run --filter tellu-docs dev",
+    "docs:build": "bun run --filter tellu-docs build",
+    "docs:preview": "bun run --filter tellu-docs preview",
+    "docs:check": "bun run --filter tellu-docs check",
+    "docs:format": "bun run --filter tellu-docs format",
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "prepare": "lefthook install"

@@ -1,4 +1,4 @@
-import { fill, glow, linearGradient, shadow, stroke, type TextNodeProps } from "tixi";
+import { fill, glow, linearGradient, shadow, stroke, type TextNodeProps } from "tellu";
 
 const SCENE = 80;
 

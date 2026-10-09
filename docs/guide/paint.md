@@ -20,7 +20,7 @@ linearGradient(stops, { angle?, scope? })
 `stops` is a list of colors, spread evenly from 0 to 1, or a list of `[offset, color]` pairs. `angle` follows CSS `linear-gradient`: `180` (the default) runs top to bottom and `90` runs left to right.
 
 ```ts demo compare
-import { fill, linearGradient, stroke } from "tixi";
+import { fill, linearGradient, stroke } from "tellu";
 
 const style = (paint: ReturnType<typeof linearGradient>) => ({
   fontFamily: "Noto Sans JP",
@@ -65,7 +65,7 @@ A gradient has to be stretched over *some* box, and `scope` picks which one:
 | `"block"` | The whole text block | Patterns |
 
 ```ts demo compare
-import { fill, linearGradient, stroke, type PaintScope } from "tixi";
+import { fill, linearGradient, stroke, type PaintScope } from "tellu";
 
 const style = (scope: PaintScope) => ({
   fontFamily: "Noto Sans JP",
@@ -96,7 +96,7 @@ radialGradient(stops, { center?, radius?, scope? })
 `center` is relative to the scope box (`[0.5, 0.5]` is the middle). `radius` is a factor of the distance to the box's farthest corner, with a default of `1`.
 
 ```ts demo
-import { fill, glow, radialGradient } from "tixi";
+import { fill, glow, radialGradient } from "tellu";
 
 export default {
   text: "GLOW",
@@ -123,7 +123,7 @@ export default {
 A pattern tiles any `CanvasImageSource`: an `<img>`, a canvas, an `ImageBitmap` or an `OffscreenCanvas`.
 
 ```ts demo
-import { fill, shadow, stroke, type PatternPaint } from "tixi";
+import { fill, shadow, stroke, type PatternPaint } from "tellu";
 
 const tile = new OffscreenCanvas(24, 24);
 const ctx = tile.getContext("2d")!;

@@ -1,5 +1,5 @@
 {
-  "name": "tixi-remotion-example",
+  "name": "tellu-remotion-example",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "remotion": "4.0.534",
-    "tixi": "workspace:*"
+    "tellu": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

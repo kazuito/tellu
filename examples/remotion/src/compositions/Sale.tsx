@@ -1,6 +1,6 @@
 import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, linearGradient, parseMarkup, shadow, stroke, type TextStyle } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, linearGradient, parseMarkup, shadow, stroke, type TextStyle } from "tellu";
+import { Text } from "tellu/remotion";
 import { easeOut, ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";

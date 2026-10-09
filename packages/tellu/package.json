@@ -1,5 +1,5 @@
 {
-  "name": "tixi",
+  "name": "tellu",
   "version": "0.1.0",
   "description": "Advanced telop (caption) rendering on PixiJS — multi-layer strokes, shadows, gradients, rich text and Japanese line breaking.",
   "type": "module",
@@ -48,15 +48,15 @@
   },
   "exports": {
     ".": {
-      "tixi-source": "./src/index.ts",
+      "tellu-source": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./react": {
-      "tixi-source": "./src/react/index.ts",
+      "tellu-source": "./src/react/index.ts",
       "default": "./dist/react.js"
     },
     "./remotion": {
-      "tixi-source": "./src/remotion/index.ts",
+      "tellu-source": "./src/remotion/index.ts",
       "default": "./dist/remotion.js"
     },
     "./package.json": "./package.json"

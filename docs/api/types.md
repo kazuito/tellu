@@ -4,10 +4,10 @@ description: Type reference for TextNodeProps, LayoutOptions, writing modes, Tex
 
 # Types
 
-Every type is exported from `tixi`:
+Every type is exported from `tellu`:
 
 ```ts
-import type { Layer, TextNodeProps, TextStyle } from "tixi";
+import type { Layer, TextNodeProps, TextStyle } from "tellu";
 ```
 
 ## Props

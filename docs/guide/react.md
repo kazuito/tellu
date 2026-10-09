@@ -1,14 +1,14 @@
 ---
-description: Use <Text> from tixi/react in any React app, with layout-box sizing, anchors, draw callbacks, pending state and a shared renderer.
+description: Use <Text> from tellu/react in any React app, with layout-box sizing, anchors, draw callbacks, pending state and a shared renderer.
 ---
 
 # React
 
-`tixi/react` exports `<Text>`, a component that draws a caption into its own `<canvas>`. It is the same component `tixi/remotion` wraps, without the Remotion-specific frame holding.
+`tellu/react` exports `<Text>`, a component that draws a caption into its own `<canvas>`. It is the same component `tellu/remotion` wraps, without the Remotion-specific frame holding.
 
 ```tsx
-import { fill, stroke } from "tixi";
-import { Text } from "tixi/react";
+import { fill, stroke } from "tellu";
+import { Text } from "tellu/react";
 
 const style = {
   fontFamily: "Noto Sans JP",
@@ -59,8 +59,8 @@ All `<Text>` components share one offscreen WebGL renderer, `TextRenderer.shared
 To use a specific renderer for a subtree, for example with custom PixiJS options, wrap it in `TextRendererProvider`:
 
 ```tsx
-import { TextRenderer } from "tixi";
-import { TextRendererProvider } from "tixi/react";
+import { TextRenderer } from "tellu";
+import { TextRendererProvider } from "tellu/react";
 
 const renderer = TextRenderer.create({ powerPreference: "high-performance" });
 
@@ -75,4 +75,4 @@ const renderer = TextRenderer.create({ powerPreference: "high-performance" });
 
 On the server, `<Text>` renders its wrapper with an empty canvas and draws after hydration. The wrapper has no size until then, so reserve space with CSS if the layout must not shift.
 
-See the [`tixi/react` reference](/api/react) for every prop.
+See the [`tellu/react` reference](/api/react) for every prop.

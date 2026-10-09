@@ -1,12 +1,12 @@
 ---
-description: Known limitations of tixi, covering approximated vertical forms, no ruby, no ligatures, how overlapping outlines of different colors combine, and font declaration requirements.
+description: Known limitations of tellu, covering approximated vertical forms, no ruby, no ligatures, how overlapping outlines of different colors combine, and font declaration requirements.
 ---
 
 # Limitations
 
 ## Vertical forms are approximated
 
-Canvas 2D can't request a font's vertical glyph alternates (the OpenType `vert` feature). In [vertical text](./vertical), tixi rotates brackets and dashes and moves punctuation and small kana by their ink. That is close to Chrome's CSS rendering for typical Japanese fonts, but glyphs whose vertical forms differ more keep their horizontal shapes.
+Canvas 2D can't request a font's vertical glyph alternates (the OpenType `vert` feature). In [vertical text](./vertical), tellu rotates brackets and dashes and moves punctuation and small kana by their ink. That is close to Chrome's CSS rendering for typical Japanese fonts, but glyphs whose vertical forms differ more keep their horizontal shapes.
 
 ## No ruby
 
@@ -26,7 +26,7 @@ This rarely shows at normal letter spacing. When it does, give the overlapping r
 
 ## Fonts must be declared before drawing
 
-tixi loads the font faces and subsets a caption needs, but only from `@font-face` rules that already exist. If a caption is drawn before your font stylesheet loads, it silently uses a fallback font. See [Fonts](./fonts).
+tellu loads the font faces and subsets a caption needs, but only from `@font-face` rules that already exist. If a caption is drawn before your font stylesheet loads, it silently uses a fallback font. See [Fonts](./fonts).
 
 ## WebGL is required
 

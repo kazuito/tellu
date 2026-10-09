@@ -1,18 +1,18 @@
 ---
-description: API reference for tixi/remotion, the Text component that holds Remotion frames with delayRender until a caption is drawn.
+description: API reference for tellu/remotion, the Text component that holds Remotion frames with delayRender until a caption is drawn.
 ---
 
-# tixi/remotion
+# tellu/remotion
 
 ```ts
-import { Text } from "tixi/remotion";
+import { Text } from "tellu/remotion";
 ```
 
 Guide: [Remotion](/guide/remotion).
 
 ## `Text`
 
-[`<Text>` from `tixi/react`](./react#text) that holds Remotion's frame capture until the caption is drawn:
+[`<Text>` from `tellu/react`](./react#text) that holds Remotion's frame capture until the caption is drawn:
 
 - calls `delayRender()` on mount, and again whenever new props need fonts that aren't loaded yet;
 - calls `continueRender()` once the renderer is ready, the fonts are loaded and the current props are drawn;
@@ -26,11 +26,11 @@ Every [`TextProps`](./react#textprops) prop, plus:
 
 | Prop | Type | Default | |
 | --- | --- | --- | --- |
-| `delayRenderLabel` | `string` | `"tixi: drawing text"` | Shown if Remotion times out waiting |
+| `delayRenderLabel` | `string` | `"tellu: drawing text"` | Shown if Remotion times out waiting |
 
 ## Re-exports
 
-For convenience, `tixi/remotion` also exports these from `tixi/react`:
+For convenience, `tellu/remotion` also exports these from `tellu/react`:
 
 - [`Anchor`](./react#anchor)
 - [`TextDrawEvent`](./react#textdrawevent)

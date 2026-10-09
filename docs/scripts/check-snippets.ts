@@ -10,7 +10,7 @@ const docs = join(import.meta.dir, "..");
 const out = join(docs, ".vitepress/cache/snippets");
 
 const DEMO_TYPES = `
-import type { TextNodeProps as __Props } from "tixi";
+import type { TextNodeProps as __Props } from "tellu";
 type __Demo = __Props | ((frame: number) => __Props);
 type __Compare = Readonly<Record<string, __Props>>;
 export default __demo;

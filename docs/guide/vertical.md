@@ -7,7 +7,7 @@ description: Vertical writing (縦書き) with writingMode, glyph orientation, �
 Set `writingMode: "vertical-rl"` and text runs top to bottom, with lines stacked right to left: the 縦書き of Japanese TV titles, drama captions and posters. Every other feature works the same way, including layers, gradients, rich text, kinsoku, plates and glyph transforms.
 
 ```ts demo
-import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
+import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
   text: parseMarkup("<em>第3話</em><br/>消えた<red>ラーメン</red>の謎", {
@@ -61,10 +61,10 @@ In vertical text, each character is either set **upright** or turned **sideways*
 | `"sideways"` | Every character sideways, like horizontal text turned 90° clockwise |
 
 ```ts demo compare
-import { fill, stroke, type TextOrientation } from "tixi";
+import { fill, stroke, type TextOrientation } from "tellu";
 
 const props = (textOrientation: TextOrientation) => ({
-  text: "tixi v2で縦書きOK",
+  text: "tellu v2で縦書きOK",
   writingMode: "vertical-rl" as const,
   style: {
     fontFamily: "Noto Sans JP",
@@ -102,7 +102,7 @@ Short numbers read better set horizontally inside a single upright cell. `textCo
 Runs of more digits than the limit are set by `textOrientation` instead. To combine something other than digits, such as `!?` or `100%`, give it its own style with `"all"`. Markup makes that easy:
 
 ```ts demo compare
-import { fill, parseMarkup, stroke } from "tixi";
+import { fill, parseMarkup, stroke } from "tellu";
 
 const style = {
   fontFamily: "Noto Sans JP",
@@ -143,7 +143,7 @@ In vertical text the line length is the **height**, so `maxHeight` wraps lines j
 `align` works along the line: `"start"` is the top, `"end"` the bottom. (`"top"` and `"bottom"` are accepted as aliases, as are `"left"` and `"right"`.)
 
 ```ts demo compare
-import { fill, stroke, type TextAlign } from "tixi";
+import { fill, stroke, type TextAlign } from "tellu";
 
 const props = (align: TextAlign) => ({
   text: "「さあ、始めましょう。」ちょっと待って……まだ準備中です！",
@@ -173,7 +173,7 @@ export default {
 `overflow` works along the line too: `"squeeze"` condenses overflowing lines *vertically*, and `"shrink"` scales the font until the text fits. In vertical text, `maxWidth` bounds how wide the stack of lines may grow, so `shrink` can fit text into a box:
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const style = {
   fontFamily: "Noto Sans JP",
@@ -212,5 +212,5 @@ export default {
 - **Glyph transforms** stay in screen space: `y` moves a glyph down, whatever the writing mode. `glyph.x/y/width/height` is the glyph's cell on screen.
 
 ::: info Vertical forms are approximated
-Canvas 2D can't ask a font for its vertical glyph alternates (the OpenType `vert` feature). tixi rotates brackets and dashes and moves punctuation and small kana by their ink, which matches Chrome's CSS rendering closely for typical Japanese fonts. Glyphs with vertical forms that differ more, like some symbols, keep their horizontal shapes.
+Canvas 2D can't ask a font for its vertical glyph alternates (the OpenType `vert` feature). tellu rotates brackets and dashes and moves punctuation and small kana by their ink, which matches Chrome's CSS rendering closely for typical Japanese fonts. Glyphs with vertical forms that differ more, like some symbols, keep their horizontal shapes.
 :::

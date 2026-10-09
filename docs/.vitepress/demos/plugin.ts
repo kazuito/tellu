@@ -4,7 +4,7 @@ import type { Plugin } from "vite";
 import type { MarkdownRenderer } from "vitepress";
 import { extractDemos, parseDemoInfo } from "./extract";
 
-const REGISTRY = "virtual:tixi-demos";
+const REGISTRY = "virtual:tellu-demos";
 const RESOLVED_REGISTRY = `\0${REGISTRY}`;
 /** A demo is served as a fake TypeScript file next to its page, so Vite transforms it and resolves its imports. */
 const DEMO_ID = /^(.*\.md)\.demo-(\d+)\.ts$/;
@@ -17,15 +17,15 @@ function markdownFiles(root: string): string[] {
     .map((file) => join(root, file));
 }
 
-/** Demo key used by the registry and `<TixiDemo>`: the page path relative to the docs root, plus its index. */
+/** Demo key used by the registry and `<TelluDemo>`: the page path relative to the docs root, plus its index. */
 export const demoKey = (relativePath: string, index: number) => `${toPosix(relativePath)}#${index}`;
 
-/** Makes ```` ```ts demo ```` fences executable: each one becomes a module that `<TixiDemo>` imports. */
+/** Makes ```` ```ts demo ```` fences executable: each one becomes a module that `<TelluDemo>` imports. */
 export function demoPlugin(root: string): Plugin {
   const pageDemos = new Map<string, string[]>();
 
   return {
-    name: "tixi-demos",
+    name: "tellu-demos",
     enforce: "pre",
     resolveId(id) {
       if (id === REGISTRY) return RESOLVED_REGISTRY;
@@ -53,7 +53,7 @@ export function demoPlugin(root: string): Plugin {
       const [, page, index] = match as unknown as [string, string, string];
       this.addWatchFile(page);
       const demo = extractDemos(readFileSync(page, "utf8"))[Number(index)];
-      if (!demo) throw new Error(`tixi-demos: ${page} has no demo #${index}`);
+      if (!demo) throw new Error(`tellu-demos: ${page} has no demo #${index}`);
       return demo.code;
     },
     configureServer(server) {
@@ -82,15 +82,15 @@ export function demoPlugin(root: string): Plugin {
   };
 }
 
-/** Renders a demo fence as `<TixiDemo>` around the highlighted code. */
+/** Renders a demo fence as `<TelluDemo>` around the highlighted code. */
 export function demoMarkdown(md: MarkdownRenderer): void {
   const fence = md.renderer.rules.fence!;
   md.renderer.rules.fence = (tokens, index, options, env, self) => {
     const token = tokens[index]!;
     const demo = parseDemoInfo(token.info);
     if (!demo) return fence(tokens, index, options, env, self);
-    const demoIndex: number = env.tixiDemoIndex ?? 0;
-    env.tixiDemoIndex = demoIndex + 1;
+    const demoIndex: number = env.telluDemoIndex ?? 0;
+    env.telluDemoIndex = demoIndex + 1;
     token.info = "ts";
     const attrs = [
       `id="${md.utils.escapeHtml(demoKey(env.relativePath, demoIndex))}"`,
@@ -99,6 +99,6 @@ export function demoMarkdown(md: MarkdownRenderer): void {
       demo.loop !== undefined ? `:loop="${demo.loop}"` : "",
       demo.still !== undefined ? `:still="${demo.still}"` : "",
     ].filter(Boolean);
-    return `<TixiDemo ${attrs.join(" ")}>${fence(tokens, index, options, env, self)}</TixiDemo>\n`;
+    return `<TelluDemo ${attrs.join(" ")}>${fence(tokens, index, options, env, self)}</TelluDemo>\n`;
   };
 }

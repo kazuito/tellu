@@ -4,12 +4,12 @@ description: The layer model behind every fill, outline, shadow and glow, with s
 
 # Layers
 
-Every decoration in tixi is a **layer**: the glyph's shape, grown by `stroke` pixels and painted with `paint`. A fill is a layer with no stroke. An outline is a layer with a stroke, and a shadow is an outline that has been offset and blurred.
+Every decoration in tellu is a **layer**: the glyph's shape, grown by `stroke` pixels and painted with `paint`. A fill is a layer with no stroke. An outline is a layer with a stroke, and a shadow is an outline that has been offset and blurred.
 
 `style.layers` lists them **bottom to top**:
 
 ```ts demo
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "重ねる",
@@ -44,10 +44,10 @@ Every option of a layer can go in the last argument: `fill("#fff", { opacity: 0.
 
 ## Outlines merge
 
-Layers are composited **per slot**: tixi draws the bottom layer of *every* glyph, then the next layer of every glyph, and so on. Outlines of neighbouring glyphs therefore melt into one shape, and a glyph's outline never covers the fill of the glyph before it. Telop software works the same way.
+Layers are composited **per slot**: tellu draws the bottom layer of *every* glyph, then the next layer of every glyph, and so on. Outlines of neighbouring glyphs therefore melt into one shape, and a glyph's outline never covers the fill of the glyph before it. Telop software works the same way.
 
 ```ts demo
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "ギュッと詰める",
@@ -68,7 +68,7 @@ Even with glyphs pulled together by `letterSpacing: -14`, every white outline si
 A shadow is a layer with `offset` and `blur`. Give it the same `stroke` as your widest outline and it becomes the shadow of the whole outlined caption, not just of the glyphs:
 
 ```ts demo compare backdrop=scene
-import { fill, shadow, stroke } from "tixi";
+import { fill, shadow, stroke } from "tellu";
 
 const base = { fontFamily: "Noto Sans JP", fontWeight: 900, fontSize: 64 };
 
@@ -105,14 +105,14 @@ export default {
 };
 ```
 
-`blur` is a PixiJS `BlurFilter` strength in CSS pixels, and `blurQuality` (default `4`) is its number of passes. tixi grows the drawn area to fit the whole blur, so soft shadows are never cropped.
+`blur` is a PixiJS `BlurFilter` strength in CSS pixels, and `blurQuality` (default `4`) is its number of passes. tellu grows the drawn area to fit the whole blur, so soft shadows are never cropped.
 
 ## Glows
 
 A glow is a blurred, grown layer with no offset. Stack two for a richer halo:
 
 ```ts demo backdrop=night
-import { fill, glow, stroke } from "tixi";
+import { fill, glow, stroke } from "tellu";
 
 export default {
   text: "きらめく夜",
@@ -141,7 +141,7 @@ By default a stroke grows the glyph **outward**, and the grown shape includes th
 | `"center"` | A band of width `stroke` centred on the outline |
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const base = { fontFamily: "Noto Sans JP", fontWeight: 900, fontSize: 80 };
 
@@ -177,7 +177,7 @@ An inside stroke sits *on top of* the fill, so put it after the fill in `layers`
 `join` sets how a stroke turns corners: `"round"` (the default), `"miter"` or `"bevel"`. `miterLimit` (default `10`) caps how far miter joins may reach.
 
 ```ts demo compare
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 const style = (join: CanvasLineJoin) => ({
   fontFamily: "Montserrat",
@@ -202,7 +202,7 @@ With non-uniform scaling (`scaleX` ≠ `scaleY`), strokes always use round joins
 A layer's `opacity` applies to the merged layer as a whole, after all glyphs are combined. Overlapping outlines don't get darker where they cross:
 
 ```ts demo backdrop=scene
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "半透明の縁取り",
@@ -221,7 +221,7 @@ export default {
 `blendMode` blends a layer against the layers below it, using any PixiJS blend mode. `"add"` makes light build up, which suits neon:
 
 ```ts demo
-import { fill, glow, stroke } from "tixi";
+import { fill, glow, stroke } from "tellu";
 
 export default {
   text: "OPEN 24H 営業中",
@@ -242,11 +242,11 @@ export default {
 
 ## PixiJS filters
 
-Need something tixi doesn't do? Put any PixiJS filter on a layer with `filters`:
+Need something tellu doesn't do? Put any PixiJS filter on a layer with `filters`:
 
 ```ts demo
 import { NoiseFilter } from "pixi.js";
-import { fill, shadow, stroke } from "tixi";
+import { fill, shadow, stroke } from "tellu";
 
 const grain = new NoiseFilter({ noise: 0.45, seed: 0.37 });
 
@@ -265,7 +265,7 @@ export default {
 ```
 
 ::: warning Create filters once
-tixi compares filters by identity. Create them outside your render function or component body, as above. A new filter instance on every frame forces a full rebuild every frame.
+tellu compares filters by identity. Create them outside your render function or component body, as above. A new filter instance on every frame forces a full rebuild every frame.
 :::
 
 ## Hiding and naming layers

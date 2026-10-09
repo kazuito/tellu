@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { AbsoluteFill, random, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, linearGradient, shadow, stroke, type TextStyle } from "tixi";
-import { Text } from "tixi/remotion";
+import { fill, linearGradient, shadow, stroke, type TextStyle } from "tellu";
+import { Text } from "tellu/remotion";
 import { ramp } from "../anim";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";

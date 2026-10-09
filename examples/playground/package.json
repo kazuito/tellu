@@ -1,14 +1,14 @@
 {
-  "name": "tixi-playground",
+  "name": "tellu-playground",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --conditions=tixi-source --port=3100 index.html",
+    "dev": "bun --conditions=tellu-source --port=3100 index.html",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "pixi.js": "^8.22.0",
-    "tixi": "workspace:*"
+    "tellu": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

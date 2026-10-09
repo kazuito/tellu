@@ -4,7 +4,7 @@
     "target": "ESNext",
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "customConditions": ["tixi-source"],
+    "customConditions": ["tellu-source"],
     "types": ["bun"],
     "strict": true,
     "skipLibCheck": true,

@@ -1,6 +1,6 @@
 import { AbsoluteFill, Easing, interpolate, random, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { linearGradient } from "tixi";
-import { Text } from "tixi/remotion";
+import { linearGradient } from "tellu";
+import { Text } from "tellu/remotion";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
 import { note, punchline, variety } from "../styles";

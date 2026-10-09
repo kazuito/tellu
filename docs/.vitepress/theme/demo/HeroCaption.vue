@@ -21,5 +21,5 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="host" class="tixi-hero-caption" />
+  <div ref="host" class="tellu-hero-caption" />
 </template>

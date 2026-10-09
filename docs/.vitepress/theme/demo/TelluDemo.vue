@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import demos from "virtual:tixi-demos";
+import demos from "virtual:tellu-demos";
 import { onBeforeUnmount, onMounted, ref, shallowRef } from "vue";
 import type { DemoView } from "./runtime";
 
@@ -62,15 +62,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="tixi-demo" :class="{ compare }">
-    <div ref="stage" class="tixi-demo-stage" :class="`backdrop-${backdrop}`" :data-status="status">
-      <div ref="host" class="tixi-demo-canvas" />
-      <span v-if="status === 'idle' || status === 'loading'" class="tixi-demo-hint">Rendering…</span>
-      <span v-else-if="status === 'error'" class="tixi-demo-error">{{ error }}</span>
+  <div class="tellu-demo" :class="{ compare }">
+    <div ref="stage" class="tellu-demo-stage" :class="`backdrop-${backdrop}`" :data-status="status">
+      <div ref="host" class="tellu-demo-canvas" />
+      <span v-if="status === 'idle' || status === 'loading'" class="tellu-demo-hint">Rendering…</span>
+      <span v-else-if="status === 'error'" class="tellu-demo-error">{{ error }}</span>
       <button
         v-if="view?.animated"
         type="button"
-        class="tixi-demo-play"
+        class="tellu-demo-play"
         :aria-label="playing ? 'Pause animation' : 'Play animation'"
         @click="togglePlay"
       >

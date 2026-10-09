@@ -29,7 +29,7 @@ function loadStylesheet(): Promise<void> {
 }
 
 /**
- * Renders children once the @font-face rules exist. The rules are split by unicode-range and tixi
+ * Renders children once the @font-face rules exist. The rules are split by unicode-range and tellu
  * loads only the subsets each `<Text>` needs, but it can only see rules that are already declared.
  */
 export const FontGate = ({ children }: { children: ReactNode }) => {

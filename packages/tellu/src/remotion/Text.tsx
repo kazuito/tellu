@@ -12,7 +12,7 @@ export interface RemotionTextProps extends TextProps {
  * fonts are loaded and the current props are drawn. Render with `--gl=angle` for WebGL in headless Chrome.
  */
 export const Text = forwardRef<HTMLDivElement, RemotionTextProps>(function Text(
-  { delayRenderLabel = "tixi: drawing text", onPendingChange, onError, ...props },
+  { delayRenderLabel = "tellu: drawing text", onPendingChange, onError, ...props },
   ref,
 ): ReactNode {
   const [initialHandle] = useState(() => delayRender(delayRenderLabel));

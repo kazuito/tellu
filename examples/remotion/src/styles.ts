@@ -1,4 +1,4 @@
-import { fill, glow, linearGradient, shadow, stroke, type TextStyle } from "tixi";
+import { fill, glow, linearGradient, shadow, stroke, type TextStyle } from "tellu";
 import { FONTS } from "./fonts";
 
 type Style = Partial<TextStyle>;

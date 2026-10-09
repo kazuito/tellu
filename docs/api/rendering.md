@@ -97,7 +97,7 @@ class TextRenderer {
 
 ### `TextRendererOptions`
 
-PixiJS `AutoDetectOptions`, merged over tixi's defaults: `preference: "webgl"`, `backgroundAlpha: 0`, `antialias: false`, `preserveDrawingBuffer: true`.
+PixiJS `AutoDetectOptions`, merged over tellu's defaults: `preference: "webgl"`, `backgroundAlpha: 0`, `antialias: false`, `preserveDrawingBuffer: true`.
 
 ### `DrawOptions`
 

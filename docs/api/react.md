@@ -1,11 +1,11 @@
 ---
-description: API reference for tixi/react, covering the Text component and its props, Anchor, TextDrawEvent, TextRendererProvider and useTextRenderer.
+description: API reference for tellu/react, covering the Text component and its props, Anchor, TextDrawEvent, TextRendererProvider and useTextRenderer.
 ---
 
-# tixi/react
+# tellu/react
 
 ```ts
-import { Text, TextRendererProvider, useTextRenderer } from "tixi/react";
+import { Text, TextRendererProvider, useTextRenderer } from "tellu/react";
 ```
 
 Guide: [React](/guide/react).

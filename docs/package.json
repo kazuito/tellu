@@ -1,5 +1,5 @@
 {
-  "name": "tixi-docs",
+  "name": "tellu-docs",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,6 +20,6 @@
   },
   "dependencies": {
     "pixi.js": "^8.22.0",
-    "tixi": "workspace:*"
+    "tellu": "workspace:*"
   }
 }

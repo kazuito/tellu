@@ -4,14 +4,14 @@ description: Variety-show captions to copy, including the classic gradient telop
 
 # Variety shows
 
-The loud, layered captions of Japanese variety TV, the look tixi was built for. Every example is complete: copy it, swap the text, done.
+The loud, layered captions of Japanese variety TV, the look tellu was built for. Every example is complete: copy it, swap the text, done.
 
 ## Classic telop
 
 Navy and white outlines, a shadow cast by the whole outline, a warm gradient fill, and an emphasized word that patches two layers.
 
 ```ts demo backdrop=scene
-import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
+import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
   text: parseMarkup("今日は<em>最高</em>の一日！", {
@@ -48,7 +48,7 @@ export default {
 A heavy display face, slightly condensed, with a red edge and tilted glyphs for energy.
 
 ```ts demo
-import { fill, linearGradient, shadow, stroke } from "tixi";
+import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {
   text: "なんでやねん！",
@@ -81,7 +81,7 @@ export default {
 Rounded type, a soft pink glow and a small annotation in the same palette.
 
 ```ts demo backdrop=studio
-import { fill, glow, parseMarkup, stroke } from "tixi";
+import { fill, glow, parseMarkup, stroke } from "tellu";
 
 export default {
   text: parseMarkup("かわいすぎる…！<br/><note>※スタッフ一同メロメロ</note>", {
@@ -116,7 +116,7 @@ export default {
 Quiet, slanted and translucent: a skew transform plus a low-contrast palette.
 
 ```ts demo backdrop=street
-import { fill, stroke } from "tixi";
+import { fill, stroke } from "tellu";
 
 export default {
   text: "（え、今のって…まさか？）",
@@ -136,7 +136,13 @@ export default {
 The caption slams in from a large scale and settles with a small overshoot.
 
 ```ts demo loop=60 still=40
-import { fill, linearGradient, shadow, stroke, type TextNodeProps } from "tixi";
+import {
+  fill,
+  linearGradient,
+  shadow,
+  stroke,
+  type TextNodeProps,
+} from "tellu";
 
 const overshoot = (t: number) => 1 + 2.7 * (t - 1) ** 3 + 1.7 * (t - 1) ** 2;
 
@@ -168,7 +174,7 @@ export default (frame: number): TextNodeProps => ({
 A question on a plate, then the answer in a contrasting style. The two are separate captions placed on top of each other in your scene.
 
 ```ts demo compare backdrop=studio
-import { fill, linearGradient, shadow, stroke } from "tixi";
+import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {
   question: {

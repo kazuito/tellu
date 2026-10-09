@@ -7,7 +7,7 @@ description: Draw captions into any HTML or offscreen canvas with createCanvasTe
 `createCanvasText()` draws a caption into a canvas you own, with no React and no PixiJS scene to manage. It suits vanilla apps, editors and thumbnail generation.
 
 ```ts
-import { createCanvasText, fill, stroke } from "tixi";
+import { createCanvasText, fill, stroke } from "tellu";
 
 const canvas = document.querySelector("canvas")!;
 

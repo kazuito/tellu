@@ -7,7 +7,7 @@ description: Style part of a caption with runs or <tag> markup, override fonts a
 `text` takes either a string or a list of **runs**. A run is a string, or an object with its own `style` override:
 
 ```ts demo
-import { fill, linearGradient, shadow, stroke } from "tixi";
+import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {
   text: [
@@ -71,7 +71,7 @@ Layers composite by slot (index) across the whole caption, so slot 1 of every ru
 Building runs by hand gets noisy. `parseMarkup()` turns `<tag>` markup into runs, with one style override per tag name:
 
 ```ts demo
-import { fill, linearGradient, parseMarkup, shadow, stroke } from "tixi";
+import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
   text: parseMarkup("今日は<em>最高</em>の<b>1日</b>だった", {
@@ -123,7 +123,7 @@ parseMarkup("突然の<shake>ドッキリ</shake>！", { shake: { fontSize: 88 }
 `\n` in a string (or `<br/>` in markup) starts a new line. An empty line keeps the height of the style it was typed in.
 
 ```ts demo
-import { fill, parseMarkup, stroke } from "tixi";
+import { fill, parseMarkup, stroke } from "tellu";
 
 export default {
   text: parseMarkup(

@@ -3,17 +3,17 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "tixi-monorepo",
+      "name": "tellu-monorepo",
       "devDependencies": {
         "@biomejs/biome": "2.5.15",
         "lefthook": "2.2.1",
       },
     },
     "docs": {
-      "name": "tixi-docs",
+      "name": "tellu-docs",
       "dependencies": {
         "pixi.js": "^8.22.0",
-        "tixi": "workspace:*",
+        "tellu": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -25,10 +25,10 @@
       },
     },
     "examples/playground": {
-      "name": "tixi-playground",
+      "name": "tellu-playground",
       "dependencies": {
         "pixi.js": "^8.22.0",
-        "tixi": "workspace:*",
+        "tellu": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -36,14 +36,14 @@
       },
     },
     "examples/remotion": {
-      "name": "tixi-remotion-example",
+      "name": "tellu-remotion-example",
       "dependencies": {
         "@remotion/cli": "4.0.534",
         "pixi.js": "^8.22.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "remotion": "4.0.534",
-        "tixi": "workspace:*",
+        "tellu": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -51,8 +51,8 @@
         "typescript": "^7.0.2",
       },
     },
-    "packages/tixi": {
-      "name": "tixi",
+    "packages/tellu": {
+      "name": "tellu",
       "version": "0.1.0",
       "devDependencies": {
         "@types/bun": "latest",
@@ -1217,13 +1217,13 @@
 
     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.4" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
 
-    "tixi": ["tixi@workspace:packages/tixi"],
+    "tellu": ["tellu@workspace:packages/tellu"],
 
-    "tixi-docs": ["tixi-docs@workspace:docs"],
+    "tellu-docs": ["tellu-docs@workspace:docs"],
 
-    "tixi-playground": ["tixi-playground@workspace:examples/playground"],
+    "tellu-playground": ["tellu-playground@workspace:examples/playground"],
 
-    "tixi-remotion-example": ["tixi-remotion-example@workspace:examples/remotion"],
+    "tellu-remotion-example": ["tellu-remotion-example@workspace:examples/remotion"],
 
     "to-fast-properties": ["to-fast-properties@2.0.0", "", {}, "sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog=="],
 

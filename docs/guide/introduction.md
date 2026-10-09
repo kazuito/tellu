@@ -1,13 +1,13 @@
 ---
-description: What tixi is, what it draws that CSS can't, and how its pieces fit together.
+description: What tellu is, what it draws that CSS can't, and how its pieces fit together.
 ---
 
 # Introduction
 
-**tixi** draws *telops*: the bold, outlined, shadowed captions of Japanese TV, YouTube edits and short-form video. It renders with [PixiJS](https://pixijs.com) and is made first for [Remotion](https://remotion.dev), but works anywhere a canvas does.
+**tellu** draws *telops*: the bold, outlined, shadowed captions of Japanese TV, YouTube edits and short-form video. It renders with [PixiJS](https://pixijs.com) and is made first for [Remotion](https://remotion.dev), but works anywhere a canvas does.
 
 ```ts demo backdrop=scene
-import { fill, linearGradient, shadow, stroke } from "tixi";
+import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {
   text: "今日もいい天気ですね！",
@@ -31,7 +31,7 @@ Every rendering on this site is live. The code below each one is exactly what pr
 
 CSS gets you one `-webkit-text-stroke` and a few `text-shadow`s. Real captions need more:
 
-| You want | CSS | tixi |
+| You want | CSS | tellu |
 | --- | --- | --- |
 | Two, three, five outlines of different colors | Stacked copies of the element | One `layers` array |
 | An outline that casts its own blurred shadow | Not possible | `shadow({ stroke: 20 })` |
@@ -43,15 +43,15 @@ CSS gets you one `-webkit-text-stroke` and a few `text-shadow`s. Real captions n
 | Shrink to fit a box, frame-accurate | JavaScript measuring loops | `overflow: "shrink"` |
 | Per-glyph animation without re-layout | One `<span>` per glyph | `glyphTransform` |
 
-tixi also renders the same pixels in Chrome, in headless Chrome and on every frame, which matters when you render video.
+tellu also renders the same pixels in Chrome, in headless Chrome and on every frame, which matters when you render video.
 
 ## What's in the box
 
 The package has three entry points:
 
-- **`tixi`** is the core: style helpers, layout, and `TextNode`, a PixiJS container. It also has `TextRenderer` and `createCanvasText()` for drawing into any `<canvas>`.
-- **`tixi/react`** exports `<Text>`, a component that draws into its own canvas.
-- **`tixi/remotion`** exports the same `<Text>`, wired to `delayRender` so Remotion never captures a frame before the text is drawn.
+- **`tellu`** is the core: style helpers, layout, and `TextNode`, a PixiJS container. It also has `TextRenderer` and `createCanvasText()` for drawing into any `<canvas>`.
+- **`tellu/react`** exports `<Text>`, a component that draws into its own canvas.
+- **`tellu/remotion`** exports the same `<Text>`, wired to `delayRender` so Remotion never captures a frame before the text is drawn.
 
 ## Core ideas
 
@@ -78,10 +78,10 @@ Three ideas carry most of the API:
 
 ## Rules for code generation
 
-- In Remotion projects, import `Text` from `tixi/remotion` (it holds frames with `delayRender`), not `tixi/react`.
+- In Remotion projects, import `Text` from `tellu/remotion` (it holds frames with `delayRender`), not `tellu/react`.
 - `<Text>` takes the caption style as `textStyle`. Its `style` prop is the wrapper element's CSS.
 - Remotion renders need `Config.setChromiumOpenGlRenderer("angle")` because PixiJS needs WebGL.
-- Load font stylesheets before any caption is drawn. tixi cannot load faces whose `@font-face` rules don't exist yet, and silently falls back.
+- Load font stylesheets before any caption is drawn. tellu cannot load faces whose `@font-face` rules don't exist yet, and silently falls back.
 - `style.layers` is bottom → top. Each outline must be wider than the ones above it.
 
 </llm-only>
@@ -89,5 +89,5 @@ Three ideas carry most of the API:
 ## Next steps
 
 - [Quick start](./quick-start): install and draw your first caption.
-- [Remotion](./remotion): set up `tixi/remotion` in a video project.
+- [Remotion](./remotion): set up `tellu/remotion` in a video project.
 - [Examples](/examples/): real-world captions to copy from.
