@@ -91,6 +91,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
   - `docs/guide/*.md`: concepts and how-tos, with live examples.
   - `docs/api/*.md`: the reference. Every export needs a heading with its name in backticks (`check-api.ts` enforces this); options tables list types and defaults.
   - `docs/examples/*.md`: real-world recipes.
+  - `docs/playground.md`: the in-browser editor (Monaco, transpiled with Sucrase). Its TypeScript presets are the `ts demo` fences of `docs/examples/*.md` (`.vitepress/playground/plugin.ts`); its React presets are the `.tsx` files in `.vitepress/theme/playground/presets/`, type-checked by `bun run typecheck`.
   - `README.md` files: keep them short and in sync with the guide's claims.
   - When adding a page, add it to the sidebar in `docs/.vitepress/config.ts` and give it a frontmatter `description` (it becomes the page's line in `llms.txt`).
 - Live examples are fences with the info string `ts demo`. The fence code runs in the browser and is type-checked against the built library by `bun run typecheck` (`docs/scripts/check-snippets.ts`, errors reported at the Markdown line).

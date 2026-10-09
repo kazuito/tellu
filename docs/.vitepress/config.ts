@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig, type MarkdownRenderer } from "vitepress";
 import llmstxt, { copyOrDownloadAsMarkdownButtons } from "vitepress-plugin-llms";
 import { demoMarkdown, demoPlugin } from "./demos/plugin";
+import { playgroundPlugin } from "./playground/plugin";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const base = process.env.DOCS_BASE ?? "/";
@@ -39,6 +40,7 @@ export default defineConfig({
   vite: {
     plugins: [
       demoPlugin(root),
+      playgroundPlugin(root),
       llmstxt({
         domain: origin,
         description: "Telop (caption) rendering for the web on PixiJS, made for Remotion",
@@ -46,6 +48,7 @@ export default defineConfig({
           "tellu draws captions CSS can't: unlimited outline layers, shadows, gradients, rich text, Japanese kinsoku line breaking, vertical writing, " +
           "condensed glyphs with uniform outlines, background plates and per-glyph animation. " +
           "Every page is also available as Markdown by appending `.md` to its URL.",
+        ignoreFiles: ["playground.md"],
       }),
     ],
     server: { port: 3400 },
@@ -56,6 +59,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/introduction", activeMatch: "^/guide/" },
       { text: "Examples", link: "/examples/", activeMatch: "^/examples/" },
       { text: "API", link: "/api/", activeMatch: "^/api/" },
+      { text: "Playground", link: "/playground", activeMatch: "^/playground" },
       { text: "llms.txt", link: "/ai", activeMatch: "^/ai" },
     ],
     sidebar: {

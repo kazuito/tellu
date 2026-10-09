@@ -41,6 +41,12 @@
   },
   "overrides": [
     {
+      "includes": ["docs/.vitepress/theme/playground/presets/**"],
+      "formatter": {
+        "lineWidth": 80
+      }
+    },
+    {
       "includes": ["examples/remotion/**"],
       "linter": {
         "rules": {
@@ -56,7 +62,8 @@
         "rules": {
           "correctness": {
             "noUnusedVariables": "off",
-            "noUnusedImports": "off"
+            "noUnusedImports": "off",
+            "useHookAtTopLevel": "off"
           }
         }
       }

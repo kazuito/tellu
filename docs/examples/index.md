@@ -4,7 +4,7 @@ description: A gallery of real-world caption recipes for variety shows, news, su
 
 # Examples
 
-Real-world captions, rendered live in your browser. Every example is self-contained: copy the code, change the text, and use it in [Remotion](/guide/remotion), [React](/guide/react), [a canvas](/guide/canvas) or [a PixiJS scene](/guide/pixi).
+Real-world captions, rendered live in your browser. Every example is self-contained: copy the code, change the text, and use it in [Remotion](/guide/remotion), [React](/guide/react), [a canvas](/guide/canvas) or [a PixiJS scene](/guide/pixi). Every example is also a preset in the [Playground](/playground), where you can edit it with a live preview.
 
 ```ts demo
 import { fill, linearGradient, shadow, stroke } from "tellu";

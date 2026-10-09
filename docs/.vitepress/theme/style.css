@@ -223,3 +223,162 @@
 .markdown-copy-buttons .markdown-copy-buttons-inner .download-btn {
   display: none;
 }
+
+/* Playground: a toolbar over the editor and the live preview, filling the viewport below the nav. */
+
+.tellu-playground-page .VPPage {
+  padding: 0;
+}
+
+.tellu-playground {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--vp-nav-height));
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.tellu-playground-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-alt);
+  font-size: 13px;
+}
+
+.tellu-playground-modes {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--vp-c-default-soft);
+}
+
+.tellu-playground-modes button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: var(--vp-c-text-2);
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.tellu-playground-modes button[aria-checked="true"] {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.tellu-playground-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vp-c-text-2);
+}
+
+.tellu-playground-field select,
+.tellu-playground-reset {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg);
+}
+
+.tellu-playground-field select {
+  max-width: 220px;
+}
+
+.tellu-playground-reset:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+.tellu-playground-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.tellu-playground-editor {
+  position: relative;
+  min-height: 0;
+  border-right: 1px solid var(--vp-c-divider);
+}
+
+.tellu-playground-monaco {
+  position: absolute;
+  inset: 0;
+}
+
+.tellu-playground-hint {
+  position: absolute;
+  inset: 16px;
+  font-size: 13px;
+  color: var(--vp-c-text-3);
+}
+
+.tellu-playground-preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tellu-playground-stage {
+  flex: 1;
+  align-items: safe center;
+  justify-content: safe center;
+  border-radius: 0;
+  overflow: auto;
+}
+
+.tellu-playground-hosts {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.tellu-playground-host[data-pending] {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tellu-playground-error {
+  max-height: 40%;
+  overflow: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--vp-c-danger-soft);
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--vp-c-danger-1);
+  background: var(--vp-c-danger-soft);
+}
+
+@media (max-width: 959px) {
+  .tellu-playground {
+    height: auto;
+  }
+
+  .tellu-playground-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tellu-playground-preview {
+    order: -1;
+    min-height: 40vh;
+  }
+
+  .tellu-playground-editor {
+    height: 60vh;
+    border-right: none;
+    border-top: 1px solid var(--vp-c-divider);
+  }
+}

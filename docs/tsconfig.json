@@ -8,8 +8,9 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx"
   },
-  "include": [".vitepress/**/*.ts", "scripts"],
+  "include": [".vitepress/**/*.ts", ".vitepress/**/*.tsx", "scripts"],
   "exclude": [".vitepress/cache", ".vitepress/dist"]
 }
