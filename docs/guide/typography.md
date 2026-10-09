@@ -1,5 +1,5 @@
 ---
-description: Font family, size, weight and style, letter spacing, condensed and expanded glyphs (長体 / 平体) with uniform outlines, line height, kerning and baseline shift.
+description: Font family, size, weight and style, letter spacing, tsume (文字ツメ), condensed and expanded glyphs (長体 / 平体) with uniform outlines, line height, kerning and baseline shift.
 ---
 
 # Typography
@@ -13,6 +13,7 @@ Everything in `style` other than `layers` controls the type itself.
 | `fontWeight` | `"normal"` | `100`–`900`, `"bold"`, … |
 | `fontStyle` | `"normal"` | `"italic"`, `"oblique"` |
 | `letterSpacing` | `0` | px, or `{ em }` |
+| `tsume` | `0` | `0`–`1`: tightens Japanese and Chinese characters by their blank space (文字ツメ) |
 | `scaleX` / `scaleY` | `1` | Condensed / expanded glyphs |
 | `lineHeight` | `1.2` | A multiple of the font size, or `{ px }` |
 | `kerning` | `true` | |
@@ -41,6 +42,32 @@ export default {
   "{ em: 0.2 }": { text: "字間の調整", style: style({ em: 0.2 }) },
 };
 ```
+
+## Tsume (文字ツメ)
+
+Kana and fullwidth punctuation sit in the middle of an em square, so Japanese text set solid looks loose next to its kanji. `tsume` removes that fraction of the blank space on both sides of each character, like 文字ツメ in Photoshop and Premiere Pro. `1` sets the characters ink to ink, which is very tight under thick outlines; values between `0.3` and `0.5` keep some air.
+
+```ts demo compare
+import { fill, stroke } from "tellu";
+
+const style = (tsume: number) => ({
+  fontFamily: "Noto Sans JP",
+  fontWeight: 900,
+  fontSize: 48,
+  tsume,
+  layers: [stroke(7, "#111"), fill("#fff")],
+});
+
+export default {
+  "tsume: 0": { text: "ちょっとしたコツ。", style: style(0) },
+  "tsume: 0.5": { text: "ちょっとしたコツ。", style: style(0.5) },
+  "tsume: 1": { text: "ちょっとしたコツ。", style: style(1) },
+};
+```
+
+Unlike a negative `letterSpacing`, which moves every character by the same amount, `tsume` follows each glyph's ink: っ and 。 close up far more than し or た. Only kana, kanji and fullwidth punctuation are tightened; Latin text, digits and spaces keep their spacing, and so does 縦中横. In [vertical text](./vertical) the space above and below each upright character is removed.
+
+`tsume` measures ink with [`Measurer.inkBounds()`](/api/layout#measurer), which the default measurer provides; with a custom measurer that lacks it, `tsume` has no effect. It adds to `letterSpacing` and kerning, and can differ per run in [rich text](./rich-text).
 
 ## Condensed and expanded glyphs
 

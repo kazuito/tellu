@@ -13,3 +13,13 @@ export const fakeMeasurer: Measurer = {
     return { ascent: font.size * 0.8, descent: font.size * 0.2 };
   },
 };
+
+/** `fakeMeasurer` with ink: 0.1em of blank space on every side of each glyph, except 。 (ink 0.1–0.4em × -0.3–0.1em). */
+export const inkMeasurer: Measurer = {
+  ...fakeMeasurer,
+  inkBounds(text: string, font: FontSpec) {
+    const em = font.size;
+    if (text === "。") return { left: 0.1 * em, top: -0.3 * em, right: 0.4 * em, bottom: 0.1 * em };
+    return { left: 0.1 * em, top: -0.7 * em, right: fakeMeasurer.measureText(text, font) - 0.1 * em, bottom: 0.1 * em };
+  },
+};

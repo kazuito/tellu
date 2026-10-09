@@ -107,6 +107,7 @@ Defaults: [`defaultKinsoku`](./helpers#defaultkinsoku).
 | `fontWeight` | [`FontWeight`](#fontweight) | `"normal"` | |
 | `fontStyle` | [`FontStyle`](#fontstyle) | `"normal"` | |
 | `letterSpacing` | [`Length`](#length) | `0` | Extra space after each character |
+| `tsume` | `number` | `0` | `0`–`1`: removes that fraction of the blank space on both sides of each kana, kanji and fullwidth punctuation (文字ツメ). [Guide](/guide/typography#tsume-文字ツメ) |
 | `scaleX` | `number` | `1` | Horizontal glyph scale (長体 < 1 < 平体) |
 | `scaleY` | `number` | `1` | Vertical glyph scale |
 | `lineHeight` | [`LineHeight`](#lineheight) | `1.2` | |

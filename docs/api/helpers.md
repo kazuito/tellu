@@ -120,6 +120,7 @@ const defaultStyle: TextStyle = {
   fontWeight: "normal",
   fontStyle: "normal",
   letterSpacing: 0,
+  tsume: 0,
   scaleX: 1,
   scaleY: 1,
   lineHeight: 1.2,

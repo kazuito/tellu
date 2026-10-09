@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth punctuation, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.
+
 ### Fixed
 
 - Punctuation hanging past `maxWidth` (ぶら下げ) at the end of the text or before a `\n` no longer adds an empty line after it.

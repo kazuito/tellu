@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { type Layout, layoutText } from "../src/layout/layout";
 import type { LayoutOptions } from "../src/style/types";
-import { fakeMeasurer } from "./fakeMeasurer";
+import { fakeMeasurer, inkMeasurer } from "./fakeMeasurer";
 
 const style = { fontSize: 10, lineHeight: 1 };
 const vertical = (options: Omit<LayoutOptions, "writingMode"> & { writingMode?: LayoutOptions["writingMode"] }) =>
@@ -179,5 +179,30 @@ describe("text-combine-upright", () => {
 
   test("horizontal text never combines", () => {
     expect(layoutText({ text: "第12話", style }, fakeMeasurer).glyphs.length).toBe(4);
+  });
+});
+
+describe("tsume in vertical text", () => {
+  const tight = (options: LayoutOptions) =>
+    layoutText(
+      { writingMode: "vertical-rl", ...options, style: { ...style, tsume: 1, ...options.style } },
+      inkMeasurer,
+    );
+
+  test("removes the space above and below upright glyphs", () => {
+    const result = tight({ text: "あい" });
+    expect(result.glyphs.map((glyph) => glyph.y)).toEqual([7, 15]);
+    expect(result.glyphs[1]!.box).toEqual({ x: 0, y: 8, width: 10, height: 8 });
+    expect(result.height).toBe(16);
+  });
+
+  test("measures shifted punctuation where it is drawn", () => {
+    const result = tight({ text: "あ。" });
+    expect(result.glyphs[1]!.advance).toBeCloseTo(4);
+  });
+
+  test("uses the sides of sideways glyphs", () => {
+    const result = tight({ text: "（", style: { textOrientation: "sideways" } });
+    expect(result.glyphs[0]!.advance).toBeCloseTo(8);
   });
 });

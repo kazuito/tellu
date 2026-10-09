@@ -117,6 +117,11 @@ export interface TextStyle {
   fontStyle: FontStyle;
   /** Extra space after each character. */
   letterSpacing: Length;
+  /**
+   * 文字ツメ: removes this fraction (`0`–`1`) of the blank space on both sides of each Japanese or Chinese
+   * character (kana, kanji and fullwidth punctuation), measured from its ink. Needs `Measurer.inkBounds`.
+   */
+  tsume: number;
   /** Horizontal glyph scale (長体 < 1 < 平体). */
   scaleX: number;
   /** Vertical glyph scale. */

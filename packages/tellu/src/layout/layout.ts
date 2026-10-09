@@ -2,7 +2,7 @@ import { resolveKinsoku, resolveLength, resolveLineHeight, resolveStyle } from "
 import { applyOverride } from "../style/merge";
 import type { Box, KinsokuRules, LayoutOptions, TextContent, TextStyle, WritingMode } from "../style/types";
 import { type FontMetrics, fontSpecOf, getDefaultMeasurer, type Measurer } from "./measure";
-import { BREAK_FALLBACK, BREAK_PREFERRED, type Cluster, computeBreaks, segmentRuns } from "./segment";
+import { BREAK_FALLBACK, BREAK_PREFERRED, type Cluster, computeBreaks, isSquare, segmentRuns } from "./segment";
 import { combineUpright, isVertical, type VerticalOrientation, verticalOrientation, verticalShift } from "./vertical";
 
 export interface ResolvedRun {
@@ -96,6 +96,8 @@ interface Prepared {
   metrics: FontMetrics[];
   /** Offsets of shifted glyphs at the run's font size, `[x0, y0, x1, y1, …]`. */
   shifts: Float64Array;
+  /** Blank space `tsume` removes before and after each cluster along the line, at the run's font size. */
+  tsume: Float64Array;
   kinsoku: KinsokuRules | null;
 }
 
@@ -121,6 +123,7 @@ export function layoutText(options: LayoutOptions, measurer: Measurer = getDefau
     ? clusters.map((cluster) => verticalOrientation(cluster, runs[cluster.runIndex]!.style.textOrientation))
     : null;
   const metrics = runs.map((run) => measurer.fontMetrics(fontSpecOf(run.style)));
+  const shifts = measureShifts(clusters, runs, orientations, metrics, measurer);
   const prepared: Prepared = {
     options,
     vertical,
@@ -130,7 +133,8 @@ export function layoutText(options: LayoutOptions, measurer: Measurer = getDefau
     breaks: computeBreaks(clusters, { lineBreak: options.lineBreak ?? "char", locale, kinsoku }),
     advances: measureAdvances(clusters, runs, orientations, measurer),
     metrics,
-    shifts: measureShifts(clusters, runs, orientations, metrics, measurer),
+    shifts,
+    tsume: measureTsume(clusters, runs, orientations, metrics, shifts, measurer),
     kinsoku,
   };
 
@@ -269,6 +273,45 @@ function measureShifts(
   return offsets;
 }
 
+/**
+ * The blank space `tsume` removes on each side of each cluster along the line, `[before0, after0, …]`,
+ * from the ink of the glyph as it is placed: its sides in horizontal text and when set sideways,
+ * the top and bottom of its em box when upright in vertical text.
+ */
+function measureTsume(
+  clusters: readonly Cluster[],
+  runs: readonly ResolvedRun[],
+  orientations: readonly VerticalOrientation[] | null,
+  metrics: readonly FontMetrics[],
+  shifts: Float64Array,
+  measurer: Measurer,
+): Float64Array {
+  const cuts = new Float64Array(clusters.length * 2);
+  if (!measurer.inkBounds) return cuts;
+  clusters.forEach((cluster, index) => {
+    const style = runs[cluster.runIndex]!.style;
+    const tsume = Math.min(1, Math.max(0, style.tsume));
+    if (tsume === 0 || !isSquare(cluster)) return;
+    const font = fontSpecOf(style);
+    const ink = measurer.inkBounds!(cluster.text, font);
+    if (ink.right <= ink.left) return;
+    let before: number;
+    let after: number;
+    if (!orientations || orientations[index] === "sideways") {
+      before = ink.left;
+      after = measurer.measureText(cluster.text, font) - ink.right;
+    } else {
+      const [ascent] = emBox(metrics[cluster.runIndex]!, style.fontSize);
+      const shiftY = shifts[index * 2 + 1]!;
+      before = ascent + ink.top + shiftY;
+      after = style.fontSize - (ascent + ink.bottom + shiftY);
+    }
+    cuts[index * 2] = Math.max(0, before) * tsume;
+    cuts[index * 2 + 1] = Math.max(0, after) * tsume;
+  });
+  return cuts;
+}
+
 const START_ALIGN = new Set(["start", "left", "top"]);
 const END_ALIGN = new Set(["end", "right", "bottom"]);
 
@@ -281,7 +324,8 @@ interface LineMetrics {
 
 /** @param truncate Drop the lines after `maxLines`. */
 function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout {
-  const { options, vertical, runs, clusters, orientations, breaks, advances, metrics, shifts, kinsoku } = prepared;
+  const { options, vertical, runs, clusters, orientations, breaks, advances, metrics, shifts, tsume, kinsoku } =
+    prepared;
   const { maxLines, align = "start", overflow = "visible" } = options;
   const writingMode = options.writingMode ?? "horizontal-tb";
   const [lineLimit] = limits(options);
@@ -289,13 +333,17 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
 
   // Everything up to placing glyphs runs along the line ("inline") and across lines ("block").
   const advance = new Float64Array(clusters.length);
+  /** How far each glyph is drawn before its cell, by the space `tsume` removed. */
+  const offset = new Float64Array(clusters.length);
   const kern = new Float64Array(clusters.length);
   const spacing = new Float64Array(clusters.length);
   clusters.forEach((cluster, index) => {
     const style = runs[cluster.runIndex]!.style;
     const inlineScale = (vertical ? style.scaleY : style.scaleX) * fontScale;
     const upright = vertical && orientations![index] !== "sideways";
-    advance[index] = (upright ? style.fontSize : advances.own[index]!) * inlineScale;
+    const cut = (tsume[index * 2]! + tsume[index * 2 + 1]!) * inlineScale;
+    advance[index] = (upright ? style.fontSize : advances.own[index]!) * inlineScale - cut;
+    offset[index] = tsume[index * 2]! * inlineScale;
     kern[index] = advances.kern[index]! * inlineScale;
     spacing[index] = resolveLength(style.letterSpacing, style.fontSize) * fontScale;
   });
@@ -406,7 +454,7 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         lineIndex,
         indexInLine: k - range.start,
         isWhitespace: cluster.kind !== "char",
-        x: pen,
+        x: pen - offset[k]! * squeeze,
         y: baseline - shift,
         rotation: 0,
         advance: advance[k]! * squeeze,
@@ -425,14 +473,15 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
           fontScale,
           squeeze,
           center: baseline + shift,
-          top: pen,
+          cell: pen,
+          top: pen - offset[k]! * squeeze,
           ownAdvance: advances.own[k]! * fontScale,
           shiftX: shifts[k * 2]! * fontScale,
           shiftY: shifts[k * 2 + 1]! * fontScale,
         });
       } else {
         glyph.box = {
-          x: glyph.x,
+          x: pen,
           y: glyph.y - glyph.ascent,
           width: glyph.advance,
           height: glyph.ascent + glyph.descent,
@@ -473,6 +522,8 @@ interface VerticalPlacement {
   /** x of the glyph's central baseline, baseline shift included. */
   center: number;
   /** Top of the glyph's cell. */
+  cell: number;
+  /** Top of the glyph's em box, before the cell when `tsume` removed space above it. */
   top: number;
   /** Horizontal advance of the glyph at the scaled font size. */
   ownAdvance: number;
@@ -482,13 +533,13 @@ interface VerticalPlacement {
 
 /** Places a glyph of a vertical line: centered on the central baseline, its em box at the top of its cell. */
 function placeVertical(glyph: LayoutGlyph, placement: VerticalPlacement): void {
-  const { orientation, style, metric, fontScale, squeeze, center, top, ownAdvance } = placement;
+  const { orientation, style, metric, fontScale, squeeze, center, cell, top, ownAdvance } = placement;
   const fontSize = style.fontSize * fontScale;
   const [emAscent, emDescent] = emBox(metric, style.fontSize).map((value) => value * fontScale) as [number, number];
   let scaleX = style.scaleX;
   const scaleY = style.scaleY * squeeze;
   glyph.scaleY = scaleY;
-  glyph.box = { x: center - (fontSize * scaleX) / 2, y: top, width: fontSize * scaleX, height: glyph.advance };
+  glyph.box = { x: center - (fontSize * scaleX) / 2, y: cell, width: fontSize * scaleX, height: glyph.advance };
 
   if (orientation === "sideways") {
     glyph.rotation = 90;

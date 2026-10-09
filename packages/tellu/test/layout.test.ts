@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { type Layout, layoutText } from "../src/layout/layout";
 import type { LayoutOptions } from "../src/style/types";
-import { fakeMeasurer } from "./fakeMeasurer";
+import { fakeMeasurer, inkMeasurer } from "./fakeMeasurer";
 
 const style = { fontSize: 10, lineHeight: 1 };
 const layout = (options: LayoutOptions) =>
@@ -79,6 +79,39 @@ describe("line breaking", () => {
   test("em letter spacing scales with the font size", () => {
     const result = layout({ text: "あい", style: { letterSpacing: { em: 0.5 } } });
     expect(result.glyphs[1]!.x).toBe(15);
+  });
+});
+
+describe("tsume", () => {
+  const tight = (options: LayoutOptions) =>
+    layoutText({ ...options, style: { ...style, ...options.style } }, inkMeasurer);
+
+  test("removes a fraction of the blank space on both sides of each character", () => {
+    const result = tight({ text: "あいう", style: { tsume: 0.5 } });
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([-0.5, 8.5, 17.5]);
+    expect(result.glyphs.map((glyph) => glyph.advance)).toEqual([9, 9, 9]);
+    expect(result.glyphs[1]!.box.x).toBe(9);
+    expect(result.lines[0]!.inlineSize).toBe(27);
+  });
+
+  test("follows the ink of each glyph", () => {
+    const result = tight({ text: "あ。", style: { tsume: 1 } });
+    expect(result.glyphs[1]!.advance).toBeCloseTo(3);
+    expect(result.lines[0]!.inlineSize).toBeCloseTo(11);
+  });
+
+  test("leaves latin, spaces and runs without tsume alone", () => {
+    const result = tight({ text: ["a あ", { text: "い", style: { tsume: 0 } }], style: { tsume: 1 } });
+    expect(result.glyphs.map((glyph) => glyph.advance)).toEqual([5, 2.5, 8, 10]);
+  });
+
+  test("counts toward wrapping", () => {
+    expect(lineTexts(tight({ text: "あいうえ", maxWidth: 32, style: { tsume: 1 } }))).toEqual(["あいうえ"]);
+    expect(lineTexts(layout({ text: "あいうえ", maxWidth: 32 }))).toEqual(["あいう", "え"]);
+  });
+
+  test("needs a measurer with ink bounds", () => {
+    expect(layout({ text: "あい", style: { tsume: 1 } }).lines[0]!.inlineSize).toBe(20);
   });
 });
 
