@@ -20,6 +20,7 @@ The first public release.
 - Vertical writing (縦書き): `writingMode: "vertical-rl"` and `"vertical-lr"`, `textOrientation`, and 縦中横 with `textCombineUpright`.
 - Background plates (座布団) with `background`, drawn behind the whole block or behind each line.
 - Per-glyph animation with `glyphTransform` (position, scale, rotation, skew, opacity, visibility), which moves cached sprites instead of re-rasterizing.
+- Glyph bitmaps cached and shared by every node, keeping up to 64 MB of recently hidden ones so the next caption in the same style reuses them.
 - `TextNode.revision`, which changes only when what the node paints changes, so redundant draws can be skipped. `<Text>` uses it to draw a static caption once instead of on every render.
 - Rendering entry points: `TextNode` for PixiJS scenes, `TextRenderer` (one shared offscreen WebGL renderer), `createCanvasText()` for a plain canvas, and `layoutText()` with a pluggable `Measurer` for layout without rendering.
 - Font loading: `loadFonts()` loads only the font faces and `unicode-range` subsets a text uses, with `fontsReady()` to check whether they are loaded and `subscribeFontEpoch()` to react when fonts finish loading.

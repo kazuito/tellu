@@ -62,7 +62,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 2. **Style model** (`style/`): every decoration is a `Layer` (the glyph grown by `stroke` px and painted with `paint`), stacked bottom → top.
    - A rich-text run's `layers` is either an array (replaces all layers) or a patch keyed by index or `id`. Patches are resolved in `merge.ts`.
 3. **Render** (`render/`, `TextNode.ts`):
-   - Each glyph × layer is rasterized once into its own canvas texture (`rasterize.ts`), cached in `TextureCache`. The cache key includes the sub-pixel offset, the rotation, the layer shape, the paint, and the paint's scope box relative to the glyph.
+   - Each glyph × layer is rasterized once into its own canvas texture (`rasterize.ts`). Textures live in one process-wide, ref-counted `SharedCache` (`sharedCache.ts`, pure and unit-tested); each node holds its set through a `TextureSet` (`textureCache.ts`), and textures no node holds linger in a 64 MB LRU pool. `invalidate()` and `document.fonts` `loadingdone` drop the whole cache; held textures stay valid until released. The cache key includes the sub-pixel offset, the rotation, the layer shape, the paint, and the paint's scope box relative to the glyph.
    - Sideways glyphs are rotated inside their texture (rotate, then scale on screen), so paint, outlines and `glyphTransform` stay in screen space.
    - When scaleX equals scaleY, strokes use native `strokeText`. When they differ (長体/平体), strokes are grown from a supersampled signed distance field (`sdf.ts`) so outline width stays uniform.
    - `planGroups` groups sprites by **layer slot** (index) plus an effects signature (offset, blur, opacity, blend mode, filters). Groups render in slot order, so all outlines sit below all fills.

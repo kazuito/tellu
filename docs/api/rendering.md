@@ -57,13 +57,13 @@ Guide: [PixiJS scene](/guide/pixi).
 | `props: TextNodeProps` | Get, or set to replace all props and refresh |
 | `update(props: Partial<TextNodeProps>): this` | Merges props and refreshes |
 | `refresh(): void` | Rebuilds if anything but `glyphTransform` changed, then reapplies glyph transforms |
-| `invalidate(): void` | Clears cached measurements and bitmaps, then rebuilds. Use it after fonts change |
+| `invalidate(): void` | Clears cached measurements and bitmaps, then rebuilds. Use it after fonts change. Bitmaps are shared, so other nodes re-rasterize on their next rebuild |
 | `revision: number` | Increments whenever what the node paints changes: a rebuild, or glyph transforms with new output. Compare it to skip redundant draws |
 | `resolution: number` | Get, or set to re-rasterize at a new pixel density |
 | `layout: Layout` | The current [layout](./layout#layout) |
 | `layoutBounds: Rectangle` | `(0, 0, layout.width, layout.height)` |
 | `getInkBounds(): Rectangle` | Everything the node paints (outlines, shadows, blur, plate, transforms) in local coordinates |
-| `destroy(options?)` | Frees textures and the filters the node created. Your own filters are left alone |
+| `destroy(options?)` | Destroys the node and its children, releases its glyph bitmaps and frees the filters it created. Your own filters are left alone. Bitmaps are shared between nodes, so `options` never destroys them |
 
 ### `TextNodeOptions`
 

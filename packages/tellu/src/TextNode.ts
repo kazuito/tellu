@@ -5,9 +5,9 @@ import { blurPadding } from "./render/blur";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizePlate } from "./render/plate";
-import { GlyphRasterizer, layerReach, layerShape } from "./render/rasterize";
+import { layerReach, layerShape } from "./render/rasterize";
 import { ScopeBoxes } from "./render/scope";
-import { TextureCache } from "./render/textureCache";
+import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
 import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } from "./style/types";
 import { stableKey } from "./utils/stableKey";
 
@@ -42,8 +42,7 @@ export class TextNode extends Container {
   private transformed = false;
   private _revision = 0;
   private readonly measurer: Measurer;
-  private readonly rasterizer = new GlyphRasterizer();
-  private readonly textures = new TextureCache();
+  private readonly textures = new TextureSet();
   private readonly plateLayer = new Container({ label: "plate" });
   private readonly glyphLayer = new Container({ label: "glyphs" });
 
@@ -115,11 +114,13 @@ export class TextNode extends Container {
     return new Rectangle(minX, minY, maxX - minX, maxY - minY);
   }
 
-  /** Re-measures and redraws everything, e.g. after a web font finished loading. */
+  /**
+   * Re-measures and redraws everything, e.g. after a web font finished loading. Glyph bitmaps are shared
+   * between nodes, so this drops them for every node; other nodes keep theirs until they rebuild.
+   */
   invalidate(): void {
     if ("clear" in this.measurer && typeof this.measurer.clear === "function") this.measurer.clear();
-    this.rasterizer.clear();
-    this.textures.clear();
+    invalidateTextures();
     this.builtKey = "";
     this.refresh();
   }
@@ -193,9 +194,7 @@ export class TextNode extends Container {
           paintKey(layer.paint),
           paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
         ].join("\u0000");
-        const cached = this.textures.get(key, res, () =>
-          this.rasterizer.rasterize(shape, layer, paintBox, reach[index]!),
-        );
+        const cached = this.textures.get(key, res, () => rasterizer.rasterize(shape, layer, paintBox, reach[index]!));
 
         const sprite = new Sprite({ texture: cached.texture, blendMode: "max", roundPixels: false });
         const baseX = (pixelX + cached.offsetX) / res;
@@ -270,11 +269,11 @@ export class TextNode extends Container {
     this.transformed = !!fn;
   }
 
-  override destroy(options?: DestroyOptions): void {
+  /** Destroys the node and its children. Glyph textures are shared with other nodes, so `options` can't destroy them. */
+  override destroy(_options?: DestroyOptions): void {
     for (const child of [...this.glyphLayer.children, ...this.plateLayer.children]) destroyFilters(child);
     this.textures.clear();
-    this.rasterizer.clear();
-    super.destroy(typeof options === "boolean" ? options : { ...options, children: true });
+    super.destroy({ children: true });
   }
 }
 

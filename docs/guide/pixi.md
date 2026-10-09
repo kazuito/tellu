@@ -32,7 +32,7 @@ The node's local origin is the **top-left of the layout box**. Its position, sca
 - **Load fonts first.** `TextNode` measures in its constructor. Await [`loadFonts(props)`](/api/layout#loadfonts) before creating it, and again before an update that brings new fonts or characters.
 - **Match the resolution.** Pass your renderer's resolution as `resolution` so glyph bitmaps are sharp. Scaling the node up past that makes them soft. Set `node.resolution` to re-rasterize at a new density.
 - **Updates are synchronous.** `node.update(partialProps)` merges and rebuilds right away. `node.props = fullProps` replaces them.
-- **Destroy it.** `node.destroy()` frees its textures and the filters it created. Filters you passed in are left alone.
+- **Destroy it.** `node.destroy()` releases its glyph bitmaps and frees the filters it created. Filters you passed in are left alone.
 
 ## Animating
 

@@ -11,7 +11,7 @@ tellu does expensive work (layout and rasterizing) only when it has to, and chea
 On every update, a node compares a **structural key** of its props, minus `glyphTransform`, plus its resolution:
 
 - **Same key**: only glyph transforms are reapplied. This costs microseconds.
-- **Different key**: full layout and composition. Bitmaps for unchanged glyph × layer pairs still come from the cache.
+- **Different key**: full layout and composition. Bitmaps for unchanged glyph × layer pairs still come from the cache, which every node shares.
 
 `<Text>` also skips drawing when a render changes nothing it paints: same props, and glyph transforms with the same output as last time. A static caption in a Remotion composition is drawn once, not on every frame.
 

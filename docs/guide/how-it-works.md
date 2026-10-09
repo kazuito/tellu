@@ -34,7 +34,7 @@ Each **glyph × layer** pair is drawn once with Canvas 2D into its own small bit
 - With condensed or expanded glyphs (`scaleX` ≠ `scaleY`), stretching a native stroke would make it uneven. tellu instead renders the scaled glyph, builds a supersampled **signed distance field**, and grows it by the stroke width, so the outline stays the same width on every side.
 - Gradients and patterns are positioned relative to their [scope](./paint#paint-scope) box (glyph, line or block), so a glyph-sized bitmap can still carry its slice of a line-wide gradient.
 
-Bitmaps are cached by glyph, font, scale, sub-pixel offset (in quarter pixels), layer shape, paint and scope box. Repeated characters, and repeated renders, reuse them.
+Bitmaps are cached by glyph, font, scale, sub-pixel offset (in quarter pixels), layer shape, paint and scope box. The cache is shared by every node: repeated characters, repeated renders and other captions in the same style reuse the same bitmaps. Bitmaps no caption shows anymore are kept up to 64 MB, least recently used first, so the next subtitle or credit line often finds its glyphs ready.
 
 ## 3. Compose
 
