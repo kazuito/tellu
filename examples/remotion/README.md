@@ -10,7 +10,9 @@
 ```sh
 bun run studio
 bun run render   # out/showcase.mp4
-bun run stills   # out/stills/*.png
+bun run stills              # out/stills/*.png
+bun run stills --baseline   # out/stills-baseline/*.png, the reference for --diff
+bun run stills --diff       # render, then compare against the baseline (diffs in out/stills-diff)
 ```
 
 Notes:

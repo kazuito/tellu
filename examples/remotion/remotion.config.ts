@@ -1,13 +1,7 @@
 import { Config } from "@remotion/cli/config";
+import { webpackOverride } from "./webpack-override";
 
 // PixiJS needs WebGL in headless Chrome.
 Config.setChromiumOpenGlRenderer("angle");
 
-// Resolve the workspace `tellu` package to its TypeScript source (see `devExports` in its tsdown config).
-Config.overrideWebpackConfig((config) => ({
-  ...config,
-  resolve: {
-    ...config.resolve,
-    conditionNames: ["tellu-source", "..."],
-  },
-}));
+Config.overrideWebpackConfig(webpackOverride);

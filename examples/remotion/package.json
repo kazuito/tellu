@@ -17,8 +17,13 @@
     "tellu": "workspace:*"
   },
   "devDependencies": {
+    "@remotion/bundler": "4.0.534",
+    "@remotion/renderer": "4.0.534",
     "@types/bun": "latest",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19.3.0",
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0",
     "typescript": "^7.0.2"
   }
 }

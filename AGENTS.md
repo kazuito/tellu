@@ -35,6 +35,7 @@ bun run lint:fix    # biome check --write
 - Single test by name: add `-t "<name>"`.
 - Render the Remotion sample: `cd examples/remotion && bun run render` (writes `out/showcase.mp4`).
 - Representative stills: `bun run stills` (writes `out/stills/*.png`); `bun run stills News Quiz` limits it to those compositions. Inspecting stills is the practical way to check rendering changes visually.
+- Visual regression check: `bun run stills --baseline` on the code to compare against (e.g. with your changes stashed), then `bun run stills --diff` on your changes. It lists the stills that differ, writes their pixel diffs to `out/stills-diff/` and exits 1. Baselines live in the gitignored `out/` and depend on the machine, so compare on one machine. Run it for any change that should not alter rendering.
 
 TypeScript is v7 (native). tsdown warns that its API is experimental; that warning is expected.
 
