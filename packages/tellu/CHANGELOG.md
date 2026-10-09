@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth punctuation, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.
+- `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth character, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.
 - `punctuationTrim` option (約物の半角取り): trims the blank half of fullwidth opening brackets at the start of a line (`"start"`), of closing brackets, 、 and 。 at the end of a line (`"end"`), or both. With `"end"`, closing punctuation that fits once trimmed stays on its line.
 - `align: "justify-all"` (均等配置): justifies every line, including the last one, single-line text and lines ended by `\n`, so a word can be spread across a fixed width (字取り). Without `maxWidth`, lines spread to the longest one.
 - `wrap: "balance"`, which makes the lines of each paragraph about equally long, and `wrap: "pretty"`, which avoids a last line with a single word, phrase or character (泣き別れ). The new `TextWrap` type names every `wrap` mode.

@@ -119,7 +119,7 @@ export interface TextStyle {
   letterSpacing: Length;
   /**
    * 文字ツメ: removes this fraction (`0`–`1`) of the blank space on both sides of each Japanese or Chinese
-   * character (kana, kanji and fullwidth punctuation), measured from its ink. Needs `Measurer.inkBounds`.
+   * character (kana, kanji and fullwidth punctuation, letters and digits), measured from its ink. Needs `Measurer.inkBounds`.
    */
   tsume: number;
   /** Horizontal glyph scale (長体 < 1 < 平体). */

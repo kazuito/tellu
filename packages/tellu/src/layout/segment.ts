@@ -23,7 +23,7 @@ const NEWLINE = /^(?:\r\n|\r|\n|\u2028|\u2029)$/;
 const BREAK_SPACE = /^[ \t\u1680\u2000-\u2006\u2008-\u200b\u205f]$/;
 const CJK =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Bopomofo}\u3000-〿ー！-｠￠-￦]|\p{Extended_Pictographic}/u;
-/** Kana, kanji and fullwidth punctuation, set on an em square. The ideographic space is left out. */
+/** Kana, kanji and fullwidth punctuation, letters and digits, set on an em square. The ideographic space is left out. */
 const SQUARE = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}、-〿・ー！-｠￠-￦]/u;
 const IDEOGRAPHIC = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー]/u;
 const ALPHANUMERIC = /^[\p{L}\p{N}]/u;

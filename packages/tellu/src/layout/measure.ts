@@ -32,7 +32,10 @@ export interface Measurer {
   /** Advance width of `text` in px, without letter spacing or scaling. */
   measureText(text: string, font: FontSpec): number;
   fontMetrics(font: FontSpec): FontMetrics;
-  /** Places vertical punctuation and small kana by their ink. Without it they are moved by a fixed amount. */
+  /**
+   * Places vertical punctuation and small kana by their ink, and measures the space `tsume` removes.
+   * Without it they are moved by a fixed amount and `tsume` has no effect.
+   */
   inkBounds?(text: string, font: FontSpec): InkBounds;
 }
 

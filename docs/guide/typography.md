@@ -13,7 +13,7 @@ Everything in `style` other than `layers` controls the type itself.
 | `fontWeight` | `"normal"` | `100`–`900`, `"bold"`, … |
 | `fontStyle` | `"normal"` | `"italic"`, `"oblique"` |
 | `letterSpacing` | `0` | px, or `{ em }` |
-| `tsume` | `0` | `0`–`1`: tightens Japanese and Chinese characters by their blank space (文字ツメ) |
+| `tsume` | `0` | `0`–`1`: tightens kana, kanji and fullwidth characters by their blank space (文字ツメ) |
 | `scaleX` / `scaleY` | `1` | Condensed / expanded glyphs |
 | `lineHeight` | `1.2` | A multiple of the font size, or `{ px }` |
 | `kerning` | `true` | |
@@ -65,7 +65,7 @@ export default {
 };
 ```
 
-Unlike a negative `letterSpacing`, which moves every character by the same amount, `tsume` follows each glyph's ink: っ and 。 close up far more than し or た. Only kana, kanji and fullwidth punctuation are tightened; Latin text, digits and spaces keep their spacing, and so does 縦中横. In [vertical text](./vertical) the space above and below each upright character is removed.
+Unlike a negative `letterSpacing`, which moves every character by the same amount, `tsume` follows each glyph's ink: っ and 。 close up far more than し or た. Only kana, kanji and fullwidth characters (punctuation, letters and digits) are tightened; Latin text, ordinary digits and spaces keep their spacing, and so does 縦中横. In [vertical text](./vertical) the space above and below each upright character is removed.
 
 `tsume` measures ink with [`Measurer.inkBounds()`](/api/layout#measurer), which the default measurer provides; with a custom measurer that lacks it, `tsume` has no effect. It adds to `letterSpacing` and kerning, and can differ per run in [rich text](./rich-text).
 

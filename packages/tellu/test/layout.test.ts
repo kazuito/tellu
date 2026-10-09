@@ -151,6 +151,12 @@ describe("punctuation trim", () => {
     expect(lineTexts(layout({ text: "あい」\nえ", maxWidth: 25, punctuationTrim: "end" }))).toEqual(["あい」", "え"]);
   });
 
+  test("keeps trimmed punctuation at the end of a phrase", () => {
+    const options = { text: "ああ「漢字」とああ", maxWidth: 55, lineBreak: "phrase" } as const;
+    expect(lineTexts(layout(options))).toEqual(["ああ", "「漢字」と", "ああ"]);
+    expect(lineTexts(layout({ ...options, punctuationTrim: "end" }))).toEqual(["ああ「漢字」", "とああ"]);
+  });
+
   test("does not trim space that tsume already removed", () => {
     const result = layoutText({ text: "「あ", style: { ...style, tsume: 1 }, punctuationTrim: "start" }, inkMeasurer);
     expect(result.glyphs[0]!.x).toBe(-5);

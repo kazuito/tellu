@@ -30,12 +30,15 @@ export interface LayoutGlyph {
   lineIndex: number;
   indexInLine: number;
   isWhitespace: boolean;
-  /** Where the glyph is drawn from: the start of its baseline, before `rotation` (baseline shift included). */
+  /**
+   * Where the glyph is drawn from: the start of its baseline, before `rotation` (baseline shift included).
+   * It lies before `box` when `tsume` or `punctuationTrim` removed space in front of the glyph.
+   */
   x: number;
   y: number;
   /** Clockwise rotation in degrees: `90` for glyphs set sideways in vertical text. */
   rotation: 0 | 90;
-  /** Advance along the line including scale, excluding letter spacing. */
+  /** Advance along the line after scaling, `tsume` and `punctuationTrim`, excluding letter spacing. */
   advance: number;
   /** Font size after `shrink`. */
   fontSize: number;
