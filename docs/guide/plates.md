@@ -6,7 +6,7 @@ description: Background plates (座布団) behind the whole caption or behind ea
 
 A plate (座布団, "cushion") is a box behind the text that keeps it readable over busy footage. Set it with `background`:
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, stroke } from "tellu";
 
 export default {
@@ -30,7 +30,7 @@ The plate hugs the text's content box, the ink-relevant extent of the lines, plu
 
 `mode: "line"` gives each line its own plate, sized to that line. This is the classic subtitle and news-super look:
 
-```ts demo backdrop=street
+```ts demo
 import { fill, linearGradient } from "tellu";
 
 export default {
@@ -84,7 +84,7 @@ export default {
 
 Plates take `offset`, `blur`, `opacity` and PixiJS `filters` like a layer does. A little blur softens the edges:
 
-```ts demo backdrop=scene
+```ts demo
 import { fill } from "tellu";
 
 export default {

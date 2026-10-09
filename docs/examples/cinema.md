@@ -10,7 +10,7 @@ Quieter typography: thin shadows, generous tracking and serif faces.
 
 Japanese film subtitles favor a light weight and a soft shadow over an outline.
 
-```ts demo backdrop=night
+```ts demo
 import { fill, shadow } from "tellu";
 
 export default {
@@ -35,7 +35,7 @@ export default {
 
 A serif title in gold with wide tracking and a faint glow.
 
-```ts demo backdrop=night
+```ts demo
 import { fill, glow, linearGradient, parseMarkup, stroke } from "tellu";
 
 export default {
@@ -74,7 +74,7 @@ export default {
 
 Role and name in two styles, one block per entry. In a video, scroll the whole block with CSS.
 
-```ts demo backdrop=night
+```ts demo
 import { fill, parseMarkup } from "tellu";
 
 const credits = [

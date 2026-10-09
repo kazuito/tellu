@@ -160,12 +160,6 @@
   background: linear-gradient(160deg, #f4f1ea 0%, #e6e1d6 100%);
 }
 
-.backdrop-scene {
-  background:
-    radial-gradient(60% 50% at 75% 30%, rgba(255, 214, 140, 0.9), transparent 70%),
-    linear-gradient(180deg, #6fb7e8 0%, #a9d8f0 45%, #7fb069 46%, #4f7f3b 100%);
-}
-
 .backdrop-studio {
   background:
     radial-gradient(80% 120% at 50% 120%, rgba(255, 60, 140, 0.45), transparent 60%),

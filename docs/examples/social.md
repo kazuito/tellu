@@ -10,7 +10,7 @@ Captions for creator content: loud, fast and readable on a phone.
 
 Two-tone outlines, the default look of YouTube edits. The inner outline matches the fill's mood, and the outer one separates the caption from any background.
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, parseMarkup, stroke } from "tellu";
 
 export default {
@@ -36,7 +36,7 @@ export default {
 
 A two-line hook for vertical video, shrunk to fit the safe area whatever the copy says.
 
-```ts demo backdrop=night
+```ts demo
 import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
@@ -73,7 +73,7 @@ export default {
 
 Additive glows over a dark scene. The glow pulses with a per-glyph opacity animation.
 
-```ts demo loop=60 still=0 backdrop=studio
+```ts demo loop=60 still=0
 import { fill, glow, stroke, type TextNodeProps } from "tellu";
 
 export default (frame: number): TextNodeProps => ({
@@ -102,7 +102,7 @@ export default (frame: number): TextNodeProps => ({
 
 Mixed sizes on one baseline: a small ¥, big condensed digits and a tax note in a different face.
 
-```ts demo backdrop=light
+```ts demo
 import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {

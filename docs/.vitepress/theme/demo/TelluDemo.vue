@@ -5,7 +5,7 @@ import type { DemoView } from "./runtime";
 
 const props = withDefaults(
   defineProps<{ id: string; compare?: boolean; backdrop?: string; loop?: number; still?: number }>(),
-  { backdrop: "night" },
+  { backdrop: "checker" },
 );
 
 const stage = ref<HTMLElement>();

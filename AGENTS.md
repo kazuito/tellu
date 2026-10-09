@@ -93,7 +93,7 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 - Live examples are fences with the info string `ts demo`. The fence code runs in the browser and is type-checked against the library source by `bun run typecheck` (`docs/scripts/check-snippets.ts`, errors reported at the Markdown line).
   - The default export is `TextNodeProps`, or `(frame: number) => TextNodeProps` for animation (30 fps).
   - `ts demo compare` exports a `Record<label, TextNodeProps>`, drawn side by side.
-  - Attributes: `backdrop=night|scene|street|studio|light|checker`, `loop=<frames>`, `still=<frame shown when paused>`.
+  - Attributes: `backdrop=checker|night|street|studio|light` (default `checker`; use another only when a caption is hard to read on it), `loop=<frames>`, `still=<frame shown when paused>`.
   - Run `bun run docs:format` after editing examples; the code column is narrow, so they are formatted at 80 columns.
   - Keep examples self-contained (imports included) and use fonts from the stylesheet in `docs/.vitepress/theme/demo/runtime.ts`, adding any new family there.
 - Removed or renamed API: search `docs/` for the old name, including prose and non-demo code blocks, which are not type-checked.

@@ -19,7 +19,7 @@ export interface DemoBlock extends DemoOptions {
 
 const FENCE_OPEN = /^( {0,3})(`{3,}|~{3,})(.*)$/;
 
-/** Parses the info string of a fence, e.g. `ts demo compare backdrop=scene loop=90`. */
+/** Parses the info string of a fence, e.g. `ts demo compare backdrop=night loop=90`. */
 export function parseDemoInfo(info: string): DemoOptions | undefined {
   const [lang, ...words] = info.trim().split(/\s+/);
   if (lang !== "ts" || !words.includes("demo")) return undefined;

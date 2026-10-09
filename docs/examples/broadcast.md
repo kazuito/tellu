@@ -10,7 +10,7 @@ Restrained, legible captions for news, documentaries and interviews.
 
 White on a tight black outline with a soft shadow, readable over any footage.
 
-```ts demo backdrop=street
+```ts demo
 import { fill, shadow, stroke } from "tellu";
 
 export default {
@@ -34,7 +34,7 @@ export default {
 
 The label is a plain plate. The headline must fit the bar whatever its length, so it shrinks on one line.
 
-```ts demo compare backdrop=street
+```ts demo compare
 import { fill } from "tellu";
 
 const label = {
@@ -65,7 +65,7 @@ export default {
 
 Name and title in one caption: a run for the smaller title line, and one gradient plate behind both.
 
-```ts demo backdrop=street
+```ts demo
 import { fill, linearGradient } from "tellu";
 
 export default {
@@ -101,7 +101,7 @@ export default {
 
 The fill color tells you who is speaking, and a pill label names them.
 
-```ts demo compare backdrop=night
+```ts demo compare
 import { fill, shadow, stroke } from "tellu";
 
 const line = (text: string, color: string) => ({

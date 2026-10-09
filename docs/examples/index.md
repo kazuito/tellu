@@ -6,7 +6,7 @@ description: A gallery of real-world caption recipes for variety shows, news, su
 
 Real-world captions, rendered live in your browser. Every example is self-contained: copy the code, change the text, and use it in [Remotion](/guide/remotion), [React](/guide/react), [a canvas](/guide/canvas) or [a PixiJS scene](/guide/pixi).
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {

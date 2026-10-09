@@ -67,7 +67,7 @@ Even with glyphs pulled together by `letterSpacing: -14`, every white outline si
 
 A shadow is a layer with `offset` and `blur`. Give it the same `stroke` as your widest outline and it becomes the shadow of the whole outlined caption, not just of the glyphs:
 
-```ts demo compare backdrop=scene
+```ts demo compare
 import { fill, shadow, stroke } from "tellu";
 
 const base = { fontFamily: "Noto Sans JP", fontWeight: 900, fontSize: 64 };
@@ -111,7 +111,7 @@ export default {
 
 A glow is a blurred, grown layer with no offset. Stack two for a richer halo:
 
-```ts demo backdrop=night
+```ts demo
 import { fill, glow, stroke } from "tellu";
 
 export default {
@@ -201,7 +201,7 @@ With non-uniform scaling (`scaleX` ≠ `scaleY`), strokes always use round joins
 
 A layer's `opacity` applies to the merged layer as a whole, after all glyphs are combined. Overlapping outlines don't get darker where they cross:
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, stroke } from "tellu";
 
 export default {

@@ -10,7 +10,7 @@ The loud, layered captions of Japanese variety TV, the look tellu was built for.
 
 Navy and white outlines, a shadow cast by the whole outline, a warm gradient fill, and an emphasized word that patches two layers.
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
@@ -80,7 +80,7 @@ export default {
 
 Rounded type, a soft pink glow and a small annotation in the same palette.
 
-```ts demo backdrop=studio
+```ts demo
 import { fill, glow, parseMarkup, stroke } from "tellu";
 
 export default {
@@ -115,7 +115,7 @@ export default {
 
 Quiet, slanted and translucent: a skew transform plus a low-contrast palette.
 
-```ts demo backdrop=street
+```ts demo
 import { fill, stroke } from "tellu";
 
 export default {
@@ -173,7 +173,7 @@ export default (frame: number): TextNodeProps => ({
 
 A question on a plate, then the answer in a contrasting style. The two are separate captions placed on top of each other in your scene.
 
-```ts demo compare backdrop=studio
+```ts demo compare
 import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {

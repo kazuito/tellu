@@ -6,7 +6,7 @@ description: What tellu is, what it draws that CSS can't, and how its pieces fit
 
 **tellu** draws *telops*: the bold, outlined, shadowed captions of Japanese TV, YouTube edits and short-form video. It renders with [PixiJS](https://pixijs.com) and is made first for [Remotion](https://remotion.dev), but works anywhere a canvas does.
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {

@@ -49,7 +49,7 @@ features:
 
 ## Everything here renders live
 
-```ts demo backdrop=scene
+```ts demo
 import { fill, linearGradient, parseMarkup, shadow, stroke } from "tellu";
 
 export default {
