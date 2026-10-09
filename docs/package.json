@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "monaco-editor": "0.57.0",
+    "monaco-vim": "0.4.4",
     "pixi.js": "^8.22.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

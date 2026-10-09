@@ -7,6 +7,10 @@ import type { PlaygroundPreset } from "../theme/playground/presets";
 
 const PRESETS = "virtual:tellu-playground-presets";
 const TYPES = "virtual:tellu-playground-types";
+/** Waits for tsdown to finish rewriting `dist`, which it empties first, before reloading the types. */
+const DIST_SETTLE_MS = 300;
+
+const distDir = (root: string) => join(root, "../packages/tellu/dist");
 
 /** Example pages whose demos become TypeScript presets, in sidebar order. */
 const PRESET_PAGES = [
@@ -53,12 +57,10 @@ function editorTypes(root: string, watch: (file: string) => void): Record<string
     }
   };
 
-  const dist = join(root, "../packages/tellu/dist");
-  add(
-    dist,
-    readdirSync(dist).filter((name) => name.endsWith(".d.ts")),
-    "tellu/dist",
-  );
+  const dist = distDir(root);
+  for (const name of readdirSync(dist).filter((name) => name.endsWith(".d.ts"))) {
+    files[`file:///node_modules/tellu/dist/${name}`] = readFileSync(join(dist, name), "utf8");
+  }
   files["file:///node_modules/tellu/index.d.ts"] = 'export * from "./dist/index.js";\n';
   files["file:///node_modules/tellu/react.d.ts"] = 'export * from "./dist/react.js";\n';
 
@@ -75,6 +77,23 @@ function editorTypes(root: string, watch: (file: string) => void): Record<string
 export function playgroundPlugin(root: string): Plugin {
   return {
     name: "tellu-playground",
+    configureServer(server) {
+      // The whole directory, not each file: chunk names change between builds, and a load during a rebuild sees none.
+      const dist = distDir(root);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const onDistChange = (file: string) => {
+        if (dirname(file) !== dist || !file.endsWith(".d.ts")) return;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          const module = server.moduleGraph.getModuleById(`\0${TYPES}`);
+          if (!module) return;
+          server.moduleGraph.invalidateModule(module);
+          server.ws.send({ type: "full-reload" });
+        }, DIST_SETTLE_MS);
+      };
+      server.watcher.add(dist);
+      server.watcher.on("add", onDistChange).on("change", onDistChange).on("unlink", onDistChange);
+    },
     resolveId(id) {
       if (id === PRESETS || id === TYPES) return `\0${id}`;
       return undefined;

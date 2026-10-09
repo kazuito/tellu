@@ -34,14 +34,19 @@ export interface PlaygroundEditor {
   setCode(code: string): void;
   getCode(): string;
   setDark(dark: boolean): void;
+  /** Turns Vim keybindings on or off, showing the mode and `:` commands in `statusBar`. */
+  setVim(enabled: boolean): Promise<void>;
   dispose(): void;
 }
 
 export function createEditor(
   element: HTMLElement,
-  { dark, onChange }: { dark: boolean; onChange: (code: string) => void },
+  { dark, statusBar, onChange }: { dark: boolean; statusBar: HTMLElement; onChange: (code: string) => void },
 ): PlaygroundEditor {
   const models = new Map<PlaygroundMode, monaco.editor.ITextModel>();
+  let vim: { dispose(): void } | undefined;
+  // Bumped on every toggle and on dispose, so a slow import of monaco-vim can't attach after a later call.
+  let vimRequest = 0;
   const editor = monaco.editor.create(element, {
     theme: dark ? "vs-dark" : "vs",
     automaticLayout: true,
@@ -77,7 +82,17 @@ export function createEditor(
     setDark(dark) {
       monaco.editor.setTheme(dark ? "vs-dark" : "vs");
     },
+    async setVim(enabled) {
+      const request = ++vimRequest;
+      vim?.dispose();
+      vim = undefined;
+      if (!enabled) return;
+      const { initVimMode } = await import("monaco-vim");
+      if (request === vimRequest) vim = initVimMode(editor, statusBar);
+    },
     dispose() {
+      vimRequest++;
+      vim?.dispose();
       editor.dispose();
       for (const model of models.values()) model.dispose();
     },

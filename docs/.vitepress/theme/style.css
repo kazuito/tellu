@@ -292,6 +292,14 @@
   max-width: 220px;
 }
 
+.tellu-playground-vim {
+  cursor: pointer;
+}
+
+.tellu-playground-vim input {
+  accent-color: var(--vp-c-brand-1);
+}
+
 .tellu-playground-reset:hover {
   border-color: var(--vp-c-brand-1);
 }
@@ -305,13 +313,50 @@
 
 .tellu-playground-editor {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   border-right: 1px solid var(--vp-c-divider);
 }
 
 .tellu-playground-monaco {
-  position: absolute;
-  inset: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+/* monaco-vim shows and hides it with an inline `display: block`. */
+.tellu-playground-vim-status {
+  height: 28px;
+  padding: 0 12px;
+  overflow: hidden;
+  border-top: 1px solid var(--vp-c-divider);
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  line-height: 28px;
+  white-space: nowrap;
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-bg-alt);
+}
+
+.tellu-playground-vim-status:empty {
+  display: none;
+}
+
+.tellu-playground-vim-status > span:not(:empty) {
+  margin-right: 12px;
+}
+
+.tellu-playground-vim-status input {
+  width: 60%;
+  border: none;
+  outline: none;
+  font: inherit;
+  color: var(--vp-c-text-1);
+  background: transparent;
+}
+
+.tellu-playground-vim-status .vim-notification {
+  color: var(--vp-c-warning-1);
 }
 
 .tellu-playground-hint {

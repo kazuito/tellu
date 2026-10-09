@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type MarkdownRenderer } from "vitepress";
 import llmstxt, { copyOrDownloadAsMarkdownButtons } from "vitepress-plugin-llms";
@@ -12,6 +14,7 @@ const origin =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3400");
 const repository = "https://github.com/kazuito/tellu";
+const monacoVim = join(dirname(createRequire(import.meta.url).resolve("monaco-vim/package.json")), "dist/index.mjs");
 
 export default defineConfig({
   lang: "en-US",
@@ -51,6 +54,14 @@ export default defineConfig({
         ignoreFiles: ["playground.md"],
       }),
     ],
+    resolve: {
+      alias: [
+        // monaco-vim's `browser` export is a UMD build bundling parts of monaco-editor 0.33; its ESM build uses ours.
+        { find: /^monaco-vim$/, replacement: monacoVim },
+        // It imports `monaco-editor/esm/vs/…`, which monaco-editor's exports map serves as `monaco-editor/…`.
+        { find: /^monaco-editor\/esm\/vs\/(.*)$/, replacement: "monaco-editor/$1" },
+      ],
+    },
     server: { port: 3400 },
   },
   themeConfig: {

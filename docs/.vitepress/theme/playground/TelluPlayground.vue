@@ -11,6 +11,7 @@ const MODES: { value: PlaygroundMode; label: string }[] = [
 ];
 const BACKDROPS = ["checker", "night", "street", "studio", "light"];
 const DEBOUNCE_MS = 300;
+const VIM_STORAGE_KEY = "tellu-playground-vim";
 
 const { isDark } = useData();
 
@@ -35,6 +36,8 @@ const groups = computed(() => {
 const backdrop = ref(preset.value.backdrop ?? "checker");
 
 const editorElement = ref<HTMLElement>();
+const vimStatusBar = ref<HTMLElement>();
+const vim = ref(false);
 const hosts = ref<HTMLElement>();
 const editor = shallowRef<PlaygroundEditor>();
 const view = shallowRef<DemoView>();
@@ -126,14 +129,35 @@ function setMode(next: PlaygroundMode) {
   void render();
 }
 
+function readVimPreference() {
+  try {
+    return localStorage.getItem(VIM_STORAGE_KEY) === "on";
+  } catch {
+    return false;
+  }
+}
+
 watch(isDark, (dark) => editor.value?.setDark(dark));
+watch(vim, (enabled) => {
+  try {
+    if (enabled) localStorage.setItem(VIM_STORAGE_KEY, "on");
+    else localStorage.removeItem(VIM_STORAGE_KEY);
+  } catch {}
+  void editor.value?.setVim(enabled);
+});
 
 onMounted(async () => {
   wantsPlay = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  vim.value = readVimPreference();
   void render();
   const { createEditor } = await import("./editor");
-  editor.value = createEditor(editorElement.value!, { dark: isDark.value, onChange: onCodeChange });
+  editor.value = createEditor(editorElement.value!, {
+    dark: isDark.value,
+    statusBar: vimStatusBar.value!,
+    onChange: onCodeChange,
+  });
   editor.value.setMode(mode.value, codes[mode.value]);
+  if (vim.value) void editor.value.setVim(true);
 });
 
 onBeforeUnmount(() => {
@@ -176,10 +200,15 @@ onBeforeUnmount(() => {
           <option v-for="item in BACKDROPS" :key="item" :value="item">{{ item }}</option>
         </select>
       </label>
+      <label class="tellu-playground-field tellu-playground-vim" title="Edit with Vim keybindings">
+        <input v-model="vim" type="checkbox" />
+        <span>Vim</span>
+      </label>
     </div>
     <div class="tellu-playground-body">
       <div class="tellu-playground-editor">
         <div ref="editorElement" class="tellu-playground-monaco" />
+        <div ref="vimStatusBar" class="tellu-playground-vim-status" />
         <span v-if="!editor" class="tellu-playground-hint">Loading editor…</span>
       </div>
       <div class="tellu-playground-preview">
