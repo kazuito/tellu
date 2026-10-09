@@ -184,7 +184,7 @@ Everything else works the same way: layers, rich text, kinsoku, `shrink` / `sque
 ## How it works
 
 1. **Layout** — pure TypeScript: grapheme segmentation, kinsoku-aware line breaking, kerning-aware positions from Canvas 2D measurements.
-2. **Rasterize** — each glyph × layer is drawn once with Canvas 2D (native `strokeText` for uniform scale, a distance field for 長体 / 平体 so outline width stays even) and cached as a texture.
+2. **Rasterize** — each glyph × layer is drawn once with Canvas 2D (outlines grown from a distance field, so they stay even on 長体 / 平体 and fill small counters cleanly) and cached as a texture.
 3. **Compose** — PixiJS sprites grouped per layer slot, merged with `max` blending, then blurred / filtered / faded as a whole. Glyph transforms only move sprites, so animation doesn't re-rasterize.
 
 `TextRenderer` keeps one offscreen WebGL context for any number of `TextNode`s and copies each into its own canvas synchronously.

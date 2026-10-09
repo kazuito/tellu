@@ -141,7 +141,9 @@ export class GlyphRasterizer {
     const glyphY = fracY - top;
     const isFill = strokeWidth === 0 && position === "outside";
 
-    if (isFill || scaleX === scaleY) {
+    // Chrome's strokeText leaves holes where a wide stroke overruns a small counter (the loop of す), so round
+    // strokes are grown from a distance field. Other joins need the native stroker, which only scales uniformly.
+    if (isFill || (join !== "round" && scaleX === scaleY)) {
       ctx.setTransform(...matrix, glyphX, glyphY);
       ctx.font = fontToCss(shape.font);
       ctx.fillStyle = ctx.strokeStyle = "#000";
@@ -165,7 +167,6 @@ export class GlyphRasterizer {
         ctx.strokeText(shape.text, 0, 0);
       }
     } else {
-      // Non-uniform scale would distort a native stroke, so grow the scaled glyph with a distance field instead.
       const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height);
       const pixels = strokeCoverage(
         entry.field,
@@ -220,6 +221,11 @@ export class GlyphRasterizer {
     if (this.fieldCache.size > 64) this.fieldCache.delete(this.fieldCache.keys().next().value!);
     this.fieldCache.set(key, entry);
     return entry;
+  }
+
+  /** Distance fields are only reused across the layers of one build; the textures outlive them. */
+  releaseFields(): void {
+    this.fieldCache.clear();
   }
 
   clear(): void {

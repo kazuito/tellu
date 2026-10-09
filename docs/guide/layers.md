@@ -197,6 +197,8 @@ export default {
 With non-uniform scaling (`scaleX` ≠ `scaleY`), strokes always use round joins. See [Typography](./typography#condensed-and-expanded-glyphs).
 :::
 
+Round strokes are grown from the glyph's visible shape. Miter and bevel strokes use the browser's `strokeText`, which follows every contour in the font, including ones that overlap inside the glyph, and can leave small holes when a wide stroke overruns a small counter such as the loop of す.
+
 ## Opacity
 
 A layer's `opacity` applies to the merged layer as a whole, after all glyphs are combined. Overlapping outlines don't get darker where they cross:

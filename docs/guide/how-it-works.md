@@ -29,9 +29,10 @@ The output, a [`Layout`](/api/layout#layout), is plain data. You can call [`layo
 
 Each **glyph × layer** pair is drawn once with Canvas 2D into its own small bitmap:
 
-- Fills use `fillText`. Strokes with uniform scale use native `strokeText` with the layer's join.
+- Fills use `fillText`. Strokes with a miter or bevel join use native `strokeText`.
 - Sideways glyphs in vertical text are rotated inside their bitmap, so paint, outlines and glyph transforms stay in screen space.
-- With condensed or expanded glyphs (`scaleX` ≠ `scaleY`), stretching a native stroke would make it uneven. tellu instead renders the scaled glyph, builds a supersampled **signed distance field**, and grows it by the stroke width, so the outline stays the same width on every side.
+- Round strokes (the default join) are grown from a supersampled **signed distance field** of the rendered glyph. Chrome's `strokeText` leaves holes where a wide stroke overruns a small counter, such as the loop of す; the distance field fills them.
+- With condensed or expanded glyphs (`scaleX` ≠ `scaleY`), stretching a native stroke would make it uneven, so every stroke is grown from the distance field of the scaled glyph and keeps the same width on every side.
 - Gradients and patterns are positioned relative to their [scope](./paint#paint-scope) box (glyph, line or block), so a glyph-sized bitmap can still carry its slice of a line-wide gradient.
 
 Bitmaps are cached by glyph, font, scale, sub-pixel offset (in quarter pixels), layer shape, paint and scope box. The cache is shared by every node: repeated characters, repeated renders and other captions in the same style reuse the same bitmaps. Bitmaps no caption shows anymore are kept up to 64 MB, least recently used first, so the next subtitle or credit line often finds its glyphs ready.

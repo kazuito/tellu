@@ -208,6 +208,7 @@ export class TextNode extends Container {
 
     if (this._props.background) this.buildPlate(layout, this._props.background);
     this.textures.end();
+    rasterizer.releaseFields();
   }
 
   private buildPlate(layout: Layout, style: PlateStyle): void {
