@@ -26,7 +26,9 @@ export default defineConfig({
   lastUpdated: true,
   sitemap: { hostname: `${origin}${base}` },
   head: [
+    ["link", { rel: "icon", href: `${base}favicon.ico`, sizes: "48x48" }],
     ["link", { rel: "icon", type: "image/svg+xml", href: `${base}logo.svg` }],
+    ["link", { rel: "apple-touch-icon", href: `${base}apple-touch-icon.png` }],
     ["meta", { name: "theme-color", content: "#ff8a00" }],
     ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
