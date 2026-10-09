@@ -84,6 +84,8 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 
 **Every change to the public API (anything exported from `tellu`, `tellu/react` or `tellu/remotion`, or any prop, option, default or behavior) must update the docs in the same change.** Then run `bun run docs:check`; it must pass.
 
+**Every user-facing change to the library must also add an entry to `packages/tellu/CHANGELOG.md`** under `## [Unreleased]`, in the matching [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) section (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`). Write for library users, not as a commit log, and mark breaking changes with **Breaking:**. Docs-only and example-only changes don't need an entry. On release, rename `[Unreleased]` to `[x.y.z] - YYYY-MM-DD`, start a new empty `[Unreleased]`, and update the compare links at the bottom.
+
 - Where things go:
   - `docs/guide/*.md`: concepts and how-tos, with live examples.
   - `docs/api/*.md`: the reference. Every export needs a heading with its name in backticks (`check-api.ts` enforces this); options tables list types and defaults.
