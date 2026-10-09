@@ -27,6 +27,7 @@ Every [`TextNodeProps`](./types#textnodeprops) option except `style`, plus:
 | `textStyle` | `Partial<TextStyle>` | | The caption's style (`style` in `TextNodeProps`) |
 | `anchor` | [`Anchor`](#anchor) | `"top-left"` | Point of the layout box placed at the element's position |
 | `resolution` | `number` | `devicePixelRatio` | |
+| `alt` | `string` | The caption's text | Read by screen readers and find-in-page instead of the caption's text. `""` marks it as decorative. [Guide](/guide/react#accessibility) |
 | `waitForFonts` | `boolean` | `true` | Load fonts before drawing |
 | `renderer` | `TextRenderer` | From context, or `TextRenderer.shared()` | |
 | `measurer` | `Measurer` | Canvas 2D | |

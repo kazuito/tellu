@@ -10,7 +10,7 @@ import {
 import { fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "../fonts";
 import type { Layout } from "../layout/layout";
 import type { Measurer } from "../layout/measure";
-import type { TextNodeProps, TextStyle } from "../style/types";
+import type { TextContent, TextNodeProps, TextStyle } from "../style/types";
 import { TextNode } from "../TextNode";
 import type { DrawResult, TextRenderer } from "../TextRenderer";
 import { useTextRenderer } from "./context";
@@ -26,6 +26,23 @@ export type Anchor =
   | "bottom"
   | "bottom-right"
   | readonly [x: number, y: number];
+
+/** Keeps the text in the accessibility tree and find-in-page without showing or sizing it. */
+const VISUALLY_HIDDEN: CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  border: 0,
+  overflow: "hidden",
+  clipPath: "inset(50%)",
+  whiteSpace: "pre-wrap",
+};
+
+function plainText(text: TextContent): string {
+  return typeof text === "string" ? text : text.map((run) => (typeof run === "string" ? run : run.text)).join("");
+}
 
 const ANCHORS: Record<Exclude<Anchor, readonly [number, number]>, readonly [number, number]> = {
   "top-left": [0, 0],
@@ -54,6 +71,11 @@ export interface TextProps extends Omit<TextNodeProps, "style"> {
   anchor?: Anchor;
   /** Default: `devicePixelRatio`. */
   resolution?: number;
+  /**
+   * Text for screen readers and find-in-page in place of the caption's text, which the canvas hides from them.
+   * `""` marks the caption as decorative. Default: the caption's text.
+   */
+  alt?: string;
   /** Wait for web fonts before drawing so no fallback font is ever measured. Default: `true`. */
   waitForFonts?: boolean;
   renderer?: TextRenderer;
@@ -75,6 +97,7 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
     textStyle,
     anchor = "top-left",
     resolution,
+    alt,
     waitForFonts = true,
     renderer: rendererProp,
     measurer,
@@ -189,6 +212,7 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
   );
 
   const [ax, ay] = typeof anchor === "string" ? ANCHORS[anchor] : anchor;
+  const label = alt ?? plainText(rest.text);
   return (
     <div
       ref={(element) => {
@@ -205,7 +229,13 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
         ...style,
       }}
     >
-      <canvas ref={canvasRef} style={{ position: "absolute", display: "block", pointerEvents: "none" }} />
+      {/* biome-ignore lint/a11y/noAriaHiddenOnFocusable: a canvas without tabIndex is not focusable */}
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        style={{ position: "absolute", display: "block", pointerEvents: "none" }}
+      />
+      {label !== "" && <span style={VISUALLY_HIDDEN}>{label}</span>}
     </div>
   );
 });

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `punctuationTrim` option (約物の半角取り): trims the blank half of fullwidth opening brackets at the start of a line (`"start"`), of closing brackets, 、 and 。 at the end of a line (`"end"`), or both. With `"end"`, closing punctuation that fits once trimmed stays on its line.
 - `align: "justify-all"` (均等配置): justifies every line, including the last one, single-line text and lines ended by `\n`, so a word can be spread across a fixed width (字取り). Without `maxWidth`, lines spread to the longest one.
 - `wrap: "balance"`, which makes the lines of each paragraph about equally long, and `wrap: "pretty"`, which avoids a last line with a single word, phrase or character (泣き別れ). The new `TextWrap` type names every `wrap` mode.
+- `<Text>` in `tellu/react` and `tellu/remotion` is now accessible: it renders the caption's text in a visually hidden element for screen readers and find-in-page, and hides the canvas from assistive technology. The new `alt` prop replaces that text, and `alt=""` marks a caption as decorative.
 - `autospace` option (和欧間アキ): adds space between kana or kanji and Latin letters or digits, a quarter em with `true` or any `Length`.
 
 ### Fixed

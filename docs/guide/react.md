@@ -1,5 +1,5 @@
 ---
-description: Use <Text> from tellu/react in any React app, with layout-box sizing, anchors, draw callbacks, pending state and a shared renderer.
+description: Use <Text> from tellu/react in any React app, with layout-box sizing, anchors, accessible text, draw callbacks, pending state and a shared renderer.
 ---
 
 # React
@@ -29,6 +29,18 @@ The wrapper `<div>` is `inline-block` and takes the size of the **layout box**: 
 The canvas inside is positioned absolutely and sized to the caption's **ink bounds**, everything it paints. Outlines, shadows and plates therefore overflow the box visually without pushing other elements around. Make sure no ancestor clips them with `overflow: hidden`.
 
 `anchor` shifts the wrapper with a CSS `translate` so a chosen point of the box sits at its position. See [Remotion › Positioning](./remotion#positioning).
+
+## Accessibility
+
+Text in a canvas is invisible to screen readers and to the browser's find-in-page. `<Text>` therefore also renders the caption's text in a visually hidden `<span>` next to the canvas, which it hides from assistive technology with `aria-hidden`. Inside a heading or a link, the caption is read as that heading's or link's text:
+
+```tsx
+<h1>
+  <Text text="最新ニュース" textStyle={style} />
+</h1>
+```
+
+Rich text is read as its plain text, without markup. `alt` replaces what is read, for example when glyph transforms rearrange the text, and `alt=""` marks a purely decorative caption so it is skipped. The hidden text can't be selected and copied like ordinary text.
 
 ## Drawing
 
