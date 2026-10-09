@@ -53,6 +53,11 @@ describe("line breaking", () => {
     expect(lineTexts(layout({ text: "あいう。えお", maxWidth: 30 }))).toEqual(["あいう。", "えお"]);
   });
 
+  test("hanging punctuation before a newline or the end adds no blank line", () => {
+    expect(lineTexts(layout({ text: "あいう。\nえ", maxWidth: 30 }))).toEqual(["あいう。", "え"]);
+    expect(lineTexts(layout({ text: "あいう。", maxWidth: 30 }))).toEqual(["あいう。"]);
+  });
+
   test("kinsoku can be disabled", () => {
     expect(lineTexts(layout({ text: "あいう」えお", maxWidth: 30, kinsoku: false }))).toEqual(["あいう", "」えお"]);
   });

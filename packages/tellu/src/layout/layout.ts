@@ -547,6 +547,12 @@ function breakLines(
       lineLength + shift + advance[i]! > maxLength + EPSILON
     ) {
       if (!cluster.combined && kinsoku?.hanging.includes(cluster.text) && clusters[i - 1]!.kind === "char") {
+        // The line ends after this glyph anyway: keep going so the newline or the end closes it.
+        if (i + 1 === clusters.length || clusters[i + 1]!.kind === "newline") {
+          lineLength += shift + advance[i]! + spacing[i]!;
+          i++;
+          continue;
+        }
         ranges.push({ start: lineStart, end: i + 1, forced: false });
         startLine(i + 1);
         continue;

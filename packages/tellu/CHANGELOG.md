@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Punctuation hanging past `maxWidth` (ぶら下げ) at the end of the text or before a `\n` no longer adds an empty line after it.
 - Wide round outlines (the default join) no longer leave holes inside small counters, such as the loop of す. Round strokes are now grown from a distance field of the glyph's visible shape instead of Chrome's `strokeText`, which makes the first render of each glyph slightly slower. As a result, `"center"` and `"inside"` strokes follow the visible outline and no longer trace contours that overlap inside the glyph. Miter and bevel joins still use `strokeText`.
 
 ## [0.0.2] - 2026-10-09
