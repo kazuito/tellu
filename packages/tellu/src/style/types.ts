@@ -170,8 +170,10 @@ export type TextContent = string | readonly Run[];
 /**
  * Position of each line along the line direction. `start` / `end` follow the writing mode;
  * `left` / `top` mean `start` and `right` / `bottom` mean `end` in either direction.
+ * `justify` fills the line length except on the last line and lines ended by `\n`; `justify-all` fills it
+ * on every line (均等配置), spreading to the longest line without a line length.
  */
-export type TextAlign = "start" | "center" | "end" | "justify" | "left" | "right" | "top" | "bottom";
+export type TextAlign = "start" | "center" | "end" | "justify" | "justify-all" | "left" | "right" | "top" | "bottom";
 
 /**
  * - `visible`: let lines overflow the line length

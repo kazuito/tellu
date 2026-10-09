@@ -165,6 +165,7 @@ export default {
   center: props("center"),
   end: props("end"),
   justify: props("justify"),
+  "justify-all": props("justify-all"),
 };
 ```
 

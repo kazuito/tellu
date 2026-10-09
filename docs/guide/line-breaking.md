@@ -31,7 +31,7 @@ The faint plate on this page's demos marks the layout box. Japanese and Chinese 
 
 ## Alignment
 
-`align` places each line in the layout box: `"start"` (the default), `"center"`, `"end"` or `"justify"`. `"start"` and `"end"` follow the writing direction, and `"left"` / `"right"` are accepted as aliases for them.
+`align` places each line in the layout box: `"start"` (the default), `"center"`, `"end"`, `"justify"` or `"justify-all"`. `"start"` and `"end"` follow the writing direction, and `"left"` / `"right"` are accepted as aliases for them.
 
 ```ts demo compare
 import { fill, stroke, type TextAlign } from "tellu";
@@ -55,10 +55,34 @@ export default {
   center: props("center"),
   end: props("end"),
   justify: props("justify"),
+  "justify-all": props("justify-all"),
 };
 ```
 
 `justify` stretches every line except the last (and lines ended by `\n`) to the full `maxWidth`. It widens the gaps at spaces when a line has any, and otherwise spreads the extra space between all the characters, which is the usual style for Japanese.
+
+### Spreading every line (均等配置)
+
+`justify-all` stretches every line, including the last one and lines ended by `\n`. It sets a word across a fixed width (字取り), as in credits and name lists. Without `maxWidth`, lines spread to the longest one:
+
+```ts demo
+import { fill, stroke } from "tellu";
+
+export default {
+  text: "司会\n出演\n音楽監督",
+  align: "justify-all",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 40,
+    lineHeight: 1.4,
+    layers: [stroke(6, "#111"), fill("#fff")],
+  },
+  background: { paint: "rgba(255,255,255,0.1)", padding: 0 },
+};
+```
+
+A line with a single character stays at the start.
 
 ## Kinsoku (禁則処理)
 

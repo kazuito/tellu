@@ -63,10 +63,21 @@ As in CSS `writing-mode`: `vertical-rl` stacks lines right → left (縦書き),
 ### `TextAlign`
 
 ```ts
-type TextAlign = "start" | "center" | "end" | "justify" | "left" | "right" | "top" | "bottom";
+type TextAlign =
+  | "start"
+  | "center"
+  | "end"
+  | "justify"
+  | "justify-all"
+  | "left"
+  | "right"
+  | "top"
+  | "bottom";
 ```
 
 Position of each line along the line direction. `start` / `end` follow the writing mode; `left` / `top` mean `start` and `right` / `bottom` mean `end` in either direction.
+
+`justify` fills the line length on every line except the last one and lines ended by `\n`. `justify-all` fills it on every line (均等配置), spreading to the longest line when there is no line length. [Guide](/guide/line-breaking#alignment).
 
 ### `Overflow`
 

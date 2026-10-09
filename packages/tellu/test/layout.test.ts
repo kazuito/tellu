@@ -255,6 +255,34 @@ describe("alignment", () => {
   });
 });
 
+describe("justify-all", () => {
+  test("spreads a single line to the line length (字取り)", () => {
+    const result = layout({ text: "あいう", maxWidth: 50, align: "justify-all" });
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 20, 40]);
+    expect(result.lines[0]!.inlineSize).toBe(50);
+  });
+
+  test("spreads the last line and lines ended by a newline", () => {
+    const result = layout({ text: "あい\nあいう", maxWidth: 40, align: "justify-all" });
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 30, 0, 15, 30]);
+  });
+
+  test("spreads to the longest line without a line length", () => {
+    const result = layout({ text: "あい\nあいう", align: "justify-all" });
+    expect(result.width).toBe(30);
+    expect(result.glyphs[1]!.x).toBe(20);
+  });
+
+  test("widens the gaps at spaces when there are any", () => {
+    const result = layout({ text: "ab cd", maxWidth: 40, align: "justify-all" });
+    expect(result.glyphs.map((glyph) => glyph.x)).toEqual([0, 5, 27.5, 30, 35]);
+  });
+
+  test("leaves a single character at the start", () => {
+    expect(layout({ text: "あ", maxWidth: 40, align: "justify-all" }).glyphs[0]!.x).toBe(0);
+  });
+});
+
 describe("vertical metrics", () => {
   test("mixed font sizes share a baseline", () => {
     const result = layout({ text: ["あ", { text: "い", style: { fontSize: 20 } }] });

@@ -230,3 +230,10 @@ describe("punctuation and spacing in vertical text", () => {
     expect(vertical({ text: "第12回", autospace: true }).lines[0]!.inlineSize).toBe(30);
   });
 });
+
+describe("justify-all in vertical text", () => {
+  test("spreads a column to maxHeight", () => {
+    const result = vertical({ text: "あい", maxHeight: 40, align: "justify-all" });
+    expect(result.glyphs.map((glyph) => glyph.box.y)).toEqual([0, 30]);
+  });
+});

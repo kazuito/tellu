@@ -461,19 +461,20 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
     let extra = 0;
     let gapFilter: (k: number) => boolean = () => false;
     const isLastLine = lineIndex === ranges.length - 1;
-    if (align === "justify" && lineLimit !== undefined && !isLastLine && !range.forced && lineLength < lineLimit) {
+    const justified = align === "justify-all" || (align === "justify" && !isLastLine && !range.forced);
+    if (justified && lineLength < boxLength) {
       const inner = (k: number) => k >= range.start && k < contentEnd - 1;
       const spaces = (k: number) => inner(k) && clusters[k + 1]!.kind === "space" && clusters[k]!.kind !== "space";
       let gaps = 0;
       for (let k = range.start; k < contentEnd; k++) if (spaces(k)) gaps++;
       gapFilter = gaps > 0 ? spaces : inner;
       if (gaps === 0) gaps = contentEnd - range.start - 1;
-      if (gaps > 0) extra = (lineLimit - lineLength) / gaps;
+      if (gaps > 0) extra = (boxLength - lineLength) / gaps;
       lineLength += extra * gaps;
     }
 
     const inlineStart =
-      START_ALIGN.has(align) || align === "justify"
+      START_ALIGN.has(align) || align === "justify" || align === "justify-all"
         ? 0
         : END_ALIGN.has(align)
           ? boxLength - lineLength
