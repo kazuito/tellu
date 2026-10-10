@@ -2,43 +2,65 @@ import type { Shading, StrokePosition } from "../style/types";
 
 const FAR = 1e20;
 
-/** Squared Euclidean distance transform (Felzenszwalb & Huttenlocher), in place. */
-export function distanceTransform(grid: Float64Array, width: number, height: number): void {
-  const size = Math.max(width, height);
-  const f = new Float64Array(size);
-  const d = new Float64Array(size);
-  const v = new Int32Array(size);
-  const z = new Float64Array(size + 1);
-
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) f[y] = grid[y * width + x]!;
-    transform1d(f, height, d, v, z);
-    for (let y = 0; y < height; y++) grid[y * width + x] = d[y]!;
+/**
+ * Euclidean distance transform (Felzenszwalb & Huttenlocher) of the pixels on one side of a field's edge:
+ * writes `sqrt(d) - 0.5` outside or `0.5 - sqrt(d)` inside, where `d` is the squared distance to the
+ * nearest pixel on the other side. Only the sign of the field is read, and the other side is left alone.
+ */
+function measureSide(field: Float32Array, width: number, height: number, inside: boolean): void {
+  // The input is binary, so the pass along columns is the distance to the nearest pixel across the edge
+  // in the same column: one scan down and one up, row by row so memory is read in order.
+  const column = new Float32Array(width * height);
+  for (let i = 0; i < width; i++) column[i] = field[i]! < 0 !== inside ? 0 : FAR;
+  for (let i = width; i < column.length; i++) column[i] = field[i]! < 0 !== inside ? 0 : column[i - width]! + 1;
+  for (let i = column.length - width - 1; i >= 0; i--) {
+    const below = column[i + width]! + 1;
+    if (below < column[i]!) column[i] = below;
   }
+
+  const f = new Float64Array(width);
+  const d = new Float64Array(width);
+  const v = new Int32Array(width);
+  const z = new Float64Array(width + 1);
   for (let y = 0; y < height; y++) {
     const row = y * width;
-    for (let x = 0; x < width; x++) f[x] = grid[row + x]!;
+    for (let x = 0; x < width; x++) {
+      const distance = column[row + x]!;
+      f[x] = distance < FAR ? distance * distance : FAR;
+    }
     transform1d(f, width, d, v, z);
-    for (let x = 0; x < width; x++) grid[row + x] = d[x]!;
+    for (let x = 0; x < width; x++) {
+      if (field[row + x]! < 0 !== inside) continue;
+      field[row + x] = inside ? 0.5 - Math.sqrt(d[x]!) : Math.sqrt(d[x]!) - 0.5;
+    }
   }
 }
 
+/**
+ * Lower envelope of the parabolas `(x - q)² + f[q]`. Pixels with nothing across the edge in their column
+ * (`FAR`) are left out: their parabolas never reach below another one inside the row.
+ */
 function transform1d(f: Float64Array, n: number, d: Float64Array, v: Int32Array, z: Float64Array): void {
-  let k = 0;
-  v[0] = 0;
-  z[0] = -FAR;
-  z[1] = FAR;
-  for (let q = 1; q < n; q++) {
-    let s: number;
-    do {
+  let k = -1;
+  for (let q = 0; q < n; q++) {
+    if (f[q]! >= FAR) continue;
+    const fq = f[q]! + q * q;
+    let s = -FAR;
+    while (k >= 0) {
       const r = v[k]!;
-      s = (f[q]! + q * q - (f[r]! + r * r)) / (2 * q - 2 * r);
-    } while (s <= z[k]! && --k >= 0);
+      s = (fq - (f[r]! + r * r)) / (2 * q - 2 * r);
+      if (s > z[k]!) break;
+      k--;
+    }
     k++;
     v[k] = q;
-    z[k] = s;
-    z[k + 1] = FAR;
+    z[k] = k === 0 ? -FAR : s;
   }
+  if (k < 0) {
+    d.fill(FAR, 0, n);
+    return;
+  }
+  z[k + 1] = FAR;
   k = 0;
   for (let q = 0; q < n; q++) {
     while (z[k + 1]! < q) k++;
@@ -47,24 +69,27 @@ function transform1d(f: Float64Array, n: number, d: Float64Array, v: Int32Array,
   }
 }
 
-/** Signed distance in pixels from the shape edge: negative inside, positive outside. */
-export function signedDistanceField(alpha: Uint8ClampedArray, width: number, height: number): Float32Array {
-  const count = width * height;
-  const outside = new Float64Array(count);
-  const inside = new Float64Array(count);
-  for (let i = 0; i < count; i++) {
-    const isInside = alpha[i * 4 + 3]! >= 128;
-    outside[i] = isInside ? 0 : FAR;
-    inside[i] = isInside ? FAR : 0;
-  }
-  distanceTransform(outside, width, height);
-  distanceTransform(inside, width, height);
-
-  const field = new Float32Array(count);
-  for (let i = 0; i < count; i++) {
-    field[i] = outside[i]! > 0 ? Math.sqrt(outside[i]!) - 0.5 : 0.5 - Math.sqrt(inside[i]!);
-  }
+/**
+ * Signed distance in pixels from the shape edge: negative inside, positive outside.
+ * With `inside: false`, every pixel inside reads `-0.5` until `measureInside` fills in its distance:
+ * enough for shapes grown outward, which cover the whole inside.
+ */
+export function signedDistanceField(
+  alpha: Uint8ClampedArray,
+  width: number,
+  height: number,
+  inside = true,
+): Float32Array {
+  const field = new Float32Array(width * height);
+  for (let i = 0; i < field.length; i++) field[i] = alpha[i * 4 + 3]! >= 128 ? -0.5 : 0.5;
+  measureSide(field, width, height, false);
+  if (inside) measureSide(field, width, height, true);
   return field;
+}
+
+/** Fills in the distances inside the shape of a field made with `inside: false`. */
+export function measureInside(field: Float32Array, width: number, height: number): void {
+  measureSide(field, width, height, true);
 }
 
 /**

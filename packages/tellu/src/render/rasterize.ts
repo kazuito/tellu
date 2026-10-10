@@ -2,7 +2,7 @@ import { type AnyCanvas, type Canvas2D, context2d, createCanvas } from "../canva
 import { type FontSpec, fontToCss } from "../layout/measure";
 import type { Box, Layer, StrokePosition } from "../style/types";
 import { createPaintStyle } from "./paint";
-import { signedDistanceField, strokeCoverage } from "./sdf";
+import { measureInside, signedDistanceField, strokeCoverage } from "./sdf";
 
 export interface GlyphShape {
   text: string;
@@ -36,6 +36,8 @@ interface FieldEntry {
   field: Float32Array;
   width: number;
   height: number;
+  /** Whether distances inside the glyph are measured (see `signedDistanceField`). */
+  inside: boolean;
 }
 
 const SUPERSAMPLE = 2;
@@ -168,7 +170,8 @@ export class GlyphRasterizer {
         ctx.strokeText(shape.text, 0, 0);
       }
     } else {
-      const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height);
+      const inside = position !== "outside" || !!layer.shading;
+      const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height, inside);
       const pixels = strokeCoverage(
         entry.field,
         entry.width,
@@ -197,11 +200,18 @@ export class GlyphRasterizer {
     glyphY: number,
     width: number,
     height: number,
+    inside: boolean,
   ): FieldEntry {
     const css = fontToCss(shape.font);
     const key = [css, shape.text, ...matrix, glyphX, glyphY, width, height].join("\u0000");
     let entry = this.fieldCache.get(key);
-    if (entry) return entry;
+    if (entry) {
+      if (inside && !entry.inside) {
+        measureInside(entry.field, entry.width, entry.height);
+        entry.inside = true;
+      }
+      return entry;
+    }
 
     const fieldWidth = width * SUPERSAMPLE;
     const fieldHeight = height * SUPERSAMPLE;
@@ -219,7 +229,12 @@ export class GlyphRasterizer {
     ctx.fillStyle = "#000";
     ctx.fillText(shape.text, 0, 0);
     const { data } = ctx.getImageData(0, 0, fieldWidth, fieldHeight);
-    entry = { field: signedDistanceField(data, fieldWidth, fieldHeight), width: fieldWidth, height: fieldHeight };
+    entry = {
+      field: signedDistanceField(data, fieldWidth, fieldHeight, inside),
+      width: fieldWidth,
+      height: fieldHeight,
+      inside,
+    };
 
     if (this.fieldCache.size > 64) this.fieldCache.delete(this.fieldCache.keys().next().value!);
     this.fieldCache.set(key, entry);
