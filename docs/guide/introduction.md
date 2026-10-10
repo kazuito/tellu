@@ -70,7 +70,7 @@ const props = {
 
 Three ideas carry most of the API:
 
-1. **[Layers](./layers)**: every decoration is the glyph shape, grown by some stroke width and painted. Fills, outlines, shadows and glows are all layers, stacked bottom to top.
+1. **[Layers](./layers)**: every decoration is the glyph shape, grown by some stroke width and painted. Fills, outlines, shadows, glows, inner shadows and bevels are all layers, stacked bottom to top.
 2. **[Runs](./rich-text)**: part of the text can override any style property, including individual layers.
 3. **[Glyph transforms](./animation)**: a function from each glyph to a transform. It runs every frame without re-rasterizing anything.
 

@@ -64,6 +64,54 @@ export type Paint = ColorValue | LinearGradient | RadialGradient | PatternPaint;
 export type StrokePosition = "outside" | "inside" | "center";
 
 /**
+ * Paints the edge of the layer's shape, fading toward its inside (inner shadow, inner glow).
+ * The fade starts at the edge of the shape shifted by `offset`.
+ */
+export interface InsetShading {
+  type: "inset";
+  /** `[x, y]` shift of the edge the fade starts from. Default: `[0, 0]`. */
+  offset?: readonly [x: number, y: number];
+  /** Width of the fade in px. `0` is a hard edge. Default: `4`. */
+  size?: number;
+}
+
+/** Lights the layer's shape as if its edge were beveled, and paints its lit or its shaded side. */
+export interface BevelShading {
+  type: "bevel";
+  /** `highlight` paints the faces turned toward the light, `shadow` the faces turned away. Default: `"highlight"`. */
+  side?: "highlight" | "shadow";
+  /** Width of the bevel in px. Default: `4`. */
+  size?: number;
+  /** Direction the light comes from, in degrees clockwise from the top (`315` = top left). Default: `315`. */
+  angle?: number;
+  /** Steepness of the bevel; higher values make the lighting stronger. Default: `1`. */
+  depth?: number;
+  /**
+   * - `smooth`: rounded, flattening toward the inside
+   * - `chisel`: flat faces with a sharp ridge
+   * Default: `"smooth"`.
+   */
+  technique?: "smooth" | "chisel";
+}
+
+/**
+ * Silky bands inside the layer's shape (サテン): where two copies of the softened shape, shifted by `offset` and by
+ * `-offset`, differ.
+ */
+export interface SatinShading {
+  type: "satin";
+  /** `[x, y]` shift of each copy. Default: `[4, 4]`. */
+  offset?: readonly [x: number, y: number];
+  /** Softness of the copies in px. Default: `8`. */
+  size?: number;
+  /** Paint where the copies agree instead. Default: `false`. */
+  invert?: boolean;
+}
+
+/** Varies how strongly a layer paints its shape, computed from the distance to the shape's edge. */
+export type Shading = InsetShading | BevelShading | SatinShading;
+
+/**
  * One decoration layer. Every layer is the glyph shape grown by `stroke`
  * and painted with `paint`, so fills, outlines, shadows and glows are all layers.
  */
@@ -79,6 +127,8 @@ export interface Layer {
   join?: CanvasLineJoin;
   /** Default: `10`. */
   miterLimit?: number;
+  /** Paints the shape with a varying strength (inner shadow, inner glow, bevel, satin). Always renders round joins. */
+  shading?: Shading;
   offset?: readonly [x: number, y: number];
   /** Blur strength in px (PixiJS `BlurFilter` strength). The drawn area grows to fit the whole blur. */
   blur?: number;

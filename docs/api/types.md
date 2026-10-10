@@ -1,5 +1,5 @@
 ---
-description: Type reference for TextNodeProps, LayoutOptions, writing modes, TextStyle, Layer, Paint, PlateStyle, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
+description: Type reference for TextNodeProps, LayoutOptions, writing modes, TextStyle, Layer, Shading, Paint, PlateStyle, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
 ---
 
 # Types
@@ -210,6 +210,7 @@ A multiple of the font size, or absolute pixels.
 | `strokePosition` | [`StrokePosition`](#strokeposition) | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | Non-uniform scaling always uses round joins |
 | `miterLimit` | `number` | `10` | |
+| `shading` | [`Shading`](#shading) | | Paints the shape with a varying strength. Always uses round joins |
 | `offset` | `readonly [x, y]` | `[0, 0]` | |
 | `blur` | `number` | `0` | PixiJS `BlurFilter` strength |
 | `blurQuality` | `number` | `4` | |
@@ -226,6 +227,50 @@ Guide: [Layers](/guide/layers).
 ```ts
 type StrokePosition = "outside" | "inside" | "center";
 ```
+
+### `Shading`
+
+```ts
+type Shading = InsetShading | BevelShading | SatinShading;
+```
+
+Varies how strongly a layer paints its shape, computed from the distance to the shape's edge. The shape is the layer's: the glyph grown by `stroke`, at its `strokePosition`. Lengths are in px, in screen space, so they stay put when glyphs are rotated in vertical text.
+
+Guide: [Inner shadows and glows](/guide/layers#inner-shadows-and-glows), [Bevels](/guide/layers#bevels), [Satin](/guide/layers#satin).
+
+### `InsetShading`
+
+Paints the edge of the shape, fading toward its inside (inner shadow, inner glow).
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"inset"` | | Required |
+| `offset` | `readonly [x, y]` | `[0, 0]` | Shift of the edge the fade starts from |
+| `size` | `number` | `4` | Width of the fade. `0` is a hard edge |
+
+### `BevelShading`
+
+Lights the shape as if its edge were beveled, and paints its lit or its shaded side. Flat parts of the shape, farther than `size` from the edge, are not painted.
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"bevel"` | | Required |
+| `side` | `"highlight" \| "shadow"` | `"highlight"` | Faces turned toward or away from the light |
+| `size` | `number` | `4` | Width of the bevel |
+| `angle` | `number` | `315` | Direction the light comes from, in degrees clockwise from the top (`315` = top left) |
+| `depth` | `number` | `1` | Steepness; higher values make the lighting stronger |
+| `technique` | `"smooth" \| "chisel"` | `"smooth"` | Rounded, or flat faces with a sharp ridge |
+
+### `SatinShading`
+
+Silky bands inside the shape, where two copies of the softened shape, shifted by `offset` and by `-offset`, differ.
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"satin"` | | Required |
+| `offset` | `readonly [x, y]` | `[4, 4]` | Shift of each copy |
+| `size` | `number` | `8` | Softness of the copies |
+| `invert` | `boolean` | `false` | Paint where the copies agree instead |
 
 ## Paint
 

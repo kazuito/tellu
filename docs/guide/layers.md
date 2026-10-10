@@ -1,5 +1,5 @@
 ---
-description: The layer model behind every fill, outline, shadow and glow, with stroke position, joins, offsets, blur, opacity, blend modes and PixiJS filters.
+description: The layer model behind every fill, outline, shadow and glow, with inner shadows, bevels and satin, stroke position, joins, offsets, blur, opacity, blend modes and PixiJS filters.
 ---
 
 # Layers
@@ -40,7 +40,7 @@ Layers are plain objects, and four helpers cover the common cases:
 | `shadow({ color, offset, blur, stroke })` | A layer offset by `[4, 4]` and blurred by `4`, in `rgba(0,0,0,0.6)` by default |
 | `glow({ color, stroke, blur })` | A white layer grown by `8` and blurred by `8` by default |
 
-Every option of a layer can go in the last argument: `fill("#fff", { opacity: 0.8 })`.
+Every option of a layer can go in the last argument: `fill("#fff", { opacity: 0.8 })`. Four more helpers shade the inside of the glyph: [`innerShadow()` and `innerGlow()`](#inner-shadows-and-glows), [`bevel()`](#bevels) and [`satin()`](#satin).
 
 ## Outlines merge
 
@@ -130,6 +130,186 @@ export default {
 };
 ```
 
+## Inner shadows and glows
+
+`innerShadow()` darkens the inside of the shape along the edge it was shifted away from, and `innerGlow()` lights the whole inner edge:
+
+```ts demo compare
+import { fill, innerGlow, innerShadow, stroke } from "tellu";
+
+const base = { fontFamily: "Noto Sans JP", fontWeight: 900, fontSize: 80 };
+
+export default {
+  "innerShadow()": {
+    text: "凹み",
+    style: {
+      ...base,
+      layers: [stroke(8, "#1b2a7a"), fill("#ffffff"), innerShadow()],
+    },
+  },
+  "hard, size: 0": {
+    text: "凹み",
+    style: {
+      ...base,
+      layers: [
+        stroke(8, "#1b2a7a"),
+        fill("#ffe14d"),
+        innerShadow({ size: 0, offset: [5, 5], color: "#ff7a00" }),
+      ],
+    },
+  },
+  "innerGlow()": {
+    text: "凹み",
+    style: {
+      ...base,
+      layers: [
+        stroke(8, "#ffffff"),
+        fill("#0b6cff"),
+        innerGlow({ color: "#bde4ff", size: 10 }),
+      ],
+    },
+  },
+};
+```
+
+Both fade out over `size` px from the edge (`4` for `innerShadow()`, `8` for `innerGlow()`), and `size: 0` gives a hard edge. `innerShadow()` is shifted by `[4, 4]` in `rgba(0,0,0,0.6)` by default, and `innerGlow()` is white.
+
+They paint inside the layer's shape only, so put them above the layer they shade. Their `offset` shifts the shadow inside the shape; it isn't the layer's `offset`, which would move the whole layer. With `stroke`, they shade the glyph grown by that width, such as an outline. Keep shaded outlines apart, as with `letterSpacing` here, or each glyph's shading shows across its neighbour's (see [How shading works](#how-shading-works)):
+
+```ts demo
+import { fill, innerShadow, stroke } from "tellu";
+
+export default {
+  text: "フチに影",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 88,
+    letterSpacing: 24,
+    layers: [
+      stroke(12, "#ff3d8b"),
+      innerShadow({ stroke: 12, offset: [3, 3], size: 3 }),
+      fill("#ffffff"),
+    ],
+  },
+};
+```
+
+## Bevels
+
+`bevel()` makes the glyph look raised by lighting a bevel along its edge. It returns two layers, the highlight and the shadow side, so spread it into `layers`:
+
+```ts demo
+import { bevel, fill, linearGradient, shadow, stroke } from "tellu";
+
+export default {
+  text: "金メダル",
+  style: {
+    fontFamily: "Noto Serif JP",
+    fontWeight: 900,
+    fontSize: 96,
+    layers: [
+      shadow({ offset: [4, 6], stroke: 10 }),
+      stroke(10, "#3b2200"),
+      fill(linearGradient(["#fff7c2", "#f5c542", "#b8860b", "#ffe9a0"])),
+      ...bevel({ size: 5 }),
+    ],
+  },
+};
+```
+
+| Option | Default | |
+| --- | --- | --- |
+| `size` | `4` | Width of the bevel in px |
+| `angle` | `315` | Direction the light comes from, in degrees clockwise from the top (`315` = top left) |
+| `depth` | `1` | Steepness; higher values make the lighting stronger |
+| `technique` | `"smooth"` | `"smooth"` rounds the bevel into the flat inside; `"chisel"` cuts flat faces with a sharp ridge |
+| `highlight` | `"rgba(255,255,255,0.8)"` | Paint of the faces turned toward the light |
+| `shadow` | `"rgba(0,0,0,0.5)"` | Paint of the faces turned away from it |
+| `stroke` | `0` | Bevel the glyph grown by this width |
+
+```ts demo compare
+import { bevel, fill, stroke } from "tellu";
+
+const base = { fontFamily: "Dela Gothic One", fontSize: 96 };
+
+export default {
+  smooth: {
+    text: "銀",
+    style: { ...base, layers: [fill("#b9c2cc"), ...bevel({ size: 8 })] },
+  },
+  chisel: {
+    text: "銀",
+    style: {
+      ...base,
+      layers: [fill("#b9c2cc"), ...bevel({ size: 8, technique: "chisel" })],
+    },
+  },
+  "outline, stroke: 10": {
+    text: "銀",
+    style: {
+      ...base,
+      layers: [
+        stroke(10, "#4a5866"),
+        ...bevel({ stroke: 10, size: 4, depth: 2 }),
+        fill("#ffffff"),
+      ],
+    },
+  },
+};
+```
+
+A light from the opposite side (`angle: 135`) makes the glyph look sunken instead of raised. For an outer bevel or an emboss, bevel an outline layer with `stroke`, as in the last example.
+
+## Satin
+
+`satin()` paints silky bands inside the shape, where two copies of it shifted by `offset` and by `-offset` and softened by `size` differ. `invert: true` paints where they agree instead:
+
+```ts demo compare
+import { fill, satin, stroke } from "tellu";
+
+const base = { fontFamily: "Zen Maru Gothic", fontWeight: 900, fontSize: 96 };
+
+export default {
+  "satin()": {
+    text: "シルク",
+    style: {
+      ...base,
+      layers: [stroke(6, "#5b1240"), fill("#e0569b"), satin()],
+    },
+  },
+  "invert: true": {
+    text: "シルク",
+    style: {
+      ...base,
+      layers: [
+        stroke(6, "#5b1240"),
+        fill("#e0569b"),
+        satin({ color: "rgba(255,255,255,0.5)", invert: true }),
+      ],
+    },
+  },
+};
+```
+
+`satin()` defaults to `offset: [4, 4]` and `size: 8` in `rgba(0,0,0,0.5)`.
+
+### How shading works
+
+These helpers return ordinary layers with a `shading` property, which varies how strongly the layer paints its shape. `innerShadow()` is the same as:
+
+```ts
+{
+  paint: "rgba(0,0,0,0.6)",
+  stroke: 0,
+  shading: { type: "inset", offset: [4, 4], size: 4 },
+}
+```
+
+Shading is computed from each glyph's distance field, the same one round strokes are grown from, so it stays even on 長体 and 平体 glyphs, and its offsets and light direction stay in screen space for sideways glyphs in vertical text. The layer's own `offset`, `blur` and `opacity` still apply on top. See [`Shading`](/api/types#shading) for every option.
+
+Each glyph is shaded on its own. Where shaded outlines of neighbouring glyphs overlap, each one's bevel or inner shadow shows inside the other, as a seam across the merged outline. Shading the fill, or an outline narrow enough not to overlap its neighbours, avoids this.
+
 ## Stroke position
 
 By default a stroke grows the glyph **outward**, and the grown shape includes the glyph's interior. `strokePosition` changes that to a band:
@@ -194,7 +374,7 @@ export default {
 ```
 
 ::: info
-With non-uniform scaling (`scaleX` ≠ `scaleY`), strokes always use round joins. See [Typography](./typography#condensed-and-expanded-glyphs).
+With non-uniform scaling (`scaleX` ≠ `scaleY`), strokes always use round joins. See [Typography](./typography#condensed-and-expanded-glyphs). So do layers with `shading`.
 :::
 
 Round strokes are grown from the glyph's visible shape. Miter and bevel strokes use the browser's `strokeText`, which follows every contour in the font, including ones that overlap inside the glyph, and can leave small holes when a wide stroke overruns a small counter such as the loop of す.
@@ -284,6 +464,7 @@ tellu compares filters by identity. Create them outside your render function or 
 | `strokePosition` | `"outside" \| "inside" \| "center"` | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | |
 | `miterLimit` | `number` | `10` | |
+| `shading` | [`Shading`](/api/types#shading) | | Inner shadow, inner glow, bevel or satin |
 | `offset` | `[x, y]` | `[0, 0]` | |
 | `blur` | `number` | `0` | PixiJS `BlurFilter` strength, in CSS px |
 | `blurQuality` | `number` | `4` | Blur passes |
@@ -294,3 +475,4 @@ tellu compares filters by identity. Create them outside your render function or 
 | `id` | `string` | | Target for run patches |
 
 See [`Layer`](/api/types#layer) in the API reference.
+

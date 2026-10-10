@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow), gradient helpers, parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), gradient helpers, parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -54,6 +54,85 @@ All [`Layer`](./types#layer) options except `paint` and `stroke`, plus:
 | `color` | `"#ffffff"` | Any paint |
 | `stroke` | `8` | |
 | `blur` | `8` | |
+
+### `innerShadow()`
+
+```ts
+function innerShadow(options?: InnerShadowOptions): Layer;
+```
+
+A layer with [`InsetShading`](./types#insetshading): the inside of the shape, darkened along the edge the shadow is shifted away from. See [Inner shadows and glows](/guide/layers#inner-shadows-and-glows).
+
+### `InnerShadowOptions`
+
+All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `shading`, plus:
+
+| Option | Default | |
+| --- | --- | --- |
+| `color` | `"rgba(0,0,0,0.6)"` | Any paint |
+| `offset` | `[4, 4]` | Shift of the shadow inside the shape, not of the layer |
+| `size` | `4` | Width of the fade in px. `0` is a hard edge |
+| `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
+
+### `innerGlow()`
+
+```ts
+function innerGlow(options?: InnerGlowOptions): Layer;
+```
+
+A layer with [`InsetShading`](./types#insetshading) and no offset: the inside of the shape, lit along its whole edge.
+
+### `InnerGlowOptions`
+
+All [`Layer`](./types#layer) options except `paint`, `stroke` and `shading`, plus:
+
+| Option | Default | |
+| --- | --- | --- |
+| `color` | `"#ffffff"` | Any paint |
+| `size` | `8` | Width of the fade in px |
+| `stroke` | `0` | Light the glyph grown by this width, e.g. an outline |
+
+### `bevel()`
+
+```ts
+function bevel(options?: BevelOptions): [highlight: Layer, shadow: Layer];
+```
+
+Two layers with [`BevelShading`](./types#bevelshading), the highlight side and the shadow side. Spread them into `layers`: `[fill("#f5c542"), ...bevel()]`. See [Bevels](/guide/layers#bevels).
+
+### `BevelOptions`
+
+All [`Layer`](./types#layer) options except `paint`, `stroke` and `shading`, which apply to both layers, plus:
+
+| Option | Default | |
+| --- | --- | --- |
+| `highlight` | `"rgba(255,255,255,0.8)"` | Paint of the faces turned toward the light |
+| `shadow` | `"rgba(0,0,0,0.5)"` | Paint of the faces turned away from the light |
+| `size` | `4` | Width of the bevel in px |
+| `angle` | `315` | Direction the light comes from, in degrees clockwise from the top |
+| `depth` | `1` | Steepness of the bevel |
+| `technique` | `"smooth"` | `"smooth"` or `"chisel"` |
+| `stroke` | `0` | Bevel the glyph grown by this width, e.g. an outline |
+
+### `satin()`
+
+```ts
+function satin(options?: SatinOptions): Layer;
+```
+
+A layer with [`SatinShading`](./types#satinshading). See [Satin](/guide/layers#satin).
+
+### `SatinOptions`
+
+All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `shading`, plus:
+
+| Option | Default | |
+| --- | --- | --- |
+| `color` | `"rgba(0,0,0,0.5)"` | Any paint |
+| `offset` | `[4, 4]` | Shift of each copy of the shape, not of the layer |
+| `size` | `8` | Softness of the copies in px |
+| `invert` | `false` | Paint where the copies agree instead |
+| `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
 
 ## Gradients
 

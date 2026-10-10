@@ -21,7 +21,7 @@ hero:
 features:
   - icon: 🧅
     title: Unlimited layers
-    details: Outlines, shadows and glows are all layers, each with its own width, paint, offset, blur, opacity, blend mode and PixiJS filters.
+    details: Outlines, shadows, glows and bevels are all layers, each with its own width, paint, offset, blur, opacity, blend mode and PixiJS filters.
     link: /guide/layers
   - icon: 🎨
     title: Gradients that span the line

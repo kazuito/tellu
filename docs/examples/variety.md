@@ -1,5 +1,5 @@
 ---
-description: Variety-show captions to copy, including the classic gradient telop, punchline, cute glow, inner voice, impact pop and quiz reveal.
+description: Variety-show captions to copy, including the classic gradient telop, punchline, cute glow, inner voice, impact pop, gold lettering and quiz reveal.
 ---
 
 # Variety shows
@@ -167,6 +167,29 @@ export default (frame: number): TextNodeProps => ({
     };
   },
 });
+```
+
+## Gold lettering (金文字)
+
+A metallic gradient fill lit by a chisel bevel, inside a dark and a white outline.
+
+```ts demo
+import { bevel, fill, linearGradient, shadow, stroke } from "tellu";
+
+export default {
+  text: "祝・優勝！",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 96,
+    layers: [
+      shadow({ offset: [6, 8], blur: 6, stroke: 20 }),
+      stroke(20, "#ffffff"),
+      stroke(12, "#5a3200"),
+      fill(linearGradient(["#fffbe0", "#ffd84a", "#c88a10", "#ffe27a"])),
+      ...bevel({ size: 6, technique: "chisel" }),
+    ],
+  },
+};
 ```
 
 ## Quiz question and answer

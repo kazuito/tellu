@@ -1,5 +1,5 @@
 ---
-description: Known limitations of tellu, covering approximated vertical forms, no ruby, no ligatures, how overlapping outlines of different colors combine, and font declaration requirements.
+description: Known limitations of tellu, covering approximated vertical forms, no ruby, no ligatures, how overlapping outlines of different colors combine, per-glyph shading, and font declaration requirements.
 ---
 
 # Limitations
@@ -23,6 +23,10 @@ Scripts that depend on shaping across characters, such as Arabic and the Indic s
 Within one layer slot, glyphs merge with `max` blending, and per color channel the brighter value wins. When a pink outline overlaps a blue one in the same slot, the overlap shows a mix of the two rather than one cleanly on top.
 
 This rarely shows at normal letter spacing. When it does, give the overlapping runs different effects, such as a slightly different `opacity` (`0.999`), so they render as separate groups.
+
+## Shading is per glyph
+
+[Inner shadows, inner glows, bevels and satin](./layers#how-shading-works) are computed from each glyph's own shape. Where shaded outlines of neighbouring glyphs overlap, the shading of each glyph's edge shows across the merged outline as a seam. Shade the fill, or an outline that doesn't overlap its neighbours.
 
 ## Fonts must be declared before drawing
 

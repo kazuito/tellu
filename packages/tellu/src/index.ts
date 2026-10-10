@@ -21,12 +21,20 @@ export {
 export { parseMarkup } from "./markup";
 export { defaultKinsoku, defaultStyle, resolveStyle } from "./style/defaults";
 export {
+  type BevelOptions,
+  bevel,
   fill,
   type GlowOptions,
   glow,
+  type InnerGlowOptions,
+  type InnerShadowOptions,
+  innerGlow,
+  innerShadow,
   linearGradient,
   radialGradient,
+  type SatinOptions,
   type ShadowOptions,
+  satin,
   shadow,
   stroke,
 } from "./style/helpers";

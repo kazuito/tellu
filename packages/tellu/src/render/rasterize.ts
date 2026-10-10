@@ -143,7 +143,8 @@ export class GlyphRasterizer {
 
     // Chrome's strokeText leaves holes where a wide stroke overruns a small counter (the loop of す), so round
     // strokes are grown from a distance field. Other joins need the native stroker, which only scales uniformly.
-    if (isFill || (join !== "round" && scaleX === scaleY)) {
+    // Shading is computed from the distance field too.
+    if ((isFill || (join !== "round" && scaleX === scaleY)) && !layer.shading) {
       ctx.setTransform(...matrix, glyphX, glyphY);
       ctx.font = fontToCss(shape.font);
       ctx.fillStyle = ctx.strokeStyle = "#000";
@@ -175,6 +176,8 @@ export class GlyphRasterizer {
         SUPERSAMPLE,
         strokeWidth * res * SUPERSAMPLE,
         position,
+        layer.shading,
+        res * SUPERSAMPLE,
       );
       ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
     }

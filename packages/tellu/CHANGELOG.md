@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `wrap: "balance"`, which makes the lines of each paragraph about equally long, and `wrap: "pretty"`, which avoids a last line with a single word, phrase or character (泣き別れ). The new `TextWrap` type names every `wrap` mode.
 - `<Text>` in `tellu/react` and `tellu/remotion` is now accessible: it renders the caption's text in a visually hidden element for screen readers and find-in-page, and hides the canvas from assistive technology. The new `alt` prop replaces that text, and `alt=""` marks a caption as decorative.
 - `autospace` option (和欧間アキ): adds space between kana or kanji and Latin letters or digits, a quarter em with `true` or any `Length`.
+- Layer `shading` and the helpers `innerShadow()`, `innerGlow()`, `bevel()` and `satin()`, for the inner shadow, inner glow, bevel and satin layer styles of Photoshop. A shaded layer paints the inside of its shape with a strength computed from the distance to the shape's edge: shifted and faded from the edge (`type: "inset"`), lit as a smooth or chiseled bevel from a light direction (`type: "bevel"`, whose `bevel()` helper returns a highlight layer and a shadow layer), or in silky bands (`type: "satin"`). With `stroke`, outlines can be shaded too. Shading is computed per glyph, so the shaded outlines of overlapping neighbours show a seam, and shaded layers always render round joins.
 
 ### Fixed
 

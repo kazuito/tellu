@@ -29,13 +29,14 @@ The output, a [`Layout`](/api/layout#layout), is plain data. You can call [`layo
 
 Each **glyph × layer** pair is drawn once with Canvas 2D into its own small bitmap:
 
-- Fills use `fillText`. Strokes with a miter or bevel join use native `strokeText`.
+- Fills use `fillText`, unless they are shaded. Strokes with a miter or bevel join use native `strokeText`.
 - Sideways glyphs in vertical text are rotated inside their bitmap, so paint, outlines and glyph transforms stay in screen space.
 - Round strokes (the default join) are grown from a supersampled **signed distance field** of the rendered glyph. Chrome's `strokeText` leaves holes where a wide stroke overruns a small counter, such as the loop of す; the distance field fills them.
 - With condensed or expanded glyphs (`scaleX` ≠ `scaleY`), stretching a native stroke would make it uneven, so every stroke is grown from the distance field of the scaled glyph and keeps the same width on every side.
+- [Shading](./layers#how-shading-works) (inner shadows, inner glows, bevels and satin) is computed from the same distance field: how far each pixel is from the edge of the layer's shape sets how strongly it is painted, and the field's slope gives a bevel its lighting.
 - Gradients and patterns are positioned relative to their [scope](./paint#paint-scope) box (glyph, line or block), so a glyph-sized bitmap can still carry its slice of a line-wide gradient.
 
-Bitmaps are cached by glyph, font, scale, sub-pixel offset (in quarter pixels), layer shape, paint and scope box. The cache is shared by every node: repeated characters, repeated renders and other captions in the same style reuse the same bitmaps. Bitmaps no caption shows anymore are kept up to 64 MB, least recently used first, so the next subtitle or credit line often finds its glyphs ready.
+Bitmaps are cached by glyph, font, scale, sub-pixel offset (in quarter pixels), layer shape, shading, paint and scope box. The cache is shared by every node: repeated characters, repeated renders and other captions in the same style reuse the same bitmaps. Bitmaps no caption shows anymore are kept up to 64 MB, least recently used first, so the next subtitle or credit line often finds its glyphs ready.
 
 ## 3. Compose
 

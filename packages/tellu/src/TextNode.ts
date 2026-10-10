@@ -191,6 +191,7 @@ export class TextNode extends Container {
           fracY,
           reach[index],
           stableKey(layerShape(layer)),
+          stableKey(layer.shading ?? null),
           paintKey(layer.paint),
           paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
         ].join("\u0000");

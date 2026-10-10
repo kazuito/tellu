@@ -106,6 +106,7 @@ Every layer is the glyph shape grown by `stroke` px and painted with `paint`:
 | `stroke` | `0` | `0` paints the glyph itself |
 | `strokePosition` | `"outside"` | `"inside"` / `"center"` draw a band along the outline |
 | `join` / `miterLimit` | `"round"` / `10` | |
+| `shading` | | inner shadow, inner glow, bevel or satin, painted inside the shape |
 | `offset` | `[0, 0]` | |
 | `blur` / `blurQuality` | `0` / `4` | PixiJS `BlurFilter` strength / quality |
 | `opacity` | `1` | applied to the merged layer, so overlapping outlines don't darken |
@@ -115,7 +116,7 @@ Every layer is the glyph shape grown by `stroke` px and painted with `paint`:
 
 Layers are composited per slot: the outlines of all glyphs are drawn before any fill, so neighbouring outlines merge the way telop software does.
 
-Helpers: `fill(paint)`, `stroke(width, paint)`, `shadow({ color, offset, blur, stroke })`, `glow({ color, stroke, blur })`.
+Helpers: `fill(paint)`, `stroke(width, paint)`, `shadow({ color, offset, blur, stroke })`, `glow({ color, stroke, blur })`, and for shading `innerShadow()`, `innerGlow()`, `bevel()` (two layers, highlight and shadow) and `satin()`.
 
 ### Paint scope
 
