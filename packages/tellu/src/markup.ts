@@ -5,10 +5,12 @@ const TAG = /<(\/?)([A-Za-z][\w-]*)\s*(\/?)>/g;
 const ENTITIES: Record<string, string> = { "&lt;": "<", "&gt;": ">", "&amp;": "&", "&quot;": '"', "&#39;": "'" };
 
 /**
- * Parses `<tag>…</tag>` markup into runs. Tags nest; inner tag styles win.
- * `<br/>` inserts a line break. `&lt;`, `&gt;` and `&amp;` escape markup characters.
+ * Parses `<tag>…</tag>` markup into runs, each styled by the overrides of its enclosing tags. Tags nest and inner
+ * tags win. Tags missing from `tags` apply no style but are still listed in each run's `tags`, so `glyphTransform`
+ * can target them. `<br/>` inserts a line break; `&lt;` `&gt;` `&amp;` `&quot;` `&#39;` are unescaped.
  *
- * @example parseMarkup("今日は<em>最高</em>の日", { em: { fontSize: 96, layers: { 2: { paint: "red" } } } })
+ * @throws On an unclosed tag or an unexpected closing tag.
+ * @example parseMarkup("今日は<em>最高</em>の日", { em: { fontSize: 96, layers: { fill: { paint: "red" } } } })
  */
 export function parseMarkup(markup: string, tags: Readonly<Record<string, StyleOverride>> = {}): RunObject[] {
   const runs: RunObject[] = [];

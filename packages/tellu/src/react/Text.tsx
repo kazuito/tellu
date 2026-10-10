@@ -15,6 +15,10 @@ import { TextNode } from "../TextNode";
 import type { DrawResult, TextRenderer } from "../TextRenderer";
 import { useTextRenderer } from "./context";
 
+/**
+ * Point of the layout box placed at the element's position: a named point, or `[x, y]` as fractions of the layout box
+ * (`[0.5, 1]` = bottom center).
+ */
 export type Anchor =
   | "top-left"
   | "top"
@@ -56,20 +60,26 @@ const ANCHORS: Record<Exclude<Anchor, readonly [number, number]>, readonly [numb
   "bottom-right": [1, 1],
 };
 
+/** The region drawn into the canvas, relative to the layout box, plus the node and its layout. */
 export interface TextDrawEvent extends DrawResult {
+  /** The layout that was drawn, e.g. to read the number of lines or the `shrink` scale. */
   layout: Layout;
   node: TextNode;
 }
 
+/** Every `TextNodeProps` option, with `style` renamed to `textStyle`, plus props for the element and its lifecycle. */
 export interface TextProps extends Omit<TextNodeProps, "style"> {
-  /** Text style (font, layers, …). `style` styles the wrapper element. */
+  /** Text style (font, layers, …), the `style` of `TextNodeProps`. `style` styles the wrapper element. */
   textStyle?: Partial<TextStyle>;
   /**
    * Point of the layout box placed at the element's position, applied as a CSS translate.
    * Default: `"top-left"` (no translate).
    */
   anchor?: Anchor;
-  /** Default: `devicePixelRatio`. */
+  /**
+   * Pixel density of the canvas. Raise it when the element is scaled up, e.g. inside a CSS-transformed stage.
+   * Default: `devicePixelRatio`.
+   */
   resolution?: number;
   /**
    * Text for screen readers and find-in-page in place of the caption's text, which the canvas hides from them.
@@ -78,19 +88,31 @@ export interface TextProps extends Omit<TextNodeProps, "style"> {
   alt?: string;
   /** Wait for web fonts before drawing so no fallback font is ever measured. Default: `true`. */
   waitForFonts?: boolean;
+  /** Default: the one from `<TextRendererProvider>`, or `TextRenderer.shared()`. */
   renderer?: TextRenderer;
+  /** Text measurement backend. Only read when the component mounts. Default: `getDefaultMeasurer()`. */
   measurer?: Measurer;
+  /** Class of the wrapper `<div>`. */
   className?: string;
+  /** Style of the wrapper `<div>`, merged over its `position: relative` and `display: inline-block`. */
   style?: CSSProperties;
+  /** Called after each draw. A render that changes nothing the caption paints skips both the draw and this call. */
   onDraw?: (event: TextDrawEvent) => void;
   /** `true` while fonts or the renderer are loading, i.e. while the canvas may not match the props. */
   onPendingChange?: (pending: boolean) => void;
+  /** Called when the renderer, a font or a draw fails. Without it, draw errors throw to the nearest error boundary. */
   onError?: (error: unknown) => void;
 }
 
 /**
- * Draws text into a canvas. The element takes the size of the layout box; outlines, shadows and
- * transformed glyphs may paint outside of it.
+ * Draws a caption into a canvas. The element takes the size of the layout box; outlines, shadows and transformed
+ * glyphs may paint outside of it. It waits for the fonts it needs, re-measures when web fonts finish loading, and keeps
+ * the caption's text readable by screen readers and find-in-page. The ref is the wrapper `<div>`.
+ *
+ * Re-rendering is cheap: unchanged props don't redraw, and a new `glyphTransform` alone only moves the existing glyphs,
+ * so it can change every frame.
+ *
+ * @example <Text text="テロップ" textStyle={{ fontSize: 64 }} maxWidth={800} anchor="bottom" />
  */
 export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, ref): ReactNode {
   const {

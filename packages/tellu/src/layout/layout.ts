@@ -17,17 +17,24 @@ import {
 } from "./segment";
 import { combineUpright, isVertical, type VerticalOrientation, verticalOrientation, verticalShift } from "./vertical";
 
+/** A run of text with its full style. */
 export interface ResolvedRun {
   text: string;
+  /** The base style with the run's override applied. */
   style: TextStyle;
+  /** Markup tags enclosing the run, outermost first. */
   tags: readonly string[];
 }
 
+/** One positioned glyph: a grapheme cluster, or a whole 縦中横 group in vertical text. All lengths are in px. */
 export interface LayoutGlyph {
+  /** Index among all glyphs, including whitespace. */
   index: number;
   text: string;
+  /** Index of its run in `Layout.runs`. */
   runIndex: number;
   lineIndex: number;
+  /** Index within its line. */
   indexInLine: number;
   isWhitespace: boolean;
   /**
@@ -46,13 +53,15 @@ export interface LayoutGlyph {
   scaleX: number;
   /** Vertical scale on screen, including `squeeze` in vertical text. */
   scaleY: number;
-  /** Font ascent and descent in the glyph's own orientation, scaled. */
+  /** Font ascent in the glyph's own orientation, scaled. */
   ascent: number;
+  /** Font descent in the glyph's own orientation, scaled. */
   descent: number;
   /** The glyph's cell in layout coordinates: its advance along the line × the font's extent across it. */
   box: Box;
 }
 
+/** One line, horizontal or vertical. "Inline" runs along the line and "block" across the lines. */
 export interface LayoutLine {
   index: number;
   /** Glyph index range `[start, end)`. */
@@ -68,28 +77,39 @@ export interface LayoutLine {
   blockSize: number;
   /** The baseline: y in horizontal text, x of the central baseline in vertical text. */
   baseline: number;
-  /** Extent of the fonts from the baseline: up / down in horizontal text, right / left in vertical text. */
+  /** Extent of the fonts from the baseline: up in horizontal text, right in vertical text. */
   ascent: number;
+  /** Extent of the fonts from the baseline: down in horizontal text, left in vertical text. */
   descent: number;
   /** The content in layout coordinates: its length along the line × `ascent + descent` across it. */
   contentBox: Box;
 }
 
+/** Where every glyph and line goes, in layout coordinates: px from the top-left of the layout box. */
 export interface Layout {
   writingMode: WritingMode;
   runs: ResolvedRun[];
+  /** Every glyph in text order, whitespace included. */
   glyphs: LayoutGlyph[];
   /** In order: top → bottom, right → left (`vertical-rl`) or left → right (`vertical-lr`). */
   lines: LayoutLine[];
-  /** Layout box size. The line length is `maxWidth` (`maxHeight` in vertical text) when given. */
+  /**
+   * Layout box width: the line length in horizontal text (`maxWidth`, or the longest line without it), and the line
+   * boxes stacked in vertical text.
+   */
   width: number;
+  /**
+   * Layout box height: the line boxes stacked in horizontal text, and the line length in vertical text (`maxHeight`,
+   * or the longest line without it).
+   */
   height: number;
-  /** Font scale applied by `overflow: "shrink"`. */
+  /** Font scale applied by `overflow: "shrink"`, `1` without shrinking. */
   fontScale: number;
 }
 
 const EPSILON = 0.01;
 
+/** Resolves `text` into runs with full styles, applying each run's override to `base`. */
 export function normalizeRuns(text: TextContent, base: TextStyle): ResolvedRun[] {
   const runs = typeof text === "string" ? [text] : text;
   return runs.map((run) =>
@@ -123,6 +143,14 @@ interface LineRange {
   forced: boolean;
 }
 
+/**
+ * Lays out text without rendering it, exactly as `TextNode` does: line breaking, alignment and fitting. Load the fonts
+ * first, or pass your own `measurer` to lay out outside the browser.
+ *
+ * @example
+ * const layout = layoutText({ text: "長いテロップを折り返す", maxWidth: 400, style: { fontSize: 48 } });
+ * layout.lines.length; // number of lines
+ */
 export function layoutText(options: LayoutOptions, measurer: Measurer = getDefaultMeasurer()): Layout {
   const base = resolveStyle(options.style);
   const runs = normalizeRuns(options.text, base);

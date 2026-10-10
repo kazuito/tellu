@@ -12,9 +12,9 @@ import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } f
 import { stableKey } from "./utils/stableKey";
 
 export interface TextNodeOptions {
-  /** Text measurement backend. Default: Canvas 2D. */
+  /** Text measurement backend. Default: `getDefaultMeasurer()` (Canvas 2D). */
   measurer?: Measurer;
-  /** Pixel density of the generated glyph bitmaps. Default: `devicePixelRatio` or `1`. */
+  /** Pixel density of the glyph bitmaps. Raise it when the node is scaled up. Default: `devicePixelRatio` or `1`. */
   resolution?: number;
 }
 
@@ -29,8 +29,17 @@ const DEG = Math.PI / 180;
 const SUBPIXEL_STEPS = 4;
 
 /**
- * Styled text as a PixiJS container. Add it to any scene, or draw it with `TextRenderer`.
+ * Styled text as a PixiJS container. Add it to any scene, or draw it into a canvas with `TextRenderer`.
  * The local origin is the top-left of the layout box.
+ *
+ * Text is laid out and rasterized synchronously, in the constructor and whenever the props change, so
+ * `await loadFonts(props)` first. Setting equal props again doesn't rebuild, and a change to `glyphTransform` alone
+ * only moves the existing glyphs. Call `destroy()` when done to release the shared glyph bitmaps.
+ *
+ * @example
+ * await loadFonts(props);
+ * const node = new TextNode(props);
+ * app.stage.addChild(node);
  */
 export class TextNode extends Container {
   private _props: TextNodeProps;
@@ -55,6 +64,7 @@ export class TextNode extends Container {
     this.refresh();
   }
 
+  /** The current props. Setting them replaces all props and refreshes; `update()` merges instead. */
   get props(): TextNodeProps {
     return this._props;
   }
@@ -64,13 +74,14 @@ export class TextNode extends Container {
     this.refresh();
   }
 
-  /** Merges `props` into the current props. */
+  /** Merges `props` into the current props and refreshes. */
   update(props: Partial<TextNodeProps>): this {
     this._props = { ...this._props, ...props };
     this.refresh();
     return this;
   }
 
+  /** Pixel density of the glyph bitmaps. Setting it re-rasterizes the text. */
   get resolution(): number {
     return this._resolution;
   }
@@ -80,21 +91,28 @@ export class TextNode extends Container {
     this.refresh();
   }
 
-  /** Increments whenever what this node paints changes: a rebuild, or glyph transforms with new output. */
+  /**
+   * Increments whenever what this node paints changes: a rebuild, or glyph transforms with new output. Compare it with
+   * the value at the last draw to skip redundant draws.
+   */
   get revision(): number {
     return this._revision;
   }
 
+  /** The current layout: lines, glyph positions and the layout box size. */
   get layout(): Layout {
     return this._layout!;
   }
 
-  /** The layout box, `(0, 0, width, height)`. */
+  /** The layout box, `(0, 0, width, height)`. Outlines, shadows and transformed glyphs may paint outside it. */
   get layoutBounds(): Rectangle {
     return new Rectangle(0, 0, this.layout.width, this.layout.height);
   }
 
-  /** Everything this node paints, including outlines, shadows, blur and glyph transforms, in local coordinates. */
+  /**
+   * Everything this node paints, including the plate, outlines, shadows, blur and glyph transforms, in local
+   * coordinates. Empty (`0 × 0`) when nothing is painted.
+   */
   getInkBounds(): Rectangle {
     let minX = Infinity;
     let minY = Infinity;
@@ -117,6 +135,8 @@ export class TextNode extends Container {
   /**
    * Re-measures and redraws everything, e.g. after a web font finished loading. Glyph bitmaps are shared
    * between nodes, so this drops them for every node; other nodes keep theirs until they rebuild.
+   * `<Text>` calls it when web fonts finish loading; with a bare `TextNode`, call it when a font arrives after the
+   * node was built.
    */
   invalidate(): void {
     if ("clear" in this.measurer && typeof this.measurer.clear === "function") this.measurer.clear();
@@ -125,7 +145,10 @@ export class TextNode extends Container {
     this.refresh();
   }
 
-  /** Rebuilds what changed since the last call. Cheap when only `glyphTransform` output changes. */
+  /**
+   * Rebuilds if anything but `glyphTransform` changed, then reapplies glyph transforms. Setting props calls it; call it
+   * yourself when `glyphTransform` reads state that changed, such as the current frame.
+   */
   refresh(): void {
     const { glyphTransform: _, ...rest } = this._props;
     const key = stableKey([rest, this._resolution]);
@@ -271,7 +294,10 @@ export class TextNode extends Container {
     this.transformed = !!fn;
   }
 
-  /** Destroys the node and its children. Glyph textures are shared with other nodes, so `options` can't destroy them. */
+  /**
+   * Destroys the node and its children and releases its glyph bitmaps. Glyph textures are shared with other nodes, so
+   * `options` can't destroy them, and filters passed in props are left alone.
+   */
   override destroy(_options?: DestroyOptions): void {
     for (const child of [...this.glyphLayer.children, ...this.plateLayer.children]) destroyFilters(child);
     this.textures.clear();
@@ -367,6 +393,10 @@ function destroyFilters(container: Container): void {
   container.filters = null;
 }
 
+/**
+ * The `GlyphContext` of every glyph, as `glyphTransform` receives them. Use it with `layoutText()` to plan animation
+ * timing (e.g. the total duration from `visibleCount`) before creating a node.
+ */
 export function createGlyphContexts(layout: Layout): GlyphContext[] {
   const visibleCount = layout.glyphs.filter((glyph) => !glyph.isWhitespace).length;
   let visibleIndex = 0;

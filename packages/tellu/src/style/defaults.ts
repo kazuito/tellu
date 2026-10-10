@@ -1,5 +1,6 @@
 import type { KinsokuRules, Length, LineHeight, TextStyle } from "./types";
 
+/** The style every run starts from: white 64px `sans-serif` text with no outline. */
 export const defaultStyle: TextStyle = {
   fontFamily: "sans-serif",
   fontSize: 64,
@@ -17,6 +18,7 @@ export const defaultStyle: TextStyle = {
   layers: [{ paint: "#ffffff" }],
 };
 
+/** The line breaking rules `kinsoku: true` applies. Extend a set by concatenating to it. */
 export const defaultKinsoku: KinsokuRules = {
   lineStart:
     ",)]}、〕〉》」』】〙〗〟’”｠»" +
@@ -27,6 +29,7 @@ export const defaultKinsoku: KinsokuRules = {
   hanging: "、。,.，．",
 };
 
+/** `defaultStyle` with `style` applied, ignoring `undefined` values. */
 export function resolveStyle(style: Partial<TextStyle> | undefined): TextStyle {
   return style ? { ...defaultStyle, ...stripUndefined(style) } : defaultStyle;
 }

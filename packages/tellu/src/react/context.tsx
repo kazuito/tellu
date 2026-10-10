@@ -4,16 +4,24 @@ import { TextRenderer } from "../TextRenderer";
 const RendererContext = createContext<TextRenderer | Promise<TextRenderer> | null>(null);
 
 export interface TextRendererProviderProps {
-  /** Renderer used by `<Text>` components below. Default: `TextRenderer.shared()`. */
+  /** Renderer used by `<Text>` components below. A promise is awaited; `<Text>` stays pending until it resolves. */
   renderer: TextRenderer | Promise<TextRenderer>;
   children?: ReactNode;
 }
 
+/**
+ * Gives every `<Text>` below a renderer other than `TextRenderer.shared()`, e.g. one with custom PixiJS options.
+ *
+ * @example <TextRendererProvider renderer={TextRenderer.create({ powerPreference: "high-performance" })}>…
+ */
 export function TextRendererProvider({ renderer, children }: TextRendererProviderProps): ReactNode {
   return <RendererContext.Provider value={renderer}>{children}</RendererContext.Provider>;
 }
 
-/** The renderer for this subtree, or `null` while it is being created. */
+/**
+ * The renderer for this subtree: the provider's, or `TextRenderer.shared()`. `null` while it is being created;
+ * `onError` receives a failure to create it.
+ */
 export function useTextRenderer(onError?: (error: unknown) => void): TextRenderer | null {
   const source = useContext(RendererContext);
   const [renderer, setRenderer] = useState<TextRenderer | null>(source instanceof TextRenderer ? source : null);

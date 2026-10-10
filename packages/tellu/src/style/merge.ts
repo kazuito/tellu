@@ -14,7 +14,10 @@ export function applyLayerPatch(layers: readonly Layer[], patch: LayerPatch): La
   });
 }
 
-/** Combines an outer override with an inner one; the inner one wins. */
+/**
+ * Combines an outer override with an inner one; the inner one wins. Layer patches merge key by key, and an inner patch
+ * applies to an outer layer array. This is how nested markup tags combine.
+ */
 export function mergeOverrides(
   outer: StyleOverride | undefined,
   inner: StyleOverride | undefined,
@@ -38,6 +41,10 @@ function mergeLayerPatches(outer: LayerPatch, inner: LayerPatch): LayerPatch {
   return merged;
 }
 
+/**
+ * Applies a run's override to a full style: an array of `layers` replaces them, an object patches them by index or
+ * `id`. `undefined` values are ignored.
+ */
 export function applyOverride(base: TextStyle, override: StyleOverride | undefined): TextStyle {
   if (!override) return base;
   const { layers, ...rest } = override;

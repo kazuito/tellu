@@ -12,22 +12,42 @@ import type {
 
 type LayerOptions = Omit<Layer, "paint" | "stroke">;
 
+/**
+ * A layer that paints the glyph itself.
+ *
+ * @example fill(linearGradient(["#fff6c0", "#f5b400"]))
+ */
 export function fill(paint: Paint, options?: LayerOptions): Layer {
   return { ...options, paint, stroke: 0 };
 }
 
+/**
+ * An outline: the glyph grown by `width` px. Put it below the fill; `options.strokePosition` makes inside or centered
+ * strokes.
+ *
+ * @example layers: [stroke(16, "#000"), stroke(8, "#e60033"), fill("#fff")]
+ */
 export function stroke(width: number, paint: Paint, options?: LayerOptions): Layer {
   return { ...options, paint, stroke: width };
 }
 
 export interface ShadowOptions extends Omit<LayerOptions, "offset"> {
+  /** Default: `"rgba(0,0,0,0.6)"`. */
   color?: Paint;
-  /** `[x, y]` offset. Default: `[4, 4]`. */
+  /** `[x, y]` offset in px. Default: `[4, 4]`. */
   offset?: readonly [number, number];
   /** Grow the shadow shape, e.g. to cast the shadow of an outline. Default: `0`. */
   stroke?: number;
+  /** Default: `4`. */
+  blur?: number;
 }
 
+/**
+ * A drop shadow: the glyph, offset and blurred. Put it first so it sits below the other layers; give it the width of
+ * the widest outline as `stroke` to cast the outline's shadow.
+ *
+ * @example layers: [shadow({ stroke: 12, offset: [6, 6] }), stroke(12, "#000"), fill("#fff")]
+ */
 export function shadow({
   color = "rgba(0,0,0,0.6)",
   offset = [4, 4],
@@ -38,18 +58,23 @@ export function shadow({
 }
 
 export interface GlowOptions extends LayerOptions {
+  /** Default: `"#ffffff"`. */
   color?: Paint;
-  /** Default: `8`. */
+  /** How far the glow reaches out from the glyph, in px, before the blur. Default: `8`. */
   stroke?: number;
+  /** Default: `8`. */
+  blur?: number;
 }
 
+/** A soft halo around the glyph: the glyph grown by `stroke` and blurred. Put it below the fill. */
 export function glow({ color = "#ffffff", stroke = 8, ...options }: GlowOptions = {}): Layer {
   return { blur: 8, ...options, paint: color, stroke };
 }
 
 export interface InnerShadowOptions extends Omit<LayerOptions, "offset" | "shading"> {
+  /** Default: `"rgba(0,0,0,0.6)"`. */
   color?: Paint;
-  /** `[x, y]` offset of the shadow. Default: `[4, 4]`. */
+  /** `[x, y]` offset of the shadow inside the shape (the layer itself stays in place). Default: `[4, 4]`. */
   offset?: readonly [number, number];
   /** Width of the fade in px. `0` is a hard edge. Default: `4`. */
   size?: number;
@@ -57,6 +82,10 @@ export interface InnerShadowOptions extends Omit<LayerOptions, "offset" | "shadi
   stroke?: number;
 }
 
+/**
+ * A shadow cast inside the glyph, as if it were cut out: darkens the edge the shadow is offset away from. Put it above
+ * the fill it shades.
+ */
 export function innerShadow({
   color = "rgba(0,0,0,0.6)",
   offset = [4, 4],
@@ -68,6 +97,7 @@ export function innerShadow({
 }
 
 export interface InnerGlowOptions extends Omit<LayerOptions, "shading"> {
+  /** Default: `"#ffffff"`. */
   color?: Paint;
   /** Width of the fade in px. Default: `8`. */
   size?: number;
@@ -75,6 +105,7 @@ export interface InnerGlowOptions extends Omit<LayerOptions, "shading"> {
   stroke?: number;
 }
 
+/** Light along the whole inner edge of the glyph, fading toward its inside. Put it above the fill it lights. */
 export function innerGlow({ color = "#ffffff", size = 8, stroke = 0, ...options }: InnerGlowOptions = {}): Layer {
   return { ...options, paint: color, stroke, shading: { type: "inset", size } };
 }
@@ -88,7 +119,11 @@ export interface BevelOptions extends Omit<LayerOptions, "shading">, Omit<BevelS
   stroke?: number;
 }
 
-/** Two layers, the highlight and then the shadow side of the bevel. */
+/**
+ * An embossed edge, as two layers: the highlight side, then the shadow side. Spread them above the fill they light.
+ *
+ * @example layers: [stroke(8, "#000"), fill("#f5c542"), ...bevel({ size: 6 })]
+ */
 export function bevel({
   highlight = "rgba(255,255,255,0.8)",
   shadow = "rgba(0,0,0,0.5)",
@@ -107,11 +142,13 @@ export function bevel({
 }
 
 export interface SatinOptions extends Omit<LayerOptions, "offset" | "shading">, Omit<SatinShading, "type"> {
+  /** Default: `"rgba(0,0,0,0.5)"`. */
   color?: Paint;
   /** Shade the glyph grown by this many px, e.g. an outline. Default: `0`. */
   stroke?: number;
 }
 
+/** Silky bands of `color` inside the glyph, like Photoshop's satin. Put it above the fill it shades. */
 export function satin({
   color = "rgba(0,0,0,0.5)",
   offset = [4, 4],
@@ -123,6 +160,12 @@ export function satin({
   return { ...options, paint: color, stroke, shading: { type: "satin", offset, size, invert } };
 }
 
+/**
+ * A linear gradient. Plain colors are spread evenly from `0` to `1`; use `[offset, color]` stops to place them.
+ * `angle` is a CSS angle in degrees (default `180`, top → bottom) and `scope` defaults to `"line"`.
+ *
+ * @example linearGradient(["#ffffff", "#ffd400"], { angle: 180, scope: "glyph" })
+ */
 export function linearGradient(
   stops: readonly GradientStopInput[] | readonly ColorValue[],
   options: { angle?: number; scope?: PaintScope } = {},
@@ -130,6 +173,11 @@ export function linearGradient(
   return { type: "linear", ...options, stops: normalizeStopInput(stops) };
 }
 
+/**
+ * A radial gradient. Plain colors are spread evenly from the center (`0`) outward (`1`). `center` is a fraction of the
+ * scope box (default `[0.5, 0.5]`), `radius` a factor of the distance to its farthest corner (default `1`), and
+ * `scope` defaults to `"line"`.
+ */
 export function radialGradient(
   stops: readonly GradientStopInput[] | readonly ColorValue[],
   options: { center?: readonly [number, number]; radius?: number; scope?: PaintScope } = {},

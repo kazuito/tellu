@@ -8,21 +8,33 @@ function nextPowerOfTwo(value: number, min: number): number {
   return Math.max(min, 2 ** Math.ceil(Math.log2(Math.max(1, value))));
 }
 
+/**
+ * PixiJS renderer options, merged over tellu's defaults: `preference: "webgl"`, `backgroundAlpha: 0`,
+ * `antialias: false` and `preserveDrawingBuffer: true`.
+ */
 export interface TextRendererOptions extends Partial<AutoDetectOptions> {}
 
 export interface DrawOptions {
-  /** Output pixel density. Default: the node's resolution. */
+  /**
+   * Output pixel density. It becomes the node's `resolution`, so a new value re-rasterizes the node.
+   * Default: the node's resolution.
+   */
   resolution?: number;
   /** Region of the node to draw, in its local coordinates. Default: its ink bounds. */
   bounds?: { x: number; y: number; width: number; height: number };
 }
 
+/** The region drawn into the target canvas, in the node's local coordinates (CSS px). */
 export interface DrawResult {
-  /** Drawn region in the node's local coordinates. */
+  /** Left of the drawn region: where to place the canvas relative to the layout box. Whole px. */
   x: number;
+  /** Top of the drawn region: where to place the canvas relative to the layout box. Whole px. */
   y: number;
+  /** Width of the drawn region; show the canvas at this CSS width. */
   width: number;
+  /** Height of the drawn region; show the canvas at this CSS height. */
   height: number;
+  /** Pixels per CSS px: the canvas is `width × resolution` pixels wide. */
   resolution: number;
 }
 
@@ -37,8 +49,12 @@ export class TextRenderer {
   private capacityHeight = 0;
   private capacityResolution = 0;
 
-  private constructor(readonly renderer: Renderer) {}
+  private constructor(
+    /** The underlying PixiJS renderer. */
+    readonly renderer: Renderer,
+  ) {}
 
+  /** Creates a renderer with its own WebGL context. Prefer `shared()` unless you need separate options. */
   static async create(options: TextRendererOptions = {}): Promise<TextRenderer> {
     const renderer = await autoDetectRenderer({
       preference: "webgl",
@@ -53,7 +69,10 @@ export class TextRenderer {
     return new TextRenderer(renderer);
   }
 
-  /** The renderer shared by `<Text>` components. Options only apply to the first call. */
+  /**
+   * The renderer shared by `<Text>` components and `createCanvasText()`, created on the first call. Options only apply
+   * to that call. If creating it fails, the next call tries again.
+   */
   static shared(options?: TextRendererOptions): Promise<TextRenderer> {
     TextRenderer.sharedRenderer ??= TextRenderer.create(options).catch((error: unknown) => {
       TextRenderer.sharedRenderer = undefined;
@@ -64,7 +83,10 @@ export class TextRenderer {
 
   /**
    * Renders `node` and copies the result into `target`, resizing it to the drawn region.
-   * Runs synchronously, so the target is complete when this returns.
+   * Runs synchronously, so the target is complete when this returns. The node is drawn in its own local space: its
+   * position, scale, rotation and parent are ignored, so a node in a scene can still be drawn on its own.
+   *
+   * @throws If `target` has no 2D context, e.g. it already has a WebGL one.
    */
   draw(node: TextNode, target: AnyCanvas, options: DrawOptions = {}): DrawResult {
     const resolution = options.resolution ?? node.resolution;
@@ -141,6 +163,10 @@ export class TextRenderer {
     this.renderer.resize(this.capacityWidth / resolution, this.capacityHeight / resolution, resolution);
   }
 
+  /**
+   * Destroys the renderer and its WebGL context. After destroying the shared one, the next `shared()` call creates a
+   * new one.
+   */
   destroy(): void {
     if (TextRenderer.sharedRenderer) {
       void TextRenderer.sharedRenderer.then((shared) => {

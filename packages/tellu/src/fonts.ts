@@ -10,7 +10,7 @@ export interface FontRequest {
   text: string;
 }
 
-/** The fonts (and the characters drawn with each) the text needs. */
+/** The fonts the text needs, and the characters drawn with each. */
 export function fontRequests(options: Pick<LayoutOptions, "text" | "style">): FontRequest[] {
   const requests = new Map<string, string>();
   for (const run of normalizeRuns(options.text, resolveStyle(options.style))) {
@@ -24,7 +24,7 @@ function fontFaceSet(): FontFaceSet | undefined {
   return typeof document !== "undefined" ? document.fonts : undefined;
 }
 
-/** Whether every font face the text needs is loaded. */
+/** Whether every font face the text needs is loaded. Always `true` outside the browser. */
 export function fontsReady(options: Pick<LayoutOptions, "text" | "style">): boolean {
   const fonts = fontFaceSet();
   if (!fonts) return true;
@@ -37,7 +37,13 @@ export function fontsReady(options: Pick<LayoutOptions, "text" | "style">): bool
   });
 }
 
-/** Loads every font face the text needs. Resolves when they can be measured. */
+/**
+ * Loads every font face the text needs, including the `unicode-range` subsets of its characters, through
+ * `document.fonts.load()`. Resolves when they can be measured, or at once outside the browser. Only faces already
+ * declared by `@font-face` rules can load: load the stylesheet first, or text silently falls back to another font.
+ *
+ * @example await loadFonts({ text: "テロップ", style: { fontFamily: "Noto Sans JP", fontWeight: 900 } })
+ */
 export async function loadFonts(
   options: Pick<LayoutOptions, "text" | "style"> | readonly FontRequest[],
 ): Promise<void> {
@@ -52,12 +58,15 @@ export async function loadFonts(
 let fontEpoch = 0;
 const epochListeners = new Set<() => void>();
 
-/** Increments whenever the document finishes loading web fonts. */
+/** A counter that increments whenever the document finishes loading web fonts. Pairs with `subscribeFontEpoch()`. */
 export function getFontEpoch(): number {
   return fontEpoch;
 }
 
-/** Calls `listener` after the document finishes loading web fonts. Returns an unsubscribe function. */
+/**
+ * Calls `listener` after the document finishes loading web fonts. Returns an unsubscribe function. With
+ * `getFontEpoch()` it fits React's `useSyncExternalStore`, to re-measure text once late fonts arrive.
+ */
 export function subscribeFontEpoch(listener: () => void): () => void {
   const fonts = fontFaceSet();
   if (!fonts) return () => {};

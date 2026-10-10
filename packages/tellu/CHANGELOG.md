@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Every public export now has editor documentation (JSDoc): what each function, component, type and option does, its unit and default, what to pass, and short examples for the main entry points.
 - The first render of glyphs with round outlines, `"inside"` or `"center"` strokes, or shading is faster: outlined captions rasterize in about half the time, and shaded ones in about 15% less. Their output is pixel-identical.
 
 ### Fixed

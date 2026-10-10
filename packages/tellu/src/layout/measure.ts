@@ -1,16 +1,21 @@
 import { type Canvas2D, context2d, createCanvas } from "../canvas";
 import type { TextStyle } from "../style/types";
 
+/** The font a `Measurer` measures with. */
 export interface FontSpec {
   family: TextStyle["fontFamily"];
+  /** Font size in px. */
   size: number;
   weight: TextStyle["fontWeight"];
   style: TextStyle["fontStyle"];
   kerning: boolean;
 }
 
+/** Vertical extents of a font in px, measured from the alphabetic baseline. */
 export interface FontMetrics {
+  /** Distance above the baseline, positive. */
   ascent: number;
+  /** Distance below the baseline, positive. */
   descent: number;
   /**
    * Distance from the alphabetic baseline down to the ideographic baseline, the bottom of the em box
@@ -27,10 +32,14 @@ export interface InkBounds {
   bottom: number;
 }
 
-/** Text measurement backend. Swap it to lay out text outside the browser (e.g. in tests). */
+/**
+ * Text measurement backend. Swap it to lay out text outside the browser (e.g. in tests or on a server). Layout measures
+ * single glyphs and growing prefixes of each run, and derives kerning from them, so results must be consistent.
+ */
 export interface Measurer {
   /** Advance width of `text` in px, without letter spacing or scaling. */
   measureText(text: string, font: FontSpec): number;
+  /** Ascent and descent of the font. */
   fontMetrics(font: FontSpec): FontMetrics;
   /**
    * Places vertical punctuation and small kana by their ink, and measures the space `tsume` removes.
@@ -64,15 +73,23 @@ export function fontFamilyToCss(family: FontSpec["family"]): string {
     .join(", ");
 }
 
+/**
+ * A CSS `font` shorthand, e.g. `normal 900 64px "Noto Sans JP"`. Family names are quoted; generic families are left
+ * as they are.
+ */
 export function fontToCss(font: FontSpec): string {
   return `${font.style} ${font.weight} ${font.size}px ${fontFamilyToCss(font.family)}`;
 }
 
+/** The `FontSpec` of a style, at `size` px (default: its `fontSize`). */
 export function fontSpecOf(style: TextStyle, size: number = style.fontSize): FontSpec {
   return { family: style.fontFamily, size, weight: style.fontWeight, style: style.fontStyle, kerning: style.kerning };
 }
 
-/** Measures with the Canvas 2D API. Fonts must be loaded before measuring. */
+/**
+ * Measures with the Canvas 2D API and caches every result. Fonts must be loaded before measuring: a font that is still
+ * loading is measured with a fallback, and stays cached until `clear()`.
+ */
 export class CanvasMeasurer implements Measurer {
   private context: Canvas2D | undefined;
   private widths = new Map<string, number>();
