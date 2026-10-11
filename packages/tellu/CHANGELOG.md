@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-10-11
+
 ### Added
 
 - `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth character, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.
@@ -49,5 +51,6 @@ The first public release.
 - `tellu/react`: `<Text>`, `TextRendererProvider` and `useTextRenderer()`.
 - `tellu/remotion`: `<Text>`, which holds each frame with `delayRender` until the renderer, the fonts and the drawing are ready.
 
-[Unreleased]: https://github.com/kazuito/tellu/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/kazuito/tellu/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/kazuito/tellu/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/kazuito/tellu/releases/tag/v0.0.2
