@@ -18,6 +18,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - More gradients: `conicGradient()` for conic (angle) gradients, `diamondGradient()` for Photoshop's diamond gradient, and `reflect: true` on linear gradients for its reflected gradient, which runs the stops from the middle out to both ends. They paint layers and plates like the other gradients, with the same scopes.
 - Shape gradients: `shapeGradient()` colors a layer by the distance from the glyph's edge instead of across a box, like Photoshop's shape burst, so one outline layer can hold several bands (hard stops) or a smooth blend from the inside out. On a fill, the stops run `size` px into the glyph. Layers take the new `LayerPaint` type, which adds `ShapeGradient` to `Paint`; `fill()`, `stroke()` and the other layer helpers accept it.
 - Font checks: `checkFonts()` loads the fonts a caption needs, then reports each `FontIssue`: a family that is neither declared nor installed (`family-not-found`), a weight or style with no face (`face-unavailable`), a face that failed to load (`load-failed`), and characters no font in the stack has (`missing-glyphs`). Stacks with a generic family accept the fallback, so their characters aren't checked. `<Text>` and `createCanvasText()` run the check and log new issues with `console.warn`; `fontCheck: "error"` reports them as a `FontIssueError` instead (in Remotion, failing the render), and `fontCheck: "off"` skips it. `<Text>` also takes `onFontIssues`. The check embeds the Adobe Blank 2 font (SIL Open Font License), adding about 2 KB.
+
+## [0.0.3] - 2026-10-11
+
+### Added
+
 - `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth character, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.
 - `punctuationTrim` option (約物の半角取り): trims the blank half of fullwidth opening brackets at the start of a line (`"start"`), of closing brackets, 、 and 。 at the end of a line (`"end"`), or both. With `"end"`, closing punctuation that fits once trimmed stays on its line.
 - `align: "justify-all"` (均等配置): justifies every line, including the last one, single-line text and lines ended by `\n`, so a word can be spread across a fixed width (字取り). Without `maxWidth`, lines spread to the longest one.
@@ -59,5 +64,6 @@ The first public release.
 - `tellu/react`: `<Text>`, `TextRendererProvider` and `useTextRenderer()`.
 - `tellu/remotion`: `<Text>`, which holds each frame with `delayRender` until the renderer, the fonts and the drawing are ready.
 
-[Unreleased]: https://github.com/kazuito/tellu/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/kazuito/tellu/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/kazuito/tellu/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/kazuito/tellu/releases/tag/v0.0.2
