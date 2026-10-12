@@ -15,7 +15,17 @@ export interface LayerGroup {
 }
 
 export function effectsKey(layer: Layer): string {
-  return stableKey([layer.offset, layer.blur, layer.blurQuality, layer.opacity, layer.blendMode, layer.filters]);
+  const effects: unknown[] = [
+    layer.offset,
+    layer.blur,
+    layer.blurQuality,
+    layer.opacity,
+    layer.blendMode,
+    layer.filters,
+  ];
+  // Only layers with a contour or noise add them, so keys of other layers stay as they were.
+  if (layer.contour !== undefined || layer.noise) effects.push(layer.contour, layer.noise);
+  return stableKey(effects);
 }
 
 /**

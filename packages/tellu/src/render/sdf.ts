@@ -1,4 +1,5 @@
 import type { Shading, StrokePosition } from "../style/types";
+import { readContour, sampleContour } from "./contour";
 
 const FAR = 1e20;
 
@@ -111,7 +112,9 @@ export function strokeCoverage(
   const height = Math.floor(fieldHeight / factor);
   const pixels = new Uint8ClampedArray(width * height * 4);
   const samples = factor * factor;
-  const shade = shading && shadingSampler(field, fieldWidth, fieldHeight, strokeWidth, position, shading, unit);
+  const sampler = shading && shadingSampler(field, fieldWidth, fieldHeight, strokeWidth, position, shading, unit);
+  const curve = shading?.contour === undefined ? undefined : sampleContour(shading.contour);
+  const shade = sampler && curve ? (x: number, y: number) => readContour(curve, sampler(x, y)) : sampler;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {

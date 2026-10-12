@@ -72,6 +72,7 @@ All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `sha
 | `color` | `"rgba(0,0,0,0.6)"` | Any paint |
 | `offset` | `[4, 4]` | Shift of the shadow inside the shape, not of the layer |
 | `size` | `4` | Width of the fade in px. `0` is a hard edge |
+| `contour` | | Remaps the shading's strength ([`Contour`](./types#contour)). Goes on the shading, not the layer |
 | `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
 
 ### `innerGlow()`
@@ -90,6 +91,7 @@ All [`Layer`](./types#layer) options except `paint`, `stroke` and `shading`, plu
 | --- | --- | --- |
 | `color` | `"#ffffff"` | Any paint |
 | `size` | `8` | Width of the fade in px |
+| `contour` | | Remaps the shading's strength ([`Contour`](./types#contour)). Goes on the shading, not the layer |
 | `stroke` | `0` | Light the glyph grown by this width, e.g. an outline |
 
 ### `bevel()`
@@ -112,6 +114,7 @@ All [`Layer`](./types#layer) options except `paint`, `stroke` and `shading`, whi
 | `angle` | `315` | Direction the light comes from, in degrees clockwise from the top |
 | `depth` | `1` | Steepness of the bevel |
 | `technique` | `"smooth"` | `"smooth"` or `"chisel"` |
+| `contour` | | Remaps the shading's strength ([`Contour`](./types#contour)). Goes on the shading, not the layer |
 | `stroke` | `0` | Bevel the glyph grown by this width, e.g. an outline |
 
 ### `satin()`
@@ -132,6 +135,7 @@ All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `sha
 | `offset` | `[4, 4]` | Shift of each copy of the shape, not of the layer |
 | `size` | `8` | Softness of the copies in px |
 | `invert` | `false` | Paint where the copies agree instead |
+| `contour` | | Remaps the shading's strength ([`Contour`](./types#contour)). Goes on the shading, not the layer |
 | `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
 
 ## Text paths

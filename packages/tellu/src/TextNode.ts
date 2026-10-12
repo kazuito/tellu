@@ -4,6 +4,7 @@ import { type Layout, layoutText } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
 import { isVertical } from "./layout/vertical";
 import { blurPadding } from "./render/blur";
+import { ContourFilter } from "./render/contourFilter";
 import { traceLine } from "./render/decorationShapes";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
@@ -535,6 +536,11 @@ function createEffectContainer(effects: Layer, label: string): Container {
     filters.push(blur);
   }
   if (effects.filters) filters.push(...effects.filters);
+  if (effects.contour !== undefined || effects.noise) {
+    const contour = new ContourFilter(effects.contour, effects.noise ?? 0);
+    ownedFilters.add(contour);
+    filters.push(contour);
+  }
   // Always isolate the group so glyph sprites merge with `max` blending before being composited.
   const alpha = new AlphaFilter({ alpha: effects.opacity ?? 1, resolution: "inherit" });
   alpha.blendMode = effects.blendMode ?? "normal";

@@ -236,6 +236,8 @@ A multiple of the font size, or absolute pixels.
 | `offset` | `readonly [x, y]` | `[0, 0]` | |
 | `blur` | `number` | `0` | PixiJS `BlurFilter` strength |
 | `blurQuality` | `number` | `4` | |
+| `contour` | [`Contour`](#contour) | | Remaps the merged layer's opacity after the blur. [Guide](/guide/layers#contours) |
+| `noise` | `number` | `0` | `0`–`1`: speckles the opacity, after the contour. [Guide](/guide/layers#noise) |
 | `opacity` | `number` | `1` | Applied to the merged layer |
 | `blendMode` | PixiJS `BLEND_MODES` | `"normal"` | |
 | `filters` | `readonly Filter[]` | | PixiJS filters |
@@ -260,6 +262,21 @@ Varies how strongly a layer paints its shape, computed from the distance to the 
 
 Guide: [Inner shadows and glows](/guide/layers#inner-shadows-and-glows), [Bevels](/guide/layers#bevels), [Satin](/guide/layers#satin).
 
+### `Contour`
+
+```ts
+type ContourPreset =
+  | "linear" | "cone" | "cone-inverted" | "gaussian"
+  | "half-round" | "ring" | "ring-double" | "sawtooth";
+type Contour = ContourPreset | readonly (readonly [input: number, output: number])[];
+```
+
+A curve from `0`–`1` to `0`–`1`, for `Layer.contour` and the `contour` of each shading. Presets are named after Photoshop's of a similar shape; points are joined by a smooth curve, flat before the first and after the last. [Guide](/guide/layers#contours).
+
+### `ContourPreset`
+
+The named [`Contour`](#contour) curves.
+
 ### `InsetShading`
 
 Paints the edge of the shape, fading toward its inside (inner shadow, inner glow).
@@ -269,6 +286,7 @@ Paints the edge of the shape, fading toward its inside (inner shadow, inner glow
 | `type` | `"inset"` | | Required |
 | `offset` | `readonly [x, y]` | `[0, 0]` | Shift of the edge the fade starts from |
 | `size` | `number` | `4` | Width of the fade. `0` is a hard edge |
+| `contour` | [`Contour`](#contour) | | Remaps the strength through a curve |
 
 ### `BevelShading`
 
@@ -282,6 +300,7 @@ Lights the shape as if its edge were beveled, and paints its lit or its shaded s
 | `angle` | `number` | `315` | Direction the light comes from, in degrees clockwise from the top (`315` = top left) |
 | `depth` | `number` | `1` | Steepness; higher values make the lighting stronger |
 | `technique` | `"smooth" \| "chisel"` | `"smooth"` | Rounded, or flat faces with a sharp ridge |
+| `contour` | [`Contour`](#contour) | | Remaps the strength through a curve |
 
 ### `SatinShading`
 
@@ -293,6 +312,7 @@ Silky bands inside the shape, where two copies of the softened shape, shifted by
 | `offset` | `readonly [x, y]` | `[4, 4]` | Shift of each copy |
 | `size` | `number` | `8` | Softness of the copies |
 | `invert` | `boolean` | `false` | Paint where the copies agree instead |
+| `contour` | [`Contour`](#contour) | | Remaps the strength through a curve |
 
 ## Paint
 

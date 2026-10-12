@@ -130,6 +130,64 @@ export default {
 };
 ```
 
+### Contours
+
+`contour` remaps a layer's opacity through a curve after it is blurred, like the contour of Photoshop's layer styles. Opacity runs from `1` next to the glyph to `0` where the blur fades out, so the curve decides how the glow falls off. `"ring"` lifts the middle of the falloff and drops the part next to the glyph, which turns a glow into a halo standing off the text:
+
+```ts demo compare backdrop=night
+import { type Contour, fill, glow } from "tellu";
+
+const sample = (contour?: Contour) => ({
+  text: "ネオン",
+  style: {
+    fontFamily: "Zen Maru Gothic",
+    fontWeight: 900,
+    fontSize: 72,
+    layers: [
+      glow({ color: "#00e5ff", stroke: 10, blur: 10, contour }),
+      fill("#ffffff"),
+    ],
+  },
+});
+
+export default {
+  "no contour": sample(),
+  '"ring"': sample("ring"),
+  '"ring-double"': sample("ring-double"),
+  "custom points": sample([
+    [0, 0],
+    [0.3, 1],
+    [0.6, 0],
+    [1, 1],
+  ]),
+};
+```
+
+The presets are `"linear"`, `"cone"`, `"cone-inverted"`, `"gaussian"`, `"half-round"`, `"ring"`, `"ring-double"` and `"sawtooth"`, named after Photoshop's presets of a similar shape. For your own curve, pass `[input, output]` points, which are joined by a smooth curve. A curve that doesn't start at `0`, such as `"cone-inverted"`, paints where the opacity is just above zero too, which gives the glow a hard outer edge where its blur ends.
+
+### Noise
+
+`noise` (`0`–`1`) speckles a layer's opacity, as in Photoshop's glows and shadows. The speckles are fixed to the pixels, so the same frame always renders the same:
+
+```ts demo backdrop=night
+import { fill, glow } from "tellu";
+
+export default {
+  text: "ざらつく光",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 72,
+    layers: [
+      glow({ color: "#ffbe0b", stroke: 12, blur: 12, noise: 0.6 }),
+      fill("#ffffff"),
+    ],
+  },
+};
+```
+
+Contours and noise work on any layer, after its blur and filters and before its opacity.
+
 ## Inner shadows and glows
 
 `innerShadow()` darkens the inside of the shape along the edge it was shifted away from, and `innerGlow()` lights the whole inner edge:
@@ -308,6 +366,8 @@ These helpers return ordinary layers with a `shading` property, which varies how
 
 Shading is computed from each glyph's distance field, the same one round strokes are grown from, so it stays even on 長体 and 平体 glyphs, and its offsets and light direction stay in screen space for sideways glyphs in vertical text. The layer's own `offset`, `blur` and `opacity` still apply on top. See [`Shading`](/api/types#shading) for every option.
 
+Shading takes a `contour` too, which remaps its strength: on a bevel it shapes the lighting like Photoshop's gloss contour, and on an inner glow it shapes the fade. `innerShadow()`, `innerGlow()`, `bevel()` and `satin()` put their `contour` option on the shading.
+
 Each glyph is shaded on its own. Where shaded outlines of neighbouring glyphs overlap, each one's bevel or inner shadow shows inside the other, as a seam across the merged outline. Shading the fill, or an outline narrow enough not to overlap its neighbours, avoids this.
 
 ## Stroke position
@@ -468,6 +528,8 @@ tellu compares filters by identity. Create them outside your render function or 
 | `offset` | `[x, y]` | `[0, 0]` | |
 | `blur` | `number` | `0` | PixiJS `BlurFilter` strength, in CSS px |
 | `blurQuality` | `number` | `4` | Blur passes |
+| `contour` | [`Contour`](/api/types#contour) | | Remaps the opacity after the blur. [Contours](#contours) |
+| `noise` | `number` | `0` | Speckles the opacity, `0`–`1`. [Noise](#noise) |
 | `opacity` | `number` | `1` | Applied to the merged layer |
 | `blendMode` | PixiJS `BLEND_MODES` | `"normal"` | Against the layers below |
 | `filters` | PixiJS `Filter[]` | | |

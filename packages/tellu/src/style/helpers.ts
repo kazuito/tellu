@@ -3,6 +3,7 @@ import type {
   BoxDecoration,
   ColorValue,
   ConicGradient,
+  Contour,
   DiamondGradient,
   GradientStopInput,
   Layer,
@@ -13,12 +14,18 @@ import type {
   PaintScope,
   RadialGradient,
   SatinShading,
+  Shading,
   ShapeGradient,
   TextPath,
   TextPathArc,
 } from "./types";
 
 type LayerOptions = Omit<Layer, "paint" | "stroke">;
+
+/** `shading` with `contour`, if there is one. Shading helpers put their `contour` here, not on the layer. */
+function withContour<T extends Shading>(shading: T, contour: Contour | undefined): T {
+  return contour === undefined ? shading : { ...shading, contour };
+}
 
 /**
  * A layer that paints the glyph itself.
@@ -88,6 +95,8 @@ export interface InnerShadowOptions extends Omit<LayerOptions, "offset" | "shadi
   size?: number;
   /** Shade the glyph grown by this many px, e.g. an outline. Default: `0`. */
   stroke?: number;
+  /** Remaps the strength of the shading through a curve (see `Shading.contour`). Default: none. */
+  contour?: Contour;
 }
 
 /**
@@ -99,9 +108,10 @@ export function innerShadow({
   offset = [4, 4],
   size = 4,
   stroke = 0,
+  contour,
   ...options
 }: InnerShadowOptions = {}): Layer {
-  return { ...options, paint: color, stroke, shading: { type: "inset", offset, size } };
+  return { ...options, paint: color, stroke, shading: withContour({ type: "inset", offset, size }, contour) };
 }
 
 export interface InnerGlowOptions extends Omit<LayerOptions, "shading"> {
@@ -111,11 +121,19 @@ export interface InnerGlowOptions extends Omit<LayerOptions, "shading"> {
   size?: number;
   /** Light the glyph grown by this many px, e.g. an outline. Default: `0`. */
   stroke?: number;
+  /** Remaps the strength of the shading through a curve (see `Shading.contour`). Default: none. */
+  contour?: Contour;
 }
 
 /** Light along the whole inner edge of the glyph, fading toward its inside. Put it above the fill it lights. */
-export function innerGlow({ color = "#ffffff", size = 8, stroke = 0, ...options }: InnerGlowOptions = {}): Layer {
-  return { ...options, paint: color, stroke, shading: { type: "inset", size } };
+export function innerGlow({
+  color = "#ffffff",
+  size = 8,
+  stroke = 0,
+  contour,
+  ...options
+}: InnerGlowOptions = {}): Layer {
+  return { ...options, paint: color, stroke, shading: withContour({ type: "inset", size }, contour) };
 }
 
 export interface BevelOptions extends Omit<LayerOptions, "shading">, Omit<BevelShading, "type" | "side"> {
@@ -140,9 +158,10 @@ export function bevel({
   depth = 1,
   technique = "smooth",
   stroke = 0,
+  contour,
   ...options
 }: BevelOptions = {}): [highlight: Layer, shadow: Layer] {
-  const shading = { type: "bevel", size, angle, depth, technique } as const;
+  const shading = withContour({ type: "bevel", size, angle, depth, technique } as const, contour);
   return [
     { ...options, paint: highlight, stroke, shading: { ...shading, side: "highlight" } },
     { ...options, paint: shadow, stroke, shading: { ...shading, side: "shadow" } },
@@ -163,9 +182,10 @@ export function satin({
   size = 8,
   invert = false,
   stroke = 0,
+  contour,
   ...options
 }: SatinOptions = {}): Layer {
-  return { ...options, paint: color, stroke, shading: { type: "satin", offset, size, invert } };
+  return { ...options, paint: color, stroke, shading: withContour({ type: "satin", offset, size, invert }, contour) };
 }
 
 /**

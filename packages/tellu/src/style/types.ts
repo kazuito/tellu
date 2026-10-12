@@ -139,6 +139,8 @@ export interface InsetShading {
   offset?: readonly [x: number, y: number];
   /** Width of the fade in px. `0` is a hard edge. Default: `4`. */
   size?: number;
+  /** Remaps the strength of the shading through a curve, like the contour of Photoshop's layer styles. Default: none. */
+  contour?: Contour;
 }
 
 /**
@@ -161,6 +163,8 @@ export interface BevelShading {
    * Default: `"smooth"`.
    */
   technique?: "smooth" | "chisel";
+  /** Remaps the strength of the lighting through a curve, like Photoshop's gloss contour. Default: none. */
+  contour?: Contour;
 }
 
 /**
@@ -175,7 +179,26 @@ export interface SatinShading {
   size?: number;
   /** Paint where the copies agree instead. Default: `false`. */
   invert?: boolean;
+  /** Remaps the strength of the shading through a curve, like the contour of Photoshop's layer styles. Default: none. */
+  contour?: Contour;
 }
+
+/** Contour curves named after Photoshop's presets of a similar shape (not exact copies). */
+export type ContourPreset =
+  | "linear"
+  | "cone"
+  | "cone-inverted"
+  | "gaussian"
+  | "half-round"
+  | "ring"
+  | "ring-double"
+  | "sawtooth";
+
+/**
+ * A curve from `0`–`1` to `0`–`1`, applied to opacity (`Layer.contour`) or shading strength (`Shading.contour`): a
+ * preset, or `[input, output]` points joined by a smooth curve.
+ */
+export type Contour = ContourPreset | readonly (readonly [input: number, output: number])[];
 
 /**
  * Varies how strongly a layer paints its shape, computed from the distance to the shape's edge. The shape is the
@@ -218,6 +241,13 @@ export interface Layer {
   blur?: number;
   /** PixiJS `BlurFilter` quality (number of passes). Default: `4`. */
   blurQuality?: number;
+  /**
+   * Remaps the opacity of the merged layer after the blur, like a contour in Photoshop's layer styles: `"ring"` turns
+   * a glow into a ring, `"cone"` into a halo with a soft inside. Default: none (`"linear"`).
+   */
+  contour?: Contour;
+  /** `0`–`1`: random speckles in the layer's opacity, after the contour, as in Photoshop's glows. Default: `0`. */
+  noise?: number;
   /** Opacity of the whole layer, applied after its glyphs are merged. Default: `1`. */
   opacity?: number;
   /** Blend mode against the layers below. Default: `"normal"`. */
