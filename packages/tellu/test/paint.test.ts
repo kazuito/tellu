@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { diamondOffset, paintScope, reflectStops } from "../src/render/paint";
-import { conicGradient, diamondGradient, linearGradient } from "../src/style/helpers";
+import { shapeOffsets } from "../src/render/sdf";
+import { conicGradient, diamondGradient, linearGradient, shapeGradient } from "../src/style/helpers";
 
 describe("reflectStops", () => {
   test("mirrors the stops around the middle", () => {
@@ -85,5 +86,48 @@ describe("gradient helpers", () => {
 
   test("linearGradient passes reflect through", () => {
     expect(linearGradient(["a", "b"], { reflect: true }).reflect).toBe(true);
+  });
+});
+
+describe("shapeOffsets", () => {
+  // One row of field pixels: inside the glyph (negative) to outside (positive).
+  const field = new Float32Array([-3, -0.5, 0.5, 4]);
+  const offsets = (strokeWidth: number, position: "outside" | "inside" | "center", size = 6) =>
+    [...shapeOffsets(field, 4, 1, 1, strokeWidth, position, size)].map((value) => Math.round(value * 1000) / 1000);
+
+  test("outside strokes run from the glyph's edge to the outer edge", () => {
+    expect(offsets(4, "outside")).toEqual([0, 0, 0.125, 1]);
+  });
+
+  test("inside strokes run inward", () => {
+    expect(offsets(4, "inside")).toEqual([0.75, 0.125, 0, 0]);
+  });
+
+  test("centered strokes run from the inner edge to the outer edge", () => {
+    expect(offsets(4, "center")).toEqual([0, 0.375, 0.625, 1]);
+  });
+
+  test("fills run `size` inward", () => {
+    expect(offsets(0, "outside")).toEqual([0.5, 0.083, 0, 0]);
+  });
+
+  test("averages the samples of each pixel", () => {
+    const supersampled = new Float32Array([0, 2, 2, 4]);
+    expect([...shapeOffsets(supersampled, 2, 2, 2, 4, "outside", 0)]).toEqual([0.5]);
+  });
+});
+
+describe("shapeGradient", () => {
+  test("spreads plain colors and takes no scope", () => {
+    const paint = shapeGradient(["#fff", "#000"], { reverse: true });
+    expect(paint).toEqual({
+      type: "shape",
+      reverse: true,
+      stops: [
+        [0, "#fff"],
+        [1, "#000"],
+      ],
+    });
+    expect(paintScope(paint)).toBeNull();
   });
 });

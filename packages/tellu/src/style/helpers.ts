@@ -6,12 +6,14 @@ import type {
   DiamondGradient,
   GradientStopInput,
   Layer,
+  LayerPaint,
   LinearGradient,
   LineDecoration,
   Paint,
   PaintScope,
   RadialGradient,
   SatinShading,
+  ShapeGradient,
 } from "./types";
 
 type LayerOptions = Omit<Layer, "paint" | "stroke">;
@@ -21,7 +23,7 @@ type LayerOptions = Omit<Layer, "paint" | "stroke">;
  *
  * @example fill(linearGradient(["#fff6c0", "#f5b400"]))
  */
-export function fill(paint: Paint, options?: LayerOptions): Layer {
+export function fill(paint: LayerPaint, options?: LayerOptions): Layer {
   return { ...options, paint, stroke: 0 };
 }
 
@@ -31,13 +33,13 @@ export function fill(paint: Paint, options?: LayerOptions): Layer {
  *
  * @example layers: [stroke(16, "#000"), stroke(8, "#e60033"), fill("#fff")]
  */
-export function stroke(width: number, paint: Paint, options?: LayerOptions): Layer {
+export function stroke(width: number, paint: LayerPaint, options?: LayerOptions): Layer {
   return { ...options, paint, stroke: width };
 }
 
 export interface ShadowOptions extends Omit<LayerOptions, "offset"> {
   /** Default: `"rgba(0,0,0,0.6)"`. */
-  color?: Paint;
+  color?: LayerPaint;
   /** `[x, y]` offset in px. Default: `[4, 4]`. */
   offset?: readonly [number, number];
   /** Grow the shadow shape, e.g. to cast the shadow of an outline. Default: `0`. */
@@ -63,7 +65,7 @@ export function shadow({
 
 export interface GlowOptions extends LayerOptions {
   /** Default: `"#ffffff"`. */
-  color?: Paint;
+  color?: LayerPaint;
   /** How far the glow reaches out from the glyph, in px, before the blur. Default: `8`. */
   stroke?: number;
   /** Default: `8`. */
@@ -77,7 +79,7 @@ export function glow({ color = "#ffffff", stroke = 8, ...options }: GlowOptions 
 
 export interface InnerShadowOptions extends Omit<LayerOptions, "offset" | "shading"> {
   /** Default: `"rgba(0,0,0,0.6)"`. */
-  color?: Paint;
+  color?: LayerPaint;
   /** `[x, y]` offset of the shadow inside the shape (the layer itself stays in place). Default: `[4, 4]`. */
   offset?: readonly [number, number];
   /** Width of the fade in px. `0` is a hard edge. Default: `4`. */
@@ -102,7 +104,7 @@ export function innerShadow({
 
 export interface InnerGlowOptions extends Omit<LayerOptions, "shading"> {
   /** Default: `"#ffffff"`. */
-  color?: Paint;
+  color?: LayerPaint;
   /** Width of the fade in px. Default: `8`. */
   size?: number;
   /** Light the glyph grown by this many px, e.g. an outline. Default: `0`. */
@@ -116,9 +118,9 @@ export function innerGlow({ color = "#ffffff", size = 8, stroke = 0, ...options 
 
 export interface BevelOptions extends Omit<LayerOptions, "shading">, Omit<BevelShading, "type" | "side"> {
   /** Paint of the faces turned toward the light. Default: `"rgba(255,255,255,0.8)"`. */
-  highlight?: Paint;
+  highlight?: LayerPaint;
   /** Paint of the faces turned away from the light. Default: `"rgba(0,0,0,0.5)"`. */
-  shadow?: Paint;
+  shadow?: LayerPaint;
   /** Bevel the glyph grown by this many px, e.g. an outline. Default: `0`. */
   stroke?: number;
 }
@@ -147,7 +149,7 @@ export function bevel({
 
 export interface SatinOptions extends Omit<LayerOptions, "offset" | "shading">, Omit<SatinShading, "type"> {
   /** Default: `"rgba(0,0,0,0.5)"`. */
-  color?: Paint;
+  color?: LayerPaint;
   /** Shade the glyph grown by this many px, e.g. an outline. Default: `0`. */
   stroke?: number;
 }
@@ -212,6 +214,20 @@ export function diamondGradient(
   options: { center?: readonly [number, number]; radius?: number; angle?: number; scope?: PaintScope } = {},
 ): DiamondGradient {
   return { type: "diamond", ...options, stops: normalizeStopInput(stops) };
+}
+
+/**
+ * A gradient that follows the layer's shape (shape burst): plain colors are spread evenly from the glyph's edge (`0`)
+ * to the far edge of the layer (`1`). On an outline, hard stops make several bands in one layer. On a fill, the stops
+ * end `size` px inside the glyph (default `8`). `reverse` runs them from the far edge back. Only layers take it.
+ *
+ * @example stroke(16, shapeGradient([[0, "#fff"], [0.5, "#fff"], [0.5, "#000"], [1, "#000"]]))
+ */
+export function shapeGradient(
+  stops: readonly GradientStopInput[] | readonly ColorValue[],
+  options: { size?: number; reverse?: boolean } = {},
+): ShapeGradient {
+  return { type: "shape", ...options, stops: normalizeStopInput(stops) };
 }
 
 /** Plain colors are spread evenly from 0 to 1. */

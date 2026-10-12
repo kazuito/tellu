@@ -106,6 +106,23 @@ export interface PatternPaint {
 export type Paint = ColorValue | LinearGradient | RadialGradient | ConicGradient | DiamondGradient | PatternPaint;
 
 /**
+ * A gradient that follows the shape of the layer instead of running across a box (Photoshop's shape burst): `0` is the
+ * glyph's edge and `1` the far edge of the layer, so the stops band an outline from the inside out. `shapeGradient()`
+ * builds one from a list of colors. Only layers take it.
+ */
+export interface ShapeGradient {
+  type: "shape";
+  stops: readonly GradientStopInput[];
+  /** For layers with no `stroke`: how far inside the glyph the stops end (`1`), in px. Default: `8`. */
+  size?: number;
+  /** Runs the stops from the far edge (`0`) back to the glyph's edge (`1`). Default: `false`. */
+  reverse?: boolean;
+}
+
+/** What a layer is painted with: any `Paint`, or a `ShapeGradient`. */
+export type LayerPaint = Paint | ShapeGradient;
+
+/**
  * - `outside`: grows the glyph outward by `stroke` (the interior is painted too)
  * - `inside`: a band of width `stroke` along the inner edge of the glyph
  * - `center`: a band of width `stroke` centered on the glyph outline
@@ -177,7 +194,8 @@ export type Shading = InsetShading | BevelShading | SatinShading;
 export interface Layer {
   /** Name a run's layer patch can target instead of the index, so the patch survives reordering the layers. */
   id?: string;
-  paint: Paint;
+  /** Any paint, or a `ShapeGradient` colored by the distance from the glyph's edge. */
+  paint: LayerPaint;
   /**
    * How far the glyph shape grows in px, or the band width for `"inside"` and `"center"`. `0` paints the glyph itself.
    * Default: `0`.

@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond), parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond, shape), parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -9,7 +9,7 @@ description: API reference for layer helpers (fill, stroke, shadow, glow, innerS
 ### `fill()`
 
 ```ts
-function fill(paint: Paint, options?: Omit<Layer, "paint" | "stroke">): Layer;
+function fill(paint: LayerPaint, options?: Omit<Layer, "paint" | "stroke">): Layer;
 ```
 
 A layer that paints the glyph itself (`stroke: 0`).
@@ -17,7 +17,7 @@ A layer that paints the glyph itself (`stroke: 0`).
 ### `stroke()`
 
 ```ts
-function stroke(width: number, paint: Paint, options?: Omit<Layer, "paint" | "stroke">): Layer;
+function stroke(width: number, paint: LayerPaint, options?: Omit<Layer, "paint" | "stroke">): Layer;
 ```
 
 The glyph grown by `width` px. See [`strokePosition`](/guide/layers#stroke-position) for inside and centred strokes.
@@ -207,6 +207,17 @@ function radialGradient(
 ```
 
 `center` is relative to the scope box (default `[0.5, 0.5]`). `radius` multiplies the distance to the farthest corner (default `1`).
+
+### `shapeGradient()`
+
+```ts
+function shapeGradient(
+  stops: readonly ColorValue[] | readonly GradientStopInput[],
+  options?: { size?: number; reverse?: boolean },
+): ShapeGradient;
+```
+
+Plain colors are spread evenly from the glyph's edge (0) to the far edge of the layer (1). On a layer with no `stroke`, the stops end `size` px inside the glyph (default `8`). `reverse: true` runs them from the far edge back (default `false`). Only layers take it. Guide: [Shape gradients](/guide/paint#shape-gradients).
 
 ### `conicGradient()`
 

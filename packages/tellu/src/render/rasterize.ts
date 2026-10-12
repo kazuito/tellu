@@ -1,8 +1,8 @@
 import { type AnyCanvas, type Canvas2D, context2d, createCanvas } from "../canvas";
 import { type FontSpec, fontToCss } from "../layout/measure";
-import type { Box, Layer, StrokePosition } from "../style/types";
-import { createPaintStyle } from "./paint";
-import { measureInside, signedDistanceField, strokeCoverage } from "./sdf";
+import type { Box, Layer, ShapeGradient, StrokePosition } from "../style/types";
+import { colorRamp, createPaintStyle, rampIndex } from "./paint";
+import { measureInside, shapeOffsets, signedDistanceField, strokeCoverage } from "./sdf";
 
 /** A path to rasterize like a glyph, such as a decoration line. */
 export interface PathSource {
@@ -100,6 +100,38 @@ export function layerReach(layer: Layer): number {
   return join === "miter" ? half * Math.min(miterLimit, 4) : half;
 }
 
+/**
+ * Colors coverage pixels with a shape gradient, from each pixel's distance to the glyph's edge. `strokeWidth` is in
+ * device pixels.
+ */
+function colorByShape(
+  pixels: Uint8ClampedArray,
+  entry: FieldEntry,
+  paint: ShapeGradient,
+  strokeWidth: number,
+  position: StrokePosition,
+  res: number,
+): void {
+  const offsets = shapeOffsets(
+    entry.field,
+    entry.width,
+    entry.height,
+    SUPERSAMPLE,
+    strokeWidth * SUPERSAMPLE,
+    position,
+    (paint.size ?? 8) * res * SUPERSAMPLE,
+  );
+  const ramp = colorRamp(paint.stops);
+  for (let i = 0; i < offsets.length; i++) {
+    const from = rampIndex(paint.reverse ? 1 - offsets[i]! : offsets[i]!) * 4;
+    const to = i * 4;
+    pixels[to] = ramp[from]!;
+    pixels[to + 1] = ramp[from + 1]!;
+    pixels[to + 2] = ramp[from + 2]!;
+    pixels[to + 3] = Math.round((pixels[to + 3]! * ramp[from + 3]!) / 255);
+  }
+}
+
 /** Fills or strokes a shape at the origin with the context's current style, line width and transform. */
 function drawShape(ctx: Canvas2D, shape: GlyphShape, operation: "fill" | "stroke"): void {
   const { source } = shape;
@@ -169,11 +201,12 @@ export class GlyphRasterizer {
     const glyphX = fracX - left;
     const glyphY = fracY - top;
     const isFill = strokeWidth === 0 && position === "outside";
+    const shapePaint = typeof layer.paint === "object" && layer.paint.type === "shape" ? layer.paint : undefined;
 
     // Chrome's strokeText leaves holes where a wide stroke overruns a small counter (the loop of す), so round
     // strokes are grown from a distance field. Other joins need the native stroker, which only scales uniformly.
     // Shading is computed from the distance field too.
-    if ((isFill || (join !== "round" && scaleX === scaleY)) && !layer.shading) {
+    if ((isFill || (join !== "round" && scaleX === scaleY)) && !layer.shading && !shapePaint) {
       ctx.setTransform(...matrix, glyphX, glyphY);
       ctx.fillStyle = ctx.strokeStyle = "#000";
       ctx.lineJoin = join;
@@ -196,7 +229,8 @@ export class GlyphRasterizer {
         drawShape(ctx, shape, "stroke");
       }
     } else {
-      const inside = position !== "outside" || !!layer.shading;
+      // A shape gradient on a fill runs inside the glyph.
+      const inside = position !== "outside" || !!layer.shading || (!!shapePaint && strokeWidth === 0);
       const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height, inside);
       const pixels = strokeCoverage(
         entry.field,
@@ -208,13 +242,16 @@ export class GlyphRasterizer {
         layer.shading,
         res * SUPERSAMPLE,
       );
+      if (shapePaint) colorByShape(pixels, entry, shapePaint, strokeWidth * res, position, res);
       ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
     }
 
-    ctx.globalCompositeOperation = "source-in";
-    ctx.setTransform(res, 0, 0, res, glyphX, glyphY);
-    ctx.fillStyle = createPaintStyle(ctx, layer.paint, paintBox);
-    ctx.fillRect(-glyphX / res, -glyphY / res, width / res, height / res);
+    if (!shapePaint) {
+      ctx.globalCompositeOperation = "source-in";
+      ctx.setTransform(res, 0, 0, res, glyphX, glyphY);
+      ctx.fillStyle = createPaintStyle(ctx, layer.paint as Exclude<Layer["paint"], ShapeGradient>, paintBox);
+      ctx.fillRect(-glyphX / res, -glyphY / res, width / res, height / res);
+    }
 
     return { canvas, offsetX: left, offsetY: top };
   }

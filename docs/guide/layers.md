@@ -459,7 +459,7 @@ tellu compares filters by identity. Create them outside your render function or 
 
 | Option | Type | Default | |
 | --- | --- | --- | --- |
-| `paint` | [`Paint`](./paint) | | Color, gradient or pattern |
+| `paint` | [`LayerPaint`](/api/types#layerpaint) | | Color, gradient, pattern or [shape gradient](./paint#shape-gradients) |
 | `stroke` | `number` | `0` | Growth in px. `0` paints the glyph itself |
 | `strokePosition` | `"outside" \| "inside" \| "center"` | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | |

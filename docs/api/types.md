@@ -206,7 +206,7 @@ A multiple of the font size, or absolute pixels.
 
 | Property | Type | Default | |
 | --- | --- | --- | --- |
-| `paint` | [`Paint`](#paint) | | Required |
+| `paint` | [`LayerPaint`](#layerpaint) | | Required |
 | `stroke` | `number` | `0` | Growth in px |
 | `strokePosition` | [`StrokePosition`](#strokeposition) | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | Non-uniform scaling always uses round joins |
@@ -308,6 +308,25 @@ type ColorValue = string | number; // any CSS color, or 0xRRGGBB
 | `center` | `readonly [number, number]` | `[0.5, 0.5]` | Relative to the scope box |
 | `radius` | `number` | `1` | Factor of the distance to the farthest corner |
 | `scope` | `PaintScope` | `"line"` | |
+
+### `LayerPaint`
+
+```ts
+type LayerPaint = Paint | ShapeGradient;
+```
+
+What a [`Layer`](#layer) is painted with. Plates and decorations take a `Paint`.
+
+### `ShapeGradient`
+
+A gradient that follows the layer's shape (Photoshop's shape burst). Built by [`shapeGradient()`](./helpers#shapegradient). Guide: [Shape gradients](/guide/paint#shape-gradients).
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"shape"` | | |
+| `stops` | `readonly GradientStopInput[]` | | From the glyph's edge (`0`) to the far edge of the layer (`1`): the outer edge of an outside stroke, the inner edge of an inside one, and the outer edge of a centered one, from its inner edge |
+| `size` | `number` | `8` | For a layer with no `stroke`: how far inside the glyph the stops end, in px |
+| `reverse` | `boolean` | `false` | Run the stops from the far edge back to the glyph's edge |
 
 ### `ConicGradient`
 

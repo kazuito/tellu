@@ -1,5 +1,5 @@
 ---
-description: Solid colors, linear (including reflected), radial, conic and diamond gradients, and image patterns, plus the paint scope that decides whether a gradient spans each glyph, each line or the whole block.
+description: Solid colors, linear (including reflected), radial, conic, diamond and shape gradients, and image patterns, plus the paint scope that decides whether a gradient spans each glyph, each line or the whole block.
 ---
 
 # Paint
@@ -11,6 +11,7 @@ Every layer's `paint` is one of:
 - a **radial gradient**, made with `radialGradient()`;
 - a **conic gradient**, made with `conicGradient()`;
 - a **diamond gradient**, made with `diamondGradient()`;
+- for layers only, a **shape gradient** that follows the glyph's outline, made with `shapeGradient()`;
 - a **pattern** that tiles an image or canvas.
 
 ## Linear gradients
@@ -209,6 +210,89 @@ export default {
 ```
 
 Canvas 2D has no diamond gradient, so tellu computes this one pixel by pixel. That costs a little more the first time each glyph is rasterized.
+
+## Shape gradients
+
+```ts
+shapeGradient(stops, { size?, reverse? })
+```
+
+A shape gradient follows the layer's shape instead of running across a box, like Photoshop's shape burst: `0` is the glyph's edge and `1` the far edge of the layer. On an outline, it bands the outline from the inside out. Hard stops make several outlines in one layer:
+
+```ts demo compare
+import { fill, shapeGradient, stroke } from "tellu";
+
+const style = (layers: ReturnType<typeof fill>[]) => ({
+  fontFamily: "Noto Sans JP",
+  fontWeight: 900,
+  fontSize: 64,
+  layers,
+});
+
+export default {
+  "one layer": {
+    text: "二重縁",
+    style: style([
+      stroke(
+        16,
+        shapeGradient([
+          [0, "#ffffff"],
+          [0.5, "#ffffff"],
+          [0.5, "#e60033"],
+          [1, "#e60033"],
+        ]),
+      ),
+      fill("#e60033"),
+    ]),
+  },
+  "smooth stops": {
+    text: "グラデ縁",
+    style: style([
+      stroke(18, shapeGradient(["#ffe600", "#ff3b30", "#7b2cbf"])),
+      fill("#ffffff"),
+    ]),
+  },
+};
+```
+
+The two bands of the first sample are one layer, so they are rasterized once per glyph instead of twice.
+
+On a layer with no `stroke`, the stops run `size` px into the glyph (default `8`). `reverse: true` runs them from the far edge back. Shape gradients also work on glows and inside or centered strokes:
+
+```ts demo compare backdrop=night
+import { fill, glow, shapeGradient, stroke } from "tellu";
+
+const font = { fontFamily: "Noto Sans JP", fontWeight: 900, fontSize: 64 };
+
+export default {
+  "fill, size: 6": {
+    text: "内側",
+    style: {
+      ...font,
+      layers: [
+        stroke(6, "#0b1d3a"),
+        fill(shapeGradient(["#00a8ff", "#ffffff"], { size: 6 })),
+      ],
+    },
+  },
+  glow: {
+    text: "光彩",
+    style: {
+      ...font,
+      layers: [
+        glow({
+          color: shapeGradient(["#ffffff", "#00e5ff", "rgba(0, 80, 255, 0)"]),
+          stroke: 14,
+          blur: 6,
+        }),
+        fill("#ffffff"),
+      ],
+    },
+  },
+};
+```
+
+A shape gradient doesn't depend on a scope box, and only layers take it: plates and decorations don't. Like shading, it is computed from each glyph's distance field, so outlines always use round joins.
 
 ## Patterns
 

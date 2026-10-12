@@ -46,6 +46,7 @@ export {
   type ShadowOptions,
   satin,
   shadow,
+  shapeGradient,
   stroke,
   underline,
 } from "./style/helpers";

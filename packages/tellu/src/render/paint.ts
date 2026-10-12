@@ -1,5 +1,13 @@
 import { type Canvas2D, context2d, createCanvas } from "../canvas";
-import type { Box, DiamondGradient, GradientStop, GradientStopInput, Paint, PaintScope } from "../style/types";
+import type {
+  Box,
+  DiamondGradient,
+  GradientStop,
+  GradientStopInput,
+  LayerPaint,
+  Paint,
+  PaintScope,
+} from "../style/types";
 import { objectId } from "../utils/stableKey";
 
 export function colorToCss(color: string | number): string {
@@ -10,13 +18,13 @@ export function normalizeStop(stop: GradientStopInput): GradientStop {
   return "offset" in stop ? stop : { offset: stop[0], color: stop[1] };
 }
 
-/** The box this paint is stretched over, or `null` for solid colors. */
-export function paintScope(paint: Paint): PaintScope | null {
-  if (typeof paint !== "object") return null;
+/** The box this paint is stretched over, or `null` for paints that don't depend on one. */
+export function paintScope(paint: LayerPaint): PaintScope | null {
+  if (typeof paint !== "object" || paint.type === "shape") return null;
   return paint.scope ?? (paint.type === "pattern" ? "block" : "line");
 }
 
-export function paintKey(paint: Paint): string {
+export function paintKey(paint: LayerPaint): string {
   if (typeof paint !== "object") return colorToCss(paint);
   if (paint.type === "pattern")
     return `pattern#${objectId(paint.source)}:${paint.repetition}:${paint.scale}:${paint.offset}`;

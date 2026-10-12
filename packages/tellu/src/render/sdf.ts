@@ -136,6 +136,46 @@ export function strokeCoverage(
   return pixels;
 }
 
+/**
+ * Where each output pixel falls in a shape gradient, from `0` at the glyph's edge to `1` at the far edge of the
+ * layer's shape: the outer edge of an outside stroke, the inner edge of an inside one, the outer edge of a centered one
+ * (from its inner edge), or `size` inside the glyph for a fill. Distances are averaged over each pixel's samples.
+ * `strokeWidth` and `size` are in field pixels.
+ */
+export function shapeOffsets(
+  field: Float32Array,
+  fieldWidth: number,
+  fieldHeight: number,
+  factor: number,
+  strokeWidth: number,
+  position: StrokePosition,
+  size: number,
+): Float32Array {
+  const width = Math.floor(fieldWidth / factor);
+  const height = Math.floor(fieldHeight / factor);
+  const offsets = new Float32Array(width * height);
+  const samples = factor * factor;
+  const toOffset =
+    position === "outside" && strokeWidth > 0
+      ? (distance: number) => distance / strokeWidth
+      : position === "outside"
+        ? (distance: number) => -distance / Math.max(size, 1e-6)
+        : position === "inside"
+          ? (distance: number) => -distance / Math.max(strokeWidth, 1e-6)
+          : (distance: number) => (distance + strokeWidth / 2) / Math.max(strokeWidth, 1e-6);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let total = 0;
+      for (let sy = 0; sy < factor; sy++) {
+        const row = (y * factor + sy) * fieldWidth + x * factor;
+        for (let sx = 0; sx < factor; sx++) total += field[row + sx]!;
+      }
+      offsets[y * width + x] = clamp(toOffset(total / samples));
+    }
+  }
+  return offsets;
+}
+
 function clamp(value: number): number {
   return value < 0 ? 0 : value > 1 ? 1 : value;
 }
