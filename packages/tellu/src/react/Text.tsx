@@ -198,7 +198,11 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
         current.done = true;
         setPending(typeof document !== "undefined" && document.fonts?.status === "loading");
       },
-      (error: unknown) => fontCheckState.current === current && callbacks.current.onError?.(error),
+      (error: unknown) => {
+        if (fontCheckState.current !== current) return;
+        if (callbacks.current.onError) callbacks.current.onError(error);
+        else console.error(error);
+      },
     );
     return fontCheck === "error";
   };

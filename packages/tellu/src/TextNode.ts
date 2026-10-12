@@ -308,11 +308,12 @@ export class TextNode extends Container {
     const boxes = plateBoxes(layout, style);
     if (boxes.length === 0) return;
     const res = this._resolution;
-    const key = `plate\u0000${stableKey([style, boxes, res])}`;
+    const vertical = isVertical(layout.writingMode);
+    const key = `plate\u0000${stableKey([style, boxes, res, vertical])}`;
     let x = 0;
     let y = 0;
     const cached = this.textures.get(key, res, () => {
-      const plate = rasterizePlate(style, boxes, res, isVertical(layout.writingMode));
+      const plate = rasterizePlate(style, boxes, res, vertical);
       return { canvas: plate.canvas, offsetX: plate.x * res, offsetY: plate.y * res };
     });
     x = cached.offsetX / res;
