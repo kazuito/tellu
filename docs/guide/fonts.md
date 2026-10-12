@@ -115,7 +115,7 @@ A stack that contains a generic family, such as `["Dela Gothic One", "sans-serif
 
 `<Text>` and `createCanvasText()` check every caption. The `fontCheck` option decides what happens:
 
-- `"warn"` (the default) logs each issue once with `console.warn`.
+- `"warn"` (the default) logs each issue once with `console.warn`. The check runs alongside drawing and never delays it.
 - `"error"` reports the issues as a [`FontIssueError`](/api/layout#fontissueerror): `<Text>` passes it to `onError` and stays pending, so in Remotion the render fails through `cancelRender()`, and `createCanvasText()` rejects. `<Text>` also waits for the check before drawing counts as done.
 - `"off"` skips the check.
 

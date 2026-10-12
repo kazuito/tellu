@@ -26,7 +26,7 @@ Extends [`TextNodeOptions`](#textnodeoptions).
 | --- | --- | --- | --- |
 | `renderer` | `TextRenderer` | `TextRenderer.shared()` | |
 | `waitForFonts` | `boolean` | `true` | Load the needed fonts before the first draw |
-| `fontCheck` | [`FontCheckMode`](./layout#fontcheckmode) | `"warn"` | Check the fonts of the initial props before the first draw: log issues, reject with a [`FontIssueError`](./layout#fontissueerror) (`"error"`), or skip the check. [Guide](/guide/fonts#checking-fonts) |
+| `fontCheck` | [`FontCheckMode`](./layout#fontcheckmode) | `"warn"` | Check the fonts of the initial props: log issues without delaying the first draw, check before the first draw and reject with a [`FontIssueError`](./layout#fontissueerror) (`"error"`), or skip the check. [Guide](/guide/fonts#checking-fonts) |
 | `resolution` | `number` | `devicePixelRatio` | |
 | `measurer` | `Measurer` | Canvas 2D | |
 

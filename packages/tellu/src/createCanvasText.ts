@@ -31,8 +31,9 @@ export interface CreateCanvasTextOptions extends TextNodeOptions {
   /** Load the fonts the text needs before the first draw. Default: `true`. */
   waitForFonts?: boolean;
   /**
-   * Checks the fonts of the initial props before the first draw (see `checkFonts()`): `"warn"` logs each issue once
-   * with `console.warn`, `"error"` rejects with a `FontIssueError`, and `"off"` skips the check. Default: `"warn"`.
+   * Checks the fonts of the initial props (see `checkFonts()`): `"warn"` logs each issue once with `console.warn` when
+   * the check is done, without delaying the first draw; `"error"` checks before the first draw and rejects with a
+   * `FontIssueError`; `"off"` skips the check. Default: `"warn"`.
    */
   fontCheck?: FontCheckMode;
 }
@@ -59,10 +60,12 @@ export async function createCanvasText(
     providedRenderer ?? TextRenderer.shared(),
     waitForFonts ? loadFonts(props) : undefined,
   ]);
-  if (fontCheck !== "off") {
+  if (fontCheck === "error") {
     const issues = await checkFonts(props);
-    if (fontCheck === "error" && issues.length > 0) throw new FontIssueError(issues);
-    warnFontIssues(issues);
+    if (issues.length > 0) throw new FontIssueError(issues);
+  } else if (fontCheck === "warn") {
+    // The check loads fonts, so waiting for it would ignore `waitForFonts: false`.
+    void checkFonts(props).then(warnFontIssues, () => {});
   }
   const node = new TextNode(props, nodeOptions);
   let lastDraw = renderer.draw(node, canvas);
