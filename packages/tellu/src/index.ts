@@ -1,6 +1,7 @@
 export { type CanvasText, type CreateCanvasTextOptions, createCanvasText } from "./createCanvasText";
 export { checkFonts, type FontCheckMode, type FontIssue, FontIssueError } from "./fontCheck";
 export { type FontRequest, fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "./fonts";
+export type { LayoutDecoration } from "./layout/decorations";
 export {
   type Layout,
   type LayoutGlyph,
@@ -23,10 +24,12 @@ export { parseMarkup } from "./markup";
 export { defaultKinsoku, defaultStyle, resolveStyle } from "./style/defaults";
 export {
   type BevelOptions,
+  type BoxDecorationOptions,
   bevel,
   conicGradient,
   diamondGradient,
   fill,
+  frame,
   type GlowOptions,
   glow,
   type InnerGlowOptions,
@@ -34,6 +37,7 @@ export {
   innerGlow,
   innerShadow,
   linearGradient,
+  marker,
   radialGradient,
   type SatinOptions,
   type ShadowOptions,

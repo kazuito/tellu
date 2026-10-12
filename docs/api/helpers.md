@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), gradient helpers (linear, radial, conic, diamond), parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (marker, frame), gradient helpers (linear, radial, conic, diamond), parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -134,6 +134,28 @@ All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `sha
 | `invert` | `false` | Paint where the copies agree instead |
 | `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
 
+## Decorations
+
+### `marker()`
+
+```ts
+function marker(paint: Paint, options?: Omit<BoxDecorationOptions, "paint">): BoxDecoration;
+```
+
+A box painted with `paint` behind the lower half of the em box: `inset: [0.5, 1]`, `padding: [2, 0]`. Guide: [Markers and highlights](/guide/decorations#markers-and-highlights).
+
+### `frame()`
+
+```ts
+function frame(paint: Paint, options?: Omit<BoxDecorationOptions, "stroke"> & { width?: number }): BoxDecoration;
+```
+
+A box with a border of `width` px (default `3`) painted with `paint`, and no fill: `padding: [4, 2]`. Guide: [Frames](/guide/decorations#frames).
+
+### `BoxDecorationOptions`
+
+Every [`BoxDecoration`](./types#boxdecoration) option except `type`.
+
 ## Gradients
 
 ### `linearGradient()`
@@ -200,7 +222,7 @@ Guide: [Rich text](/guide/rich-text#markup).
 function applyOverride(base: TextStyle, override: StyleOverride | undefined): TextStyle;
 ```
 
-Applies a run's override to a full style. `layers` replaces when it is an array and patches by index or `id` when it is an object. `undefined` values are ignored.
+Applies a run's override to a full style. `layers` replaces when it is an array and patches by index or `id` when it is an object. `decorations` are added after the base style's, skipping equal ones. `undefined` values are ignored.
 
 ### `mergeOverrides()`
 
@@ -208,7 +230,7 @@ Applies a run's override to a full style. `layers` replaces when it is an array 
 function mergeOverrides(outer: StyleOverride | undefined, inner: StyleOverride | undefined): StyleOverride | undefined;
 ```
 
-Combines two overrides, with `inner` winning. Layer patches are merged key by key. This is how nested markup tags combine.
+Combines two overrides, with `inner` winning. Layer patches are merged key by key, and decorations add up, outer first. This is how nested markup tags combine.
 
 ## Defaults
 
@@ -230,6 +252,7 @@ const defaultStyle: TextStyle = {
   textOrientation: "mixed",
   textCombineUpright: "digits 2",
   layers: [{ paint: "#ffffff" }],
+  decorations: [],
 };
 ```
 

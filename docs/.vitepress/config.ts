@@ -92,6 +92,7 @@ export default defineConfig({
             { text: "Paint", link: "/guide/paint" },
             { text: "Typography", link: "/guide/typography" },
             { text: "Rich text", link: "/guide/rich-text" },
+            { text: "Decorations", link: "/guide/decorations" },
             { text: "Background plates", link: "/guide/plates" },
           ],
         },

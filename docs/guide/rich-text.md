@@ -32,7 +32,7 @@ export default {
 };
 ```
 
-A run's `style` can override anything in [`TextStyle`](/api/types#textstyle). `layers` gets special treatment, described next.
+A run's `style` can override anything in [`TextStyle`](/api/types#textstyle). `layers` gets special treatment, described next, and [`decorations`](./decorations) add to the inherited ones instead of replacing them.
 
 ## Patching layers
 

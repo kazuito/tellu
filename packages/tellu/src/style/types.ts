@@ -284,6 +284,11 @@ export interface TextStyle {
   textCombineUpright: TextCombineUpright;
   /** Decoration layers, bottom → top. Default: `[{ paint: "#ffffff" }]` (a white fill). */
   layers: readonly Layer[];
+  /**
+   * Lines and boxes along the text: underlines, markers, frames. A run's override adds its decorations to the ones it
+   * inherits, like CSS `text-decoration`. Default: `[]`.
+   */
+  decorations: readonly Decoration[];
 }
 
 /**
@@ -377,6 +382,11 @@ export interface PlateStyle {
   padding?: number | readonly [x: number, y: number];
   /** Corner radius in px, clamped to half the plate's size. Default: `0`. */
   radius?: number;
+  /**
+   * Slants the plate into a parallelogram, in degrees: its edge on the over side (the top, or the right in vertical
+   * text) moves toward the end of the lines. Default: `0`.
+   */
+  skew?: number;
   /** A border centered on the plate's edge. */
   stroke?: { width: number; paint: Paint };
   /** One plate around the whole block, or one per line. Default: `"block"`. */
@@ -517,3 +527,41 @@ export interface TextNodeProps extends LayoutOptions {
    */
   glyphTransform?: GlyphTransformFn;
 }
+
+/**
+ * A box along a run of text, behind or in front of its glyphs: a marker (蛍光ペン), a highlight or a frame. One box is
+ * drawn per line the run spans. `marker()` and `box()` build common ones.
+ */
+export interface BoxDecoration {
+  type: "box";
+  /** Fill of the box. Gradients and patterns span each box. Default: none. */
+  paint?: Paint;
+  /** A border centered on the box's edge. */
+  stroke?: { width: number; paint: Paint };
+  /**
+   * The part of the em box the box covers across the line, as fractions from its over side (`0`, the top, or the right
+   * in vertical text) to its under side (`1`). `[0.5, 1]` covers the lower half. Default: `[0, 1]`.
+   */
+  inset?: readonly [from: number, to: number];
+  /** `[along, across]` the line in px, or one value for both, added around the box. Default: `0`. */
+  padding?: number | readonly [along: number, across: number];
+  /** Corner radius in px, clamped to half the box's size. Default: `0`. */
+  radius?: number;
+  /** Slants the box into a parallelogram, in degrees, like `PlateStyle.skew`. Default: `0`. */
+  skew?: number;
+  /** Behind the glyphs (above the plate), or in front of them. Default: `"behind"`. */
+  placement?: "behind" | "front";
+  /** `[x, y]` shift in px. Default: `[0, 0]`. */
+  offset?: readonly [x: number, y: number];
+  /** Blur strength in px, as for layers. Default: `0`. */
+  blur?: number;
+  /** Default: `1`. */
+  opacity?: number;
+  /** Default: `"normal"`. */
+  blendMode?: BLEND_MODES;
+  /** Extra PixiJS filters, compared by identity like `Layer.filters`. */
+  filters?: readonly Filter[];
+}
+
+/** Something drawn along runs of text. */
+export type Decoration = BoxDecoration;

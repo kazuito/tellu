@@ -1,5 +1,6 @@
 import type {
   BevelShading,
+  BoxDecoration,
   ColorValue,
   ConicGradient,
   DiamondGradient,
@@ -219,4 +220,31 @@ function normalizeStopInput(stops: readonly GradientStopInput[] | readonly Color
       ? ([stops.length === 1 ? 0 : index / (stops.length - 1), stop] as const)
       : stop,
   );
+}
+
+/** Options of `marker()` and `frame()`: every `BoxDecoration` option except `type`. */
+export type BoxDecorationOptions = Omit<BoxDecoration, "type">;
+
+/**
+ * A marker (蛍光ペン) behind a run: a box painted with `paint` over the lower half of the em box (`inset: [0.5, 1]`),
+ * reaching 2px past the run on both ends. `inset: [0, 1]` covers the whole em box, like a plate behind just this run.
+ *
+ * @example parseMarkup("ここが<em>大事</em>", { em: { decorations: [marker("#ffe600")] } })
+ */
+export function marker(paint: Paint, options: Omit<BoxDecorationOptions, "paint"> = {}): BoxDecoration {
+  return { type: "box", paint, inset: [0.5, 1], padding: [2, 0], ...options };
+}
+
+/**
+ * A frame (囲み) around a run: a box with a `width` px border painted with `paint` (default `3`) and no fill, `[4, 2]`
+ * px away from the em box along and across the line.
+ *
+ * @example { decorations: [frame("#e60033", { radius: 6 })] }
+ */
+export function frame(
+  paint: Paint,
+  options: Omit<BoxDecorationOptions, "stroke"> & { width?: number } = {},
+): BoxDecoration {
+  const { width = 3, ...rest } = options;
+  return { type: "box", stroke: { width, paint }, padding: [4, 2], ...rest };
 }

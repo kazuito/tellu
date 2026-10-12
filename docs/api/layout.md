@@ -32,6 +32,7 @@ layout.fontScale;    // < 1 when overflow: "shrink" scaled the font
 | `glyphs` | [`LayoutGlyph`](#layoutglyph)`[]` |
 | `runs` | [`ResolvedRun`](#resolvedrun)`[]` |
 | `fontScale` | Scale applied by `overflow: "shrink"` (`1` otherwise) |
+| `decorations` | [`LayoutDecoration`](#layoutdecoration)`[]`: one per decoration and stretch of a line, in the order decorations first appear |
 
 ### `LayoutLine`
 
@@ -59,6 +60,18 @@ layout.fontScale;    // < 1 when overflow: "shrink" scaled the font
 | `scaleX`, `scaleY` | Scale on screen, including `squeeze` and 縦中横 condensing |
 | `ascent`, `descent` | Scaled font extents in the glyph's own orientation |
 | `box` | [`Box`](./types#box): the glyph's cell, its advance along the line × the font's extent across it |
+
+### `LayoutDecoration`
+
+One [decoration](/guide/decorations) along a stretch of one line: consecutive glyphs that all carry it, without the whitespace at the line's edges.
+
+| Field | |
+| --- | --- |
+| `decoration` | The [`Decoration`](./types#decoration) |
+| `lineIndex` | |
+| `start`, `end` | Glyph index range `[start, end)` |
+| `box` | [`Box`](./types#box): what it covers, `inset` and `padding` applied |
+| `fontSize` | Largest font size of its glyphs, after `shrink` |
 
 ### `ResolvedRun`
 

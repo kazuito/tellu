@@ -16,6 +16,7 @@ export const defaultStyle: TextStyle = {
   textOrientation: "mixed",
   textCombineUpright: "digits 2",
   layers: [{ paint: "#ffffff" }],
+  decorations: [],
 };
 
 /** The line breaking rules `kinsoku: true` applies. Extend a set by concatenating to it. */

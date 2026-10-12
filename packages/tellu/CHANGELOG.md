@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Decorations: a style's `decorations` draws boxes along runs of text, such as markers (蛍光ペン), highlights and frames, built with `marker()` and `frame()` or as a `BoxDecoration`. Each box covers a chosen part of the em box (`inset`), with `padding`, `radius`, `skew`, a fill and a border, behind the glyphs or in front of them. Boxes follow line breaks (one per line), justification, `shrink` and vertical writing. A run's decorations add to the ones it inherits from the base style and enclosing markup tags, like CSS `text-decoration`, and `layout.decorations` reports where each one goes.
+- `skew` on plates, which slants them into parallelograms.
+
 - More gradients: `conicGradient()` for conic (angle) gradients, `diamondGradient()` for Photoshop's diamond gradient, and `reflect: true` on linear gradients for its reflected gradient, which runs the stops from the middle out to both ends. They paint layers and plates like the other gradients, with the same scopes.
 
 - Font checks: `checkFonts()` loads the fonts a caption needs, then reports each `FontIssue`: a family that is neither declared nor installed (`family-not-found`), a weight or style with no face (`face-unavailable`), a face that failed to load (`load-failed`), and characters no font in the stack has (`missing-glyphs`). Stacks with a generic family accept the fallback, so their characters aren't checked. `<Text>` and `createCanvasText()` run the check and log new issues with `console.warn`; `fontCheck: "error"` reports them as a `FontIssueError` instead (in Remotion, failing the render), and `fontCheck: "off"` skips it. `<Text>` also takes `onFontIssues`. The check embeds the Adobe Blank 2 font (SIL Open Font License), adding about 2 KB.

@@ -1,5 +1,5 @@
 ---
-description: Type reference for TextNodeProps, LayoutOptions, writing modes, TextStyle, Layer, Shading, Paint, PlateStyle, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
+description: Type reference for TextNodeProps, LayoutOptions, writing modes, TextStyle, Layer, Shading, Paint, PlateStyle, decorations, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
 ---
 
 # Types
@@ -154,6 +154,7 @@ Defaults: [`defaultKinsoku`](./helpers#defaultkinsoku).
 | `textOrientation` | [`TextOrientation`](#textorientation) | `"mixed"` | Vertical text only |
 | `textCombineUpright` | [`TextCombineUpright`](#textcombineupright) | `"digits 2"` | Vertical text only: 縦中横 |
 | `layers` | `readonly `[`Layer`](#layer)`[]` | `[{ paint: "#ffffff" }]` | Bottom → top |
+| `decorations` | `readonly `[`Decoration`](#decoration)`[]` | `[]` | Markers and frames along the text. A run's decorations add to the ones it inherits. [Guide](/guide/decorations) |
 
 Guide: [Typography](/guide/typography).
 
@@ -411,6 +412,7 @@ Guide: [Patching layers](/guide/rich-text#patching-layers).
 | `paint` | `Paint` | | Required |
 | `padding` | `number \| readonly [x, y]` | 24 along the lines, 12 across | `[24, 12]` in horizontal text, `[12, 24]` in vertical |
 | `radius` | `number` | `0` | Clamped to half the plate size |
+| `skew` | `number` | `0` | Slant in degrees: the edge on the over side (top, or right in vertical text) moves toward the end of the lines |
 | `stroke` | `{ width: number; paint: Paint }` | | |
 | `mode` | `"block" \| "line"` | `"block"` | One plate, or one per line |
 | `offset` | `readonly [x, y]` | `[0, 0]` | |
@@ -471,3 +473,36 @@ interface Box {
 ```
 
 A rectangle in layout coordinates, used by [`LayoutGlyph`](./layout#layoutglyph) and [`LayoutLine`](./layout#layoutline).
+
+## Decorations
+
+Guide: [Decorations](/guide/decorations).
+
+### `Decoration`
+
+```ts
+type Decoration = BoxDecoration;
+```
+
+Something drawn along runs of text, from a style's `decorations`.
+
+### `BoxDecoration`
+
+A box along a run, one per line the run spans. Built by [`marker()`](./helpers#marker) and [`frame()`](./helpers#frame).
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"box"` | | Required |
+| `paint` | [`Paint`](#paint) | | Fill. Gradients and patterns span each box |
+| `stroke` | `{ width: number; paint: Paint }` | | Border centered on the box's edge |
+| `inset` | `readonly [from, to]` | `[0, 1]` | The part of the em box covered across the line, as fractions from its over side (top, or right in vertical text) to its under side |
+| `padding` | `number \| readonly [along, across]` | `0` | Added around the box, in px |
+| `radius` | `number` | `0` | Clamped to half the box's size |
+| `skew` | `number` | `0` | Slant in degrees, as for plates |
+| `placement` | `"behind" \| "front"` | `"behind"` | Behind the glyphs (above the plate), or in front of them |
+| `offset` | `readonly [x, y]` | `[0, 0]` | |
+| `blur` | `number` | `0` | |
+| `opacity` | `number` | `1` | |
+| `blendMode` | PixiJS `BLEND_MODES` | `"normal"` | |
+| `filters` | `readonly Filter[]` | | PixiJS filters |
+

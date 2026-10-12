@@ -1,6 +1,7 @@
 import { resolveKinsoku, resolveLength, resolveLineHeight, resolveStyle } from "../style/defaults";
 import { applyOverride } from "../style/merge";
 import type { Box, KinsokuRules, LayoutOptions, TextContent, TextStyle, WritingMode } from "../style/types";
+import { type DecorationGlyph, type LayoutDecoration, layoutDecorations } from "./decorations";
 import { type FontMetrics, fontSpecOf, getDefaultMeasurer, type Measurer } from "./measure";
 import {
   BREAK_FALLBACK,
@@ -105,6 +106,8 @@ export interface Layout {
   height: number;
   /** Font scale applied by `overflow: "shrink"`, `1` without shrinking. */
   fontScale: number;
+  /** Decorations along the text, one per decoration and stretch of a line, in the order they first appear. */
+  decorations: LayoutDecoration[];
 }
 
 const EPSILON = 0.01;
@@ -476,6 +479,8 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
 
   const glyphs: LayoutGlyph[] = [];
   const lines: LayoutLine[] = [];
+  const decorated = runs.some((run) => run.style.decorations?.length);
+  const decorationGlyphs: DecorationGlyph[] = [];
   let blockOffset = 0;
 
   ranges.forEach((range, lineIndex) => {
@@ -568,6 +573,30 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         };
       }
       glyphs.push(glyph);
+      if (decorated) {
+        // The em box across the line, from the line's baseline: baseline shifts don't move decorations.
+        let over: number;
+        let under: number;
+        if (vertical) {
+          const half = (fontSize * style.scaleX) / 2;
+          [over, under] = [-(baseline + half), -(baseline - half)];
+        } else {
+          const [emAscent, emDescent] = emBox(metric, style.fontSize);
+          [over, under] = [
+            baseline - emAscent * fontScale * style.scaleY,
+            baseline + emDescent * fontScale * style.scaleY,
+          ];
+        }
+        decorationGlyphs.push({
+          lineIndex,
+          isWhitespace: glyph.isWhitespace,
+          decorations: style.decorations ?? [],
+          box: glyph.box,
+          fontSize,
+          over,
+          under,
+        });
+      }
       pen += (cell + spacing[k]!) * squeeze + (gapFilter(k) ? extra : 0);
     }
 
@@ -590,7 +619,8 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
   });
 
   const [width, height] = vertical ? [blockTotal, boxLength] : [boxLength, blockTotal];
-  return { writingMode, runs, glyphs, lines, width, height, fontScale };
+  const decorations = decorated ? layoutDecorations(decorationGlyphs, lines.length, vertical) : [];
+  return { writingMode, runs, glyphs, lines, width, height, fontScale, decorations };
 }
 
 interface VerticalPlacement {

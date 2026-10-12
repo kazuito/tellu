@@ -80,6 +80,32 @@ export default {
 };
 ```
 
+## Slanted plates
+
+`skew` slants a plate into a parallelogram, in degrees. Its top edge moves toward the end of the lines (its right edge, in vertical text), which is the look of many news and sports supers:
+
+```ts demo
+import { fill } from "tellu";
+
+export default {
+  text: "決勝進出",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 56,
+    layers: [fill("#ffffff")],
+  },
+  background: {
+    paint: "#e60033",
+    padding: [44, 12],
+    skew: -15,
+    stroke: { width: 4, paint: "#ffffff" },
+  },
+};
+```
+
+The slant comes on top of the padding, so the text keeps the same space on both sides at its middle.
+
 ## Soft edges
 
 Plates take `offset`, `blur`, `opacity` and PixiJS `filters` like a layer does. A little blur softens the edges:
@@ -111,6 +137,7 @@ export default {
 | `paint` | | Any [paint](./paint). Gradients span the plate (or each line plate) |
 | `padding` | `[24, 12]` | `[x, y]` or one number for both. In vertical text the default is `[12, 24]` |
 | `radius` | `0` | Corner radius, clamped to half the plate's size |
+| `skew` | `0` | Slant in degrees |
 | `stroke` | | `{ width, paint }` |
 | `mode` | `"block"` | `"line"` draws one plate per line |
 | `offset` | `[0, 0]` | |

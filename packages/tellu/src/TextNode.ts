@@ -1,14 +1,16 @@
 import { AlphaFilter, BlurFilter, Container, type DestroyOptions, type Filter, Rectangle, Sprite } from "pixi.js";
+import { decorationKey } from "./layout/decorations";
 import { type Layout, layoutText } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
+import { isVertical } from "./layout/vertical";
 import { blurPadding } from "./render/blur";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
-import { plateBoxes, rasterizePlate } from "./render/plate";
+import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
 import { layerReach, layerShape } from "./render/rasterize";
 import { ScopeBoxes } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
-import type { GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } from "./style/types";
+import type { Box, BoxDecoration, GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } from "./style/types";
 import { stableKey } from "./utils/stableKey";
 
 export interface TextNodeOptions {
@@ -53,14 +55,16 @@ export class TextNode extends Container {
   private readonly measurer: Measurer;
   private readonly textures = new TextureSet();
   private readonly plateLayer = new Container({ label: "plate" });
+  private readonly backDecorationLayer = new Container({ label: "decorations behind" });
   private readonly glyphLayer = new Container({ label: "glyphs" });
+  private readonly frontDecorationLayer = new Container({ label: "decorations in front" });
 
   constructor(props: TextNodeProps, options: TextNodeOptions = {}) {
     super({ label: "text" });
     this._props = props;
     this.measurer = options.measurer ?? getDefaultMeasurer();
     this._resolution = options.resolution ?? (typeof devicePixelRatio === "number" ? devicePixelRatio : 1);
-    this.addChild(this.plateLayer, this.glyphLayer);
+    this.addChild(this.plateLayer, this.backDecorationLayer, this.glyphLayer, this.frontDecorationLayer);
     this.refresh();
   }
 
@@ -118,7 +122,7 @@ export class TextNode extends Container {
     let minY = Infinity;
     let maxX = -Infinity;
     let maxY = -Infinity;
-    for (const group of [...this.plateLayer.children, ...this.glyphLayer.children]) {
+    for (const group of this.groups()) {
       if (!group.visible) continue;
       const bounds = group.getLocalBounds();
       if (bounds.width <= 0 || bounds.height <= 0) continue;
@@ -166,7 +170,8 @@ export class TextNode extends Container {
     this._layout = layout;
     this.contexts = createGlyphContexts(layout);
 
-    for (const child of [...this.glyphLayer.removeChildren(), ...this.plateLayer.removeChildren()]) {
+    for (const child of this.groups()) {
+      child.parent?.removeChild(child);
       destroyFilters(child);
       child.destroy({ children: true });
     }
@@ -231,6 +236,7 @@ export class TextNode extends Container {
     }
 
     if (this._props.background) this.buildPlate(layout, this._props.background);
+    this.buildDecorations(layout);
     this.textures.end();
     rasterizer.releaseFields();
   }
@@ -243,7 +249,7 @@ export class TextNode extends Container {
     let x = 0;
     let y = 0;
     const cached = this.textures.get(key, res, () => {
-      const plate = rasterizePlate(style, boxes, res);
+      const plate = rasterizePlate(style, boxes, res, isVertical(layout.writingMode));
       return { canvas: plate.canvas, offsetX: plate.x * res, offsetY: plate.y * res };
     });
     x = cached.offsetX / res;
@@ -256,6 +262,58 @@ export class TextNode extends Container {
     sprite.position.set(x, y);
     container.addChild(sprite);
     this.plateLayer.addChild(container);
+  }
+
+  /** Box decorations: one sprite per decoration, holding all its boxes, behind or in front of the glyphs. */
+  private buildDecorations(layout: Layout): void {
+    const res = this._resolution;
+    const vertical = isVertical(layout.writingMode);
+    // Equal decorations from different runs draw together.
+    const boxes = new Map<string, { decoration: BoxDecoration; list: Box[] }>();
+    for (const { decoration, box } of layout.decorations) {
+      if (decoration.type !== "box" || (decoration.paint === undefined && !decoration.stroke)) continue;
+      const key = decorationKey(decoration);
+      const entry = boxes.get(key) ?? { decoration, list: [] };
+      entry.list.push(box);
+      boxes.set(key, entry);
+    }
+    for (const { decoration, list } of boxes.values()) {
+      const key = `decoration\u0000${stableKey([decoration.paint ?? null, decoration.stroke ?? null, decoration.radius, decoration.skew, vertical, list, res])}`;
+      const cached = this.textures.get(key, res, () => {
+        const drawn = rasterizeBoxes(
+          decoration,
+          list.map((box) => ({ box, scope: box })),
+          res,
+          vertical,
+        );
+        return { canvas: drawn.canvas, offsetX: drawn.x * res, offsetY: drawn.y * res };
+      });
+      const container = createEffectContainer(
+        {
+          paint: "#000",
+          offset: decoration.offset,
+          blur: decoration.blur,
+          opacity: decoration.opacity,
+          blendMode: decoration.blendMode,
+          filters: decoration.filters,
+        },
+        "decoration",
+      );
+      const sprite = new Sprite(cached.texture);
+      sprite.position.set(cached.offsetX / res, cached.offsetY / res);
+      container.addChild(sprite);
+      (decoration.placement === "front" ? this.frontDecorationLayer : this.backDecorationLayer).addChild(container);
+    }
+  }
+
+  /** Every group container: plate, decorations and glyph layer groups. */
+  private groups(): Container[] {
+    return [
+      ...this.plateLayer.children,
+      ...this.backDecorationLayer.children,
+      ...this.glyphLayer.children,
+      ...this.frontDecorationLayer.children,
+    ];
   }
 
   private applyGlyphTransforms(): void {
@@ -299,7 +357,7 @@ export class TextNode extends Container {
    * `options` can't destroy them, and filters passed in props are left alone.
    */
   override destroy(_options?: DestroyOptions): void {
-    for (const child of [...this.glyphLayer.children, ...this.plateLayer.children]) destroyFilters(child);
+    for (const child of this.groups()) destroyFilters(child);
     this.textures.clear();
     super.destroy({ children: true });
   }

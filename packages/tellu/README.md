@@ -10,7 +10,8 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 - Automatic line wrapping with Japanese kinsoku (禁則処理), hanging punctuation (ぶら下げ) and optional phrase breaking (文節改行)
 - Letter spacing, condensed / expanded glyphs (長体 / 平体) with uniform outlines, kerning, baseline shift, line height
 - Fit to width by shrinking the font or squeezing the line (長体で収める)
-- Background plates (座布団)
+- Background plates (座布団), straight or slanted, behind the block or each line
+- Markers, highlights and frames along runs of text, following line breaks and vertical writing
 - Per-glyph transforms for animation (position, scale, rotation, skew, opacity)
 
 ```sh
