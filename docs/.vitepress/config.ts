@@ -103,6 +103,7 @@ export default defineConfig({
             { text: "Fitting text", link: "/guide/fitting" },
             { text: "Vertical writing", link: "/guide/vertical" },
             { text: "Text on a path", link: "/guide/text-path" },
+            { text: "Warp", link: "/guide/warp" },
           ],
         },
         {

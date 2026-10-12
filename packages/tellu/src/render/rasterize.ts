@@ -3,6 +3,7 @@ import { type FontSpec, fontToCss } from "../layout/measure";
 import type { Box, Layer, ShapeGradient, StrokePosition } from "../style/types";
 import { colorRamp, createPaintStyle, rampIndex } from "./paint";
 import { measureInside, shapeOffsets, signedDistanceField, strokeCoverage } from "./sdf";
+import { type WarpMapping, warpedBounds } from "./warp";
 
 /** A path to rasterize like a glyph, such as a decoration line. */
 export interface PathSource {
@@ -27,6 +28,11 @@ export interface GlyphShape {
   /** Sub-pixel position of the glyph origin in device pixels, `[0, 1)`. */
   fracX: number;
   fracY: number;
+  /**
+   * Bends the shape. With a warp the shape is placed absolutely: `origin` is its origin in layout px, `fracX` and
+   * `fracY` are unused, and the result's offset is in device px from the layout origin.
+   */
+  warp?: { mapping: WarpMapping; key: string; origin: readonly [x: number, y: number] };
 }
 
 export interface RasterResult {
@@ -105,6 +111,49 @@ export function layerReach(layer: Layer): number {
   if (position === "inside") return 0;
   const half = position === "center" ? width / 2 : width;
   return join === "miter" ? half * Math.min(miterLimit, 4) : half;
+}
+
+/** Whether a layer reads distances inside the shape: inside or centered strokes, shading, or a shape gradient fill. */
+function needsInside(layer: Layer): boolean {
+  const { width, position } = layerShape(layer);
+  const shapePaint = typeof layer.paint === "object" && layer.paint.type === "shape";
+  return position !== "outside" || !!layer.shading || (shapePaint && width === 0);
+}
+
+/** Puts a layer's coverage (colored, for a shape gradient) from a distance field into the canvas. */
+function putCoverage(ctx: Canvas2D, entry: FieldEntry, layer: Layer, res: number, width: number, height: number): void {
+  const { width: strokeWidth, position } = layerShape(layer);
+  const pixels = strokeCoverage(
+    entry.field,
+    entry.width,
+    entry.height,
+    SUPERSAMPLE,
+    strokeWidth * res * SUPERSAMPLE,
+    position,
+    layer.shading,
+    res * SUPERSAMPLE,
+  );
+  if (typeof layer.paint === "object" && layer.paint.type === "shape") {
+    colorByShape(pixels, entry, layer.paint, strokeWidth * res, position, res);
+  }
+  ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
+}
+
+/** Paints the coverage in the canvas with the layer's paint, stretched over `paintBox` relative to the origin. */
+function paintCoverage(
+  ctx: Canvas2D,
+  layer: Layer,
+  paintBox: Box,
+  res: number,
+  originX: number,
+  originY: number,
+  width: number,
+  height: number,
+): void {
+  ctx.globalCompositeOperation = "source-in";
+  ctx.setTransform(res, 0, 0, res, originX, originY);
+  ctx.fillStyle = createPaintStyle(ctx, layer.paint as Exclude<Layer["paint"], ShapeGradient>, paintBox);
+  ctx.fillRect(-originX / res, -originY / res, width / res, height / res);
 }
 
 /**
@@ -193,6 +242,7 @@ export class GlyphRasterizer {
    * @param reach Extra margin around the glyph; layers of one glyph share it so distance fields can be reused.
    */
   rasterize(shape: GlyphShape, layer: Layer, paintBox: Box, reach: number): RasterResult {
+    if (shape.warp) return this.rasterizeWarped(shape, shape.warp, layer, paintBox, reach);
     const { resolution: res, scaleX, scaleY, fracX, fracY } = shape;
     const matrix = glyphMatrix(shape);
     const bounds = transformBounds(this.shapeBounds(shape), matrix);
@@ -236,31 +286,147 @@ export class GlyphRasterizer {
         drawShape(ctx, shape, "stroke");
       }
     } else {
-      // A shape gradient on a fill runs inside the glyph.
-      const inside = position !== "outside" || !!layer.shading || (!!shapePaint && strokeWidth === 0);
-      const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height, inside);
-      const pixels = strokeCoverage(
-        entry.field,
-        entry.width,
-        entry.height,
-        SUPERSAMPLE,
-        strokeWidth * res * SUPERSAMPLE,
-        position,
-        layer.shading,
-        res * SUPERSAMPLE,
-      );
-      if (shapePaint) colorByShape(pixels, entry, shapePaint, strokeWidth * res, position, res);
-      ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
+      const entry = this.distanceField(shape, matrix, glyphX, glyphY, width, height, needsInside(layer));
+      putCoverage(ctx, entry, layer, res, width, height);
     }
 
-    if (!shapePaint) {
-      ctx.globalCompositeOperation = "source-in";
-      ctx.setTransform(res, 0, 0, res, glyphX, glyphY);
-      ctx.fillStyle = createPaintStyle(ctx, layer.paint as Exclude<Layer["paint"], ShapeGradient>, paintBox);
-      ctx.fillRect(-glyphX / res, -glyphY / res, width / res, height / res);
-    }
-
+    if (!shapePaint) paintCoverage(ctx, layer, paintBox, res, glyphX, glyphY, width, height);
     return { canvas, offsetX: left, offsetY: top };
+  }
+
+  /**
+   * A warped shape: its fill is drawn flat, bent by inverse-mapping every sample of the output, and only then grown
+   * into the layer's shape, so outlines keep an even width. Always on the distance field, so joins are round.
+   * `paintBox` is in layout coordinates.
+   */
+  private rasterizeWarped(
+    shape: GlyphShape,
+    warp: NonNullable<GlyphShape["warp"]>,
+    layer: Layer,
+    paintBox: Box,
+    reach: number,
+  ): RasterResult {
+    const res = shape.resolution;
+    const [originX, originY] = warp.origin;
+    const matrix = glyphMatrix(shape);
+    const ink = transformBounds(this.shapeBounds(shape), matrix);
+    // The flat ink in layout px, with a pixel to spare for antialiasing.
+    const flat = {
+      x: originX + ink.left / res - 1,
+      y: originY + ink.top / res - 1,
+      width: (ink.right - ink.left) / res + 2,
+      height: (ink.bottom - ink.top) / res + 2,
+    };
+    const bent = warpedBounds(warp.mapping, flat, 8);
+    const margin = reach * res + AA_MARGIN;
+    const left = Math.floor(bent.x * res - margin);
+    const top = Math.floor(bent.y * res - margin);
+    const width = Math.max(1, Math.ceil((bent.x + bent.width) * res + margin) - left);
+    const height = Math.max(1, Math.ceil((bent.y + bent.height) * res + margin) - top);
+
+    const canvas = createCanvas(width, height);
+    const ctx = context2d(canvas);
+    const entry = this.warpedField(shape, warp, matrix, flat, bent, left, top, width, height, needsInside(layer));
+    putCoverage(ctx, entry, layer, res, width, height);
+    if (!(typeof layer.paint === "object" && layer.paint.type === "shape")) {
+      paintCoverage(ctx, layer, paintBox, res, -left, -top, width, height);
+    }
+    return { canvas, offsetX: left, offsetY: top };
+  }
+
+  /** The distance field of a warped shape over the output region, cached per glyph like flat fields. */
+  private warpedField(
+    shape: GlyphShape,
+    warp: NonNullable<GlyphShape["warp"]>,
+    matrix: Matrix,
+    flat: Box,
+    /** Where the flat ink goes: samples outside it can't land on ink, so they aren't mapped back. */
+    bent: Box,
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+    inside: boolean,
+  ): FieldEntry {
+    const source =
+      "path" in shape.source ? shape.source.key : `${fontToCss(shape.source.font)}\u0000${shape.source.text}`;
+    const key = ["warp", warp.key, source, ...matrix, ...warp.origin, left, top, width, height].join("\u0000");
+    let entry = this.fieldCache.get(key);
+    if (entry) {
+      if (inside && !entry.inside) {
+        measureInside(entry.field, entry.width, entry.height);
+        entry.inside = true;
+      }
+      return entry;
+    }
+
+    const res = shape.resolution;
+    const scale = res * SUPERSAMPLE;
+    // The flat shape, supersampled, in device px from `flatLeft`, `flatTop`.
+    const flatLeft = Math.floor(flat.x * scale);
+    const flatTop = Math.floor(flat.y * scale);
+    const flatWidth = Math.max(1, Math.ceil((flat.x + flat.width) * scale) - flatLeft);
+    const flatHeight = Math.max(1, Math.ceil((flat.y + flat.height) * scale) - flatTop);
+    const flatCtx = context2d(createCanvas(flatWidth, flatHeight));
+    const [a, b, c, d] = matrix;
+    flatCtx.setTransform(
+      a * SUPERSAMPLE,
+      b * SUPERSAMPLE,
+      c * SUPERSAMPLE,
+      d * SUPERSAMPLE,
+      warp.origin[0] * scale - flatLeft,
+      warp.origin[1] * scale - flatTop,
+    );
+    flatCtx.fillStyle = "#000";
+    drawShape(flatCtx, shape, "fill");
+    const flatAlpha = flatCtx.getImageData(0, 0, flatWidth, flatHeight).data;
+    const sample = (x: number, y: number): number => {
+      // Bilinear, in supersampled flat pixels; outside the flat canvas is empty.
+      const fx = x * scale - flatLeft - 0.5;
+      const fy = y * scale - flatTop - 0.5;
+      const x0 = Math.floor(fx);
+      const y0 = Math.floor(fy);
+      if (x0 < -1 || y0 < -1 || x0 >= flatWidth || y0 >= flatHeight) return 0;
+      const at = (px: number, py: number) =>
+        px < 0 || py < 0 || px >= flatWidth || py >= flatHeight ? 0 : flatAlpha[(py * flatWidth + px) * 4 + 3]!;
+      const tx = fx - x0;
+      const ty = fy - y0;
+      const upper = at(x0, y0) * (1 - tx) + at(x0 + 1, y0) * tx;
+      const lower = at(x0, y0 + 1) * (1 - tx) + at(x0 + 1, y0 + 1) * tx;
+      return upper * (1 - ty) + lower * ty;
+    };
+
+    const fieldWidth = width * SUPERSAMPLE;
+    const fieldHeight = height * SUPERSAMPLE;
+    const bentAlpha = new Uint8ClampedArray(fieldWidth * fieldHeight * 4);
+    // Neighbouring samples come from neighbouring points, so each solution seeds the next.
+    let rowGuess: [number, number] | null = null;
+    const [minX, minY, maxX, maxY] = [bent.x - 1, bent.y - 1, bent.x + bent.width + 1, bent.y + bent.height + 1];
+    for (let py = 0; py < fieldHeight; py++) {
+      const y = (top * SUPERSAMPLE + py + 0.5) / scale;
+      if (y < minY || y > maxY) continue;
+      let guess = rowGuess;
+      let first = true;
+      for (let px = 0; px < fieldWidth; px++) {
+        const x = (left * SUPERSAMPLE + px + 0.5) / scale;
+        if (x < minX || x > maxX) continue;
+        const point = warp.mapping.inverse(x, y, guess ?? undefined);
+        // The next row starts from the first solution of this one.
+        if (first) rowGuess = point;
+        first = false;
+        guess = point;
+        if (point) bentAlpha[(py * fieldWidth + px) * 4 + 3] = sample(point[0], point[1]);
+      }
+    }
+    entry = {
+      field: signedDistanceField(bentAlpha, fieldWidth, fieldHeight, inside),
+      width: fieldWidth,
+      height: fieldHeight,
+      inside,
+    };
+    if (this.fieldCache.size > 64) this.fieldCache.delete(this.fieldCache.keys().next().value!);
+    this.fieldCache.set(key, entry);
+    return entry;
   }
 
   private distanceField(

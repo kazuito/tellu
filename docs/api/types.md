@@ -1,5 +1,5 @@
 ---
-description: Type reference for TextNodeProps, LayoutOptions, writing modes, TextStyle, Layer, Shading, Paint, PlateStyle, decorations, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
+description: Type reference for TextNodeProps, warps, LayoutOptions, writing modes, TextStyle, Layer, Shading, Paint, PlateStyle, decorations, runs, kinsoku rules, GlyphContext, GlyphTransform and Box.
 ---
 
 # Types
@@ -20,6 +20,7 @@ Everything that describes a caption. Taken by [`TextNode`](./rendering#textnode)
 interface TextNodeProps extends LayoutOptions {
   background?: PlateStyle;
   glyphTransform?: GlyphTransformFn;
+  warp?: Warp;
 }
 ```
 
@@ -27,8 +28,47 @@ interface TextNodeProps extends LayoutOptions {
 | --- | --- | --- |
 | `background` | [`PlateStyle`](#platestyle) | A plate behind the text. [Guide](/guide/plates) |
 | `glyphTransform` | [`GlyphTransformFn`](#glyphtransformfn) | Per-glyph transform. [Guide](/guide/animation) |
+| `warp` | [`Warp`](#warp) | Bends the glyphs. [Guide](/guide/warp) |
 
 …plus every option of [`LayoutOptions`](#layoutoptions).
+
+### `Warp`
+
+```ts
+type Warp = WarpPreset | WarpEnvelope;
+```
+
+How `warp` bends the glyphs: a style, or an envelope. The glyphs are bent before they are outlined, so outlines keep an even width. Plates and box decorations aren't warped. [Guide](/guide/warp).
+
+### `WarpPreset`
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `style` | [`WarpStyle`](#warpstyle) | | Required |
+| `bend` | `number` | `0.5` | `-1`–`1`: how strongly, and which way |
+| `horizontalDistortion` | `number` | `0` | `-1`–`1`: a positive value makes the left side taller and the right side shorter |
+| `verticalDistortion` | `number` | `0` | `-1`–`1`: a positive value makes the top wider and the bottom narrower |
+| `direction` | `"horizontal" \| "vertical"` | `"horizontal"` | Bend along the width or along the height |
+
+### `WarpStyle`
+
+```ts
+type WarpStyle =
+  | "arc" | "arc-lower" | "arc-upper" | "arch" | "bulge" | "flag"
+  | "wave" | "rise" | "fisheye" | "inflate" | "squeeze" | "twist";
+```
+
+Named after Photoshop's warp styles and similar in spirit; the exact shapes differ. [Guide](/guide/warp#styles).
+
+### `WarpEnvelope`
+
+```ts
+interface WarpEnvelope {
+  envelope: readonly (readonly [x: number, y: number])[];
+}
+```
+
+16 control points of a bicubic Bézier patch, as fractions of the box around the text (`[0, 0]` top left, `[1, 1]` bottom right), in 4 rows of 4 from the top left. An unwarped box has them at `[column / 3, row / 3]`. [Guide](/guide/warp#envelopes).
 
 ### `LayoutOptions`
 

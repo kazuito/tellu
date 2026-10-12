@@ -1,5 +1,5 @@
 ---
-description: Known limitations of tellu, covering approximated vertical forms, horizontal-only text paths, no ruby, no ligatures, how overlapping outlines of different colors combine, per-glyph shading, and font declaration requirements.
+description: Known limitations of tellu, covering approximated vertical forms, horizontal-only text paths, what warps bend, no ruby, no ligatures, how overlapping outlines of different colors combine, per-glyph shading, and font declaration requirements.
 ---
 
 # Limitations
@@ -11,6 +11,10 @@ Canvas 2D can't request a font's vertical glyph alternates (the OpenType `vert` 
 ## Text on a path is horizontal
 
 Only horizontal text can follow a [path](./text-path), and decorations aren't drawn along paths. Glyphs turn as a whole: they follow the path's direction but aren't bent along it.
+
+## Warps bend glyphs, not plates
+
+[Warps](./warp) bend the glyphs, their outlines and line decorations, but not plates or box decorations, and they are computed per pixel on the CPU, which makes the first draw of a warped caption slower.
 
 ## No ruby
 

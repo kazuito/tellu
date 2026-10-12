@@ -10,8 +10,9 @@ import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
 import { type GlyphShape, layerReach, layerShape, type PathSource } from "./render/rasterize";
-import { ScopeBoxes } from "./render/scope";
+import { ScopeBoxes, unionBox } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
+import { type WarpMapping, warpedBounds, warpMapping } from "./render/warp";
 import type {
   Box,
   BoxDecoration,
@@ -62,6 +63,8 @@ export class TextNode extends Container {
   private glyphSprites: GlyphSprite[] = [];
   private builtKey = "";
   private transformed = false;
+  /** The warp of the current build, which glyph transform origins follow. */
+  private warp: WarpMapping | null = null;
   private _revision = 0;
   private readonly measurer: Measurer;
   private readonly textures = new TextureSet();
@@ -194,6 +197,18 @@ export class TextNode extends Container {
     const reach = layout.glyphs.map((glyph) =>
       Math.max(0, ...layout.runs[glyph.runIndex]!.style.layers.map(layerReach)),
     );
+    const warp = this.buildWarp(layout);
+    // Paint spans the warped scope box, so gradients cover the bent text.
+    const warpedScopes = new Map<Box, Box>();
+    const scopeOf = (box: Box) => {
+      if (!warp) return box;
+      let bent = warpedScopes.get(box);
+      if (!bent) {
+        bent = warpedBounds(warp.mapping, box);
+        warpedScopes.set(box, bent);
+      }
+      return bent;
+    };
 
     const vertical = isVertical(layout.writingMode);
     const lines = new Map<number, LineShape>();
@@ -204,16 +219,17 @@ export class TextNode extends Container {
         if ("decoration" in member) {
           let line = lines.get(member.decoration);
           if (!line) {
-            line = lineShape(layout, member.decoration, vertical, res);
+            line = lineShape(layout, member.decoration, vertical, res, warp);
             lines.set(member.decoration, line);
           }
-          const scopeBox = scopes.forBand(paintScope(layer.paint), line.lineIndex, line.band, vertical);
+          const scopeBox = scopeOf(scopes.forBand(paintScope(layer.paint), line.lineIndex, line.band, vertical));
           const paintBox = { ...scopeBox, x: scopeBox.x - line.originX, y: scopeBox.y - line.originY };
           const key = [
             line.shape.source.key,
             res,
             line.shape.fracX,
             line.shape.fracY,
+            warp ? `${warp.key}\u0000${roundPoint(line.band.x, line.band.y)}` : "",
             line.reach,
             stableKey(layerShape(layer)),
             stableKey(layer.shading ?? null),
@@ -234,13 +250,14 @@ export class TextNode extends Container {
         const style = layout.runs[glyph.runIndex]!.style;
         const font = fontSpecOf(style, glyph.fontSize);
 
-        const [pixelX, fracX] = snap(glyph.x * res);
-        const [pixelY, fracY] = snap(glyph.y * res);
+        // A warped glyph is placed absolutely, so its position isn't snapped and its paint box is in layout px.
+        const [pixelX, fracX] = warp ? [0, 0] : snap(glyph.x * res);
+        const [pixelY, fracY] = warp ? [0, 0] : snap(glyph.y * res);
         const originX = (pixelX + fracX) / res;
         const originY = (pixelY + fracY) / res;
-        const scopeBox = scopes.get(paintScope(layer.paint), glyph);
+        const scopeBox = scopeOf(scopes.get(paintScope(layer.paint), glyph));
         const paintBox = { ...scopeBox, x: scopeBox.x - originX, y: scopeBox.y - originY };
-        const shape = {
+        const shape: GlyphShape = {
           source: { text: glyph.text, font },
           scaleX: glyph.scaleX,
           scaleY: glyph.scaleY,
@@ -250,6 +267,7 @@ export class TextNode extends Container {
           fracX,
           fracY,
         };
+        if (warp) shape.warp = { ...warp, origin: [glyph.x, glyph.y] };
 
         const key = [
           glyph.text,
@@ -261,6 +279,7 @@ export class TextNode extends Container {
           res,
           fracX,
           fracY,
+          warp ? `${warp.key}\u0000${roundPoint(glyph.x, glyph.y)}` : "",
           reach[index],
           stableKey(layerShape(layer)),
           stableKey(layer.shading ?? null),
@@ -306,6 +325,18 @@ export class TextNode extends Container {
     sprite.position.set(x, y);
     container.addChild(sprite);
     this.plateLayer.addChild(container);
+  }
+
+  /** The warp of this build, over the text's content, or `null` for none. */
+  private buildWarp(layout: Layout): { mapping: WarpMapping; key: string } | null {
+    this.warp = null;
+    const { warp } = this._props;
+    if (!warp) return null;
+    const content = unionBox(layout.lines.filter((line) => line.end > line.start).map((line) => line.contentBox));
+    const mapping = warpMapping(warp, content);
+    if (!mapping) return null;
+    this.warp = mapping;
+    return { mapping, key: stableKey([warp, roundBox(content)]) };
   }
 
   /**
@@ -389,6 +420,8 @@ export class TextNode extends Container {
         px = box.x + box.width / 2 + dx * cos - dy * sin;
         py = box.y + box.height / 2 + dx * sin + dy * cos;
       }
+      // And it bends with the glyph under a warp.
+      if (this.warp) [px, py] = this.warp.forward(px, py);
       const scale = t.scale ?? 1;
       const placement: SpritePlacement = [
         px - baseX,
@@ -468,6 +501,10 @@ function snap(value: number): [pixel: number, fraction: number] {
   return [pixel, fraction];
 }
 
+function roundPoint(x: number, y: number): string {
+  return `${Math.round(x * 1000) / 1000},${Math.round(y * 1000) / 1000}`;
+}
+
 function roundBox(box: { x: number; y: number; width: number; height: number }) {
   const round = (value: number) => Math.round(value * 100) / 100;
   return [round(box.x), round(box.y), round(box.width), round(box.height)];
@@ -488,14 +525,20 @@ interface LineShape {
   reach: number;
 }
 
-function lineShape(layout: Layout, index: number, vertical: boolean, res: number): LineShape {
+function lineShape(
+  layout: Layout,
+  index: number,
+  vertical: boolean,
+  res: number,
+  warp: { mapping: WarpMapping; key: string } | null,
+): LineShape {
   const { decoration, box, fontSize, runIndex, lineIndex } = layout.decorations[index]!;
   const line = decoration as LineDecoration;
   const thickness = lineThickness(line, fontSize);
   const path = new Path2D();
   traceLine(path, line, box.width, box.height, thickness, vertical);
-  const [pixelX, fracX] = snap(box.x * res);
-  const [pixelY, fracY] = snap(box.y * res);
+  const [pixelX, fracX] = warp ? [0, 0] : snap(box.x * res);
+  const [pixelY, fracY] = warp ? [0, 0] : snap(box.y * res);
   const round = (value: number) => Math.round(value * 1000) / 1000;
   const key = `line\u0000${stableKey([line.style ?? "solid", round(box.width), round(box.height), round(thickness), vertical])}`;
   return {
@@ -507,6 +550,7 @@ function lineShape(layout: Layout, index: number, vertical: boolean, res: number
       resolution: res,
       fracX,
       fracY,
+      ...(warp && { warp: { ...warp, origin: [box.x, box.y] as const } }),
     },
     lineIndex,
     band: box,

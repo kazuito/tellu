@@ -7,7 +7,7 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 - Solid colors, linear (or reflected) / radial / conic / diamond gradients and image patterns, stretched per glyph, per line or over the whole block
 - Rich text: change font, size, color or any layer for part of the text (runs or `<tag>` markup)
 - Horizontal and vertical writing (縦書き) with upright / sideways glyphs, vertical punctuation and 縦中横
-- Text on a path: arched titles and captions along any SVG path
+- Text on a path (arched titles, captions along any SVG path) and warps (arc, bulge, flag, fisheye, … or a free-form envelope) with even outlines
 - Automatic line wrapping with Japanese kinsoku (禁則処理), hanging punctuation (ぶら下げ) and optional phrase breaking (文節改行)
 - Letter spacing, condensed / expanded glyphs (長体 / 平体) with uniform outlines, kerning, baseline shift, line height
 - Fit to width by shrinking the font or squeezing the line (長体で収める)

@@ -44,6 +44,12 @@ const grain = new NoiseFilter();
 <Text text={fullText} glyphTransform={(glyph) => ({ visible: glyph.visibleIndex < frame })} />
 ```
 
+## Warps and curves
+
+[Warped](./warp) glyphs are bent pixel by pixel on the CPU when they are first rasterized, which takes a few hundred milliseconds for a short caption. A static warp costs that once. Animating `warp` (a waving flag, say) pays it on every frame, which is fine for rendering video and heavy for live playback.
+
+Glyphs on a [text path](./text-path) are each rasterized at their own angle, so they share fewer bitmaps than straight text, but cost about the same to draw.
+
 ## Big blurs
 
 Blurred layers render through PixiJS's `BlurFilter`, whose cost grows with strength × quality × area. A few large glows on a full-HD caption are fine. Dozens of animated captions each with a 40 px, quality-8 blur will add up. Lower `blurQuality` (default `4`) first: 2–3 passes are often indistinguishable.

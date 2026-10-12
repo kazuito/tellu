@@ -614,11 +614,56 @@ export interface TextNodeProps extends LayoutOptions {
    * rebuild the text, so passing a fresh one every frame is cheap.
    */
   glyphTransform?: GlyphTransformFn;
+  /**
+   * Bends the glyphs, like Photoshop's warp text: a style with a bend, or an envelope of 16 points. Outlines are grown
+   * after the warp, so they stay even. Plates and box decorations aren't warped.
+   */
+  warp?: Warp;
+}
+
+/** Warp styles, named after Photoshop's and similar in spirit; the exact shapes differ. */
+export type WarpStyle =
+  | "arc"
+  | "arc-lower"
+  | "arc-upper"
+  | "arch"
+  | "bulge"
+  | "flag"
+  | "wave"
+  | "rise"
+  | "fisheye"
+  | "inflate"
+  | "squeeze"
+  | "twist";
+
+/** A warp style, bent by `bend` over the box around the text. */
+export interface WarpPreset {
+  style: WarpStyle;
+  /** `-1`–`1`: how strongly, and which way (Photoshop's bend of −100% to 100%). Default: `0.5`. */
+  bend?: number;
+  /** `-1`–`1`: makes the left side taller and the right side shorter, or the other way. Default: `0`. */
+  horizontalDistortion?: number;
+  /** `-1`–`1`: makes the top wider and the bottom narrower, or the other way. Default: `0`. */
+  verticalDistortion?: number;
+  /** Bends along the width (`horizontal`) or along the height (`vertical`). Default: `"horizontal"`. */
+  direction?: "horizontal" | "vertical";
 }
 
 /**
+ * A free-form warp: the box around the text becomes a bicubic Bézier patch with these 16 control points, as fractions
+ * of the box (`[0, 0]` its top left, `[1, 1]` its bottom right), in 4 rows of 4 from the top left. The points of an
+ * unwarped box are `[column / 3, row / 3]`.
+ */
+export interface WarpEnvelope {
+  envelope: readonly (readonly [x: number, y: number])[];
+}
+
+/** How `TextNodeProps.warp` bends the glyphs. */
+export type Warp = WarpPreset | WarpEnvelope;
+
+/**
  * A box along a run of text, behind or in front of its glyphs: a marker (蛍光ペン), a highlight or a frame. One box is
- * drawn per line the run spans. `marker()` and `box()` build common ones.
+ * drawn per line the run spans. `marker()` and `frame()` build common ones.
  */
 export interface BoxDecoration {
   type: "box";
