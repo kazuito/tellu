@@ -137,7 +137,7 @@ import { arcPath, fill, stroke, type TextNodeProps } from "tellu";
 
 export default (frame: number): TextNodeProps => ({
   text: "ぴょこぴょこアーチ",
-  textPath: arcPath(260, { sweep: 110 }),
+  textPath: arcPath(260, { sweep: 130 }),
   align: "center",
   style: {
     fontFamily: "Zen Maru Gothic",
