@@ -34,6 +34,11 @@ export interface LinearGradient {
   /** CSS `linear-gradient` angle in degrees (`180` = top → bottom, `90` = left → right). Default: `180`. */
   angle?: number;
   stops: readonly GradientStopInput[];
+  /**
+   * Reflected gradient: the stops run from the middle of the gradient line (`0`) out to both ends (`1`), as in
+   * Photoshop's reflected gradient. Default: `false`.
+   */
+  reflect?: boolean;
   /** Default: `"line"`. */
   scope?: PaintScope;
 }
@@ -45,6 +50,35 @@ export interface RadialGradient {
   center?: readonly [number, number];
   /** Radius as a factor of the distance from the center to the farthest corner. Default: `1`. */
   radius?: number;
+  stops: readonly GradientStopInput[];
+  /** Default: `"line"`. */
+  scope?: PaintScope;
+}
+
+/** A conic (angle) gradient: the stops run clockwise around the center. `conicGradient()` builds one from a list of colors. */
+export interface ConicGradient {
+  type: "conic";
+  /** Where the stops start, in degrees clockwise from the top, as in CSS `conic-gradient(from …)`. Default: `0`. */
+  angle?: number;
+  /** Center as fractions of the scope box. Default: `[0.5, 0.5]`. */
+  center?: readonly [number, number];
+  stops: readonly GradientStopInput[];
+  /** Default: `"line"`. */
+  scope?: PaintScope;
+}
+
+/**
+ * A diamond gradient: the stops run from the center (`0`) out to a diamond (a square turned 45°) through the farthest
+ * corner of the scope box (`1`), as in Photoshop. `diamondGradient()` builds one from a list of colors.
+ */
+export interface DiamondGradient {
+  type: "diamond";
+  /** Center as fractions of the scope box. Default: `[0.5, 0.5]`. */
+  center?: readonly [number, number];
+  /** Size of the diamond as a factor of the one through the farthest corner. Default: `1`. */
+  radius?: number;
+  /** Clockwise rotation of the diamond in degrees. Default: `0`. */
+  angle?: number;
   stops: readonly GradientStopInput[];
   /** Default: `"line"`. */
   scope?: PaintScope;
@@ -69,7 +103,7 @@ export interface PatternPaint {
 }
 
 /** What a layer or plate is filled with: a solid color, a gradient or an image pattern. */
-export type Paint = ColorValue | LinearGradient | RadialGradient | PatternPaint;
+export type Paint = ColorValue | LinearGradient | RadialGradient | ConicGradient | DiamondGradient | PatternPaint;
 
 /**
  * - `outside`: grows the glyph outward by `stroke` (the interior is painted too)

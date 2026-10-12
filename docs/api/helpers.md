@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), gradient helpers, parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), gradient helpers (linear, radial, conic, diamond), parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -141,11 +141,11 @@ All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `sha
 ```ts
 function linearGradient(
   stops: readonly ColorValue[] | readonly GradientStopInput[],
-  options?: { angle?: number; scope?: PaintScope },
+  options?: { angle?: number; reflect?: boolean; scope?: PaintScope },
 ): LinearGradient;
 ```
 
-Plain colors are spread evenly from 0 to 1. `angle` is a CSS angle in degrees (default `180`, top → bottom). `scope` defaults to `"line"`. Guide: [Paint](/guide/paint#linear-gradients).
+Plain colors are spread evenly from 0 to 1. `angle` is a CSS angle in degrees (default `180`, top → bottom). `reflect: true` runs the stops from the middle out to both ends (default `false`). `scope` defaults to `"line"`. Guide: [Paint](/guide/paint#linear-gradients).
 
 ### `radialGradient()`
 
@@ -157,6 +157,28 @@ function radialGradient(
 ```
 
 `center` is relative to the scope box (default `[0.5, 0.5]`). `radius` multiplies the distance to the farthest corner (default `1`).
+
+### `conicGradient()`
+
+```ts
+function conicGradient(
+  stops: readonly ColorValue[] | readonly GradientStopInput[],
+  options?: { angle?: number; center?: readonly [number, number]; scope?: PaintScope },
+): ConicGradient;
+```
+
+Plain colors are spread evenly clockwise from 0 to 1. `angle` is where the stops start, in degrees clockwise from the top (default `0`). `center` is relative to the scope box (default `[0.5, 0.5]`). `scope` defaults to `"line"`. Guide: [Paint](/guide/paint#conic-gradients).
+
+### `diamondGradient()`
+
+```ts
+function diamondGradient(
+  stops: readonly ColorValue[] | readonly GradientStopInput[],
+  options?: { center?: readonly [number, number]; radius?: number; angle?: number; scope?: PaintScope },
+): DiamondGradient;
+```
+
+Plain colors are spread evenly from the center (0) out to the diamond through the scope box's farthest corner (1). `radius` scales the diamond (default `1`), `angle` turns it clockwise in degrees (default `0`), and `center` is relative to the scope box (default `[0.5, 0.5]`). `scope` defaults to `"line"`. Guide: [Paint](/guide/paint#diamond-gradients).
 
 ## Markup
 

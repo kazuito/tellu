@@ -1,5 +1,5 @@
 ---
-description: Solid colors, linear and radial gradients, and image patterns, plus the paint scope that decides whether a gradient spans each glyph, each line or the whole block.
+description: Solid colors, linear (including reflected), radial, conic and diamond gradients, and image patterns, plus the paint scope that decides whether a gradient spans each glyph, each line or the whole block.
 ---
 
 # Paint
@@ -7,8 +7,10 @@ description: Solid colors, linear and radial gradients, and image patterns, plus
 Every layer's `paint` is one of:
 
 - a **color**: any CSS color string (`"#ffd000"`, `"rgba(0,0,0,0.5)"`, `"tomato"`) or a number (`0xffd000`);
-- a **linear gradient**, made with `linearGradient()`;
+- a **linear gradient**, made with `linearGradient()`, optionally [reflected](#reflected-gradients);
 - a **radial gradient**, made with `radialGradient()`;
+- a **conic gradient**, made with `conicGradient()`;
+- a **diamond gradient**, made with `diamondGradient()`;
 - a **pattern** that tiles an image or canvas.
 
 ## Linear gradients
@@ -117,6 +119,96 @@ export default {
   },
 };
 ```
+
+## Reflected gradients
+
+`reflect: true` runs a linear gradient's stops from the middle of the gradient line out to both ends, as in Photoshop's reflected gradient. `0` is the middle and `1` is each end:
+
+```ts demo compare
+import { fill, linearGradient, stroke } from "tellu";
+
+const style = (reflect: boolean) => ({
+  fontFamily: "Noto Sans JP",
+  fontWeight: 900,
+  fontSize: 64,
+  layers: [
+    stroke(10, "#3a1c00"),
+    fill(linearGradient(["#ffffff", "#ffd400", "#ff7a00"], { reflect })),
+  ],
+});
+
+export default {
+  linear: { text: "金メダル", style: style(false) },
+  "reflect: true": { text: "金メダル", style: style(true) },
+};
+```
+
+A bright band through the middle with darker edges reads as metal, which is why this look is common on titles.
+
+## Conic gradients
+
+```ts
+conicGradient(stops, { angle?, center?, scope? })
+```
+
+The stops run clockwise around `center`, starting at `angle` degrees from the top (default `0`), like CSS `conic-gradient(from …)`. `center` is relative to the scope box. Repeat the first color at the end so the loop is seamless:
+
+```ts demo
+import { conicGradient, fill, stroke } from "tellu";
+
+export default {
+  text: "レインボー",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 88,
+    layers: [
+      stroke(14, "#ffffff"),
+      fill(
+        conicGradient(
+          ["#ff3b30", "#ffcc00", "#34c759", "#0a84ff", "#bf5af2", "#ff3b30"],
+          { scope: "glyph" },
+        ),
+      ),
+    ],
+  },
+};
+```
+
+## Diamond gradients
+
+```ts
+diamondGradient(stops, { center?, radius?, angle?, scope? })
+```
+
+The stops run from `center` (`0`) out to a diamond, a square turned 45°, that passes through the scope box's farthest corner (`1`). `radius` scales the diamond and `angle` turns it clockwise in degrees:
+
+```ts demo compare
+import { diamondGradient, fill, stroke } from "tellu";
+
+const sample = (angle: number) => ({
+  text: "キラリ",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 80,
+    layers: [
+      stroke(10, "#002a5c"),
+      fill(
+        diamondGradient(["#ffffff", "#7fdbff", "#0057d9"], {
+          angle,
+          scope: "glyph",
+        }),
+      ),
+    ],
+  },
+});
+
+export default {
+  "angle: 0": sample(0),
+  "angle: 45": sample(45),
+};
+```
+
+Canvas 2D has no diamond gradient, so tellu computes this one pixel by pixel. That costs a little more the first time each glyph is rasterized.
 
 ## Patterns
 

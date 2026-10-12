@@ -24,6 +24,8 @@ export { defaultKinsoku, defaultStyle, resolveStyle } from "./style/defaults";
 export {
   type BevelOptions,
   bevel,
+  conicGradient,
+  diamondGradient,
   fill,
   type GlowOptions,
   glow,

@@ -277,7 +277,7 @@ Silky bands inside the shape, where two copies of the softened shape, shifted by
 ### `Paint`
 
 ```ts
-type Paint = ColorValue | LinearGradient | RadialGradient | PatternPaint;
+type Paint = ColorValue | LinearGradient | RadialGradient | ConicGradient | DiamondGradient | PatternPaint;
 ```
 
 Guide: [Paint](/guide/paint).
@@ -295,6 +295,7 @@ type ColorValue = string | number; // any CSS color, or 0xRRGGBB
 | `type` | `"linear"` | | |
 | `stops` | `readonly `[`GradientStopInput`](#gradientstopinput)`[]` | | |
 | `angle` | `number` | `180` | CSS angle in degrees |
+| `reflect` | `boolean` | `false` | Run the stops from the middle (`0`) out to both ends (`1`). [Guide](/guide/paint#reflected-gradients) |
 | `scope` | [`PaintScope`](#paintscope) | `"line"` | |
 
 ### `RadialGradient`
@@ -305,6 +306,27 @@ type ColorValue = string | number; // any CSS color, or 0xRRGGBB
 | `stops` | `readonly GradientStopInput[]` | | |
 | `center` | `readonly [number, number]` | `[0.5, 0.5]` | Relative to the scope box |
 | `radius` | `number` | `1` | Factor of the distance to the farthest corner |
+| `scope` | `PaintScope` | `"line"` | |
+
+### `ConicGradient`
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"conic"` | | |
+| `stops` | `readonly GradientStopInput[]` | | Clockwise from `angle` (`0`) around to it again (`1`) |
+| `angle` | `number` | `0` | Where the stops start, in degrees clockwise from the top |
+| `center` | `readonly [number, number]` | `[0.5, 0.5]` | Relative to the scope box |
+| `scope` | `PaintScope` | `"line"` | |
+
+### `DiamondGradient`
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"diamond"` | | |
+| `stops` | `readonly GradientStopInput[]` | | From the center (`0`) out to the diamond through the scope box's farthest corner (`1`) |
+| `center` | `readonly [number, number]` | `[0.5, 0.5]` | Relative to the scope box |
+| `radius` | `number` | `1` | Factor of the diamond's size |
+| `angle` | `number` | `0` | Clockwise rotation in degrees |
 | `scope` | `PaintScope` | `"line"` | |
 
 ### `PatternPaint`

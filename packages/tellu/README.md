@@ -4,7 +4,7 @@ Telop (caption) rendering for the web, built on [PixiJS](https://pixijs.com). Ma
 
 - Unlimited outline layers, each with its own width, paint, offset, blur, opacity, blend mode and PixiJS filters
 - Shadows and glows as ordinary layers (they can be outlined too)
-- Solid colors, linear / radial gradients and image patterns, stretched per glyph, per line or over the whole block
+- Solid colors, linear (or reflected) / radial / conic / diamond gradients and image patterns, stretched per glyph, per line or over the whole block
 - Rich text: change font, size, color or any layer for part of the text (runs or `<tag>` markup)
 - Horizontal and vertical writing (縦書き) with upright / sideways glyphs, vertical punctuation and 縦中横
 - Automatic line wrapping with Japanese kinsoku (禁則処理), hanging punctuation (ぶら下げ) and optional phrase breaking (文節改行)
@@ -102,7 +102,7 @@ Every layer is the glyph shape grown by `stroke` px and painted with `paint`:
 
 | Option | Default | |
 | --- | --- | --- |
-| `paint` | | color, `linearGradient()`, `radialGradient()` or `{ type: "pattern", source }` |
+| `paint` | | color, `linearGradient()`, `radialGradient()`, `conicGradient()`, `diamondGradient()` or `{ type: "pattern", source }` |
 | `stroke` | `0` | `0` paints the glyph itself |
 | `strokePosition` | `"outside"` | `"inside"` / `"center"` draw a band along the outline |
 | `join` / `miterLimit` | `"round"` / `10` | |

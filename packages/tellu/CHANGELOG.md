@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- More gradients: `conicGradient()` for conic (angle) gradients, `diamondGradient()` for Photoshop's diamond gradient, and `reflect: true` on linear gradients for its reflected gradient, which runs the stops from the middle out to both ends. They paint layers and plates like the other gradients, with the same scopes.
+
 - Font checks: `checkFonts()` loads the fonts a caption needs, then reports each `FontIssue`: a family that is neither declared nor installed (`family-not-found`), a weight or style with no face (`face-unavailable`), a face that failed to load (`load-failed`), and characters no font in the stack has (`missing-glyphs`). Stacks with a generic family accept the fallback, so their characters aren't checked. `<Text>` and `createCanvasText()` run the check and log new issues with `console.warn`; `fontCheck: "error"` reports them as a `FontIssueError` instead (in Remotion, failing the render), and `fontCheck: "off"` skips it. `<Text>` also takes `onFontIssues`. The check embeds the Adobe Blank 2 font (SIL Open Font License), adding about 2 KB.
 
 - `tsume` style (文字ツメ): removes a fraction (`0`–`1`) of the blank space on both sides of each kana, kanji and fullwidth character, measured from the glyph's ink, like 文字ツメ in Photoshop and Premiere Pro. It works in vertical text too.

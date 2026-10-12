@@ -1,6 +1,8 @@
 import type {
   BevelShading,
   ColorValue,
+  ConicGradient,
+  DiamondGradient,
   GradientStopInput,
   Layer,
   LinearGradient,
@@ -162,13 +164,14 @@ export function satin({
 
 /**
  * A linear gradient. Plain colors are spread evenly from `0` to `1`; use `[offset, color]` stops to place them.
- * `angle` is a CSS angle in degrees (default `180`, top → bottom) and `scope` defaults to `"line"`.
+ * `angle` is a CSS angle in degrees (default `180`, top → bottom), `reflect: true` runs the stops from the middle out
+ * to both ends, and `scope` defaults to `"line"`.
  *
  * @example linearGradient(["#ffffff", "#ffd400"], { angle: 180, scope: "glyph" })
  */
 export function linearGradient(
   stops: readonly GradientStopInput[] | readonly ColorValue[],
-  options: { angle?: number; scope?: PaintScope } = {},
+  options: { angle?: number; reflect?: boolean; scope?: PaintScope } = {},
 ): LinearGradient {
   return { type: "linear", ...options, stops: normalizeStopInput(stops) };
 }
@@ -183,6 +186,30 @@ export function radialGradient(
   options: { center?: readonly [number, number]; radius?: number; scope?: PaintScope } = {},
 ): RadialGradient {
   return { type: "radial", ...options, stops: normalizeStopInput(stops) };
+}
+
+/**
+ * A conic (angle) gradient. Plain colors are spread evenly clockwise from `angle` (`0`) around to the start again
+ * (`1`). `angle` is in degrees clockwise from the top (default `0`), `center` a fraction of the scope box (default
+ * `[0.5, 0.5]`), and `scope` defaults to `"line"`. Repeat the first color at the end for a seamless loop.
+ */
+export function conicGradient(
+  stops: readonly GradientStopInput[] | readonly ColorValue[],
+  options: { angle?: number; center?: readonly [number, number]; scope?: PaintScope } = {},
+): ConicGradient {
+  return { type: "conic", ...options, stops: normalizeStopInput(stops) };
+}
+
+/**
+ * A diamond gradient. Plain colors are spread evenly from the center (`0`) out to the diamond through the scope box's
+ * farthest corner (`1`). `radius` scales the diamond (default `1`), `angle` turns it clockwise in degrees (default
+ * `0`), `center` is a fraction of the scope box (default `[0.5, 0.5]`), and `scope` defaults to `"line"`.
+ */
+export function diamondGradient(
+  stops: readonly GradientStopInput[] | readonly ColorValue[],
+  options: { center?: readonly [number, number]; radius?: number; angle?: number; scope?: PaintScope } = {},
+): DiamondGradient {
+  return { type: "diamond", ...options, stops: normalizeStopInput(stops) };
 }
 
 /** Plain colors are spread evenly from 0 to 1. */
