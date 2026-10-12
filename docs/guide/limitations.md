@@ -1,5 +1,5 @@
 ---
-description: Known limitations of tellu, covering approximated vertical forms, no ruby, no ligatures, how overlapping outlines of different colors combine, per-glyph shading, and font declaration requirements.
+description: Known limitations of tellu, covering approximated vertical forms, horizontal-only text paths, no ruby, no ligatures, how overlapping outlines of different colors combine, per-glyph shading, and font declaration requirements.
 ---
 
 # Limitations
@@ -7,6 +7,10 @@ description: Known limitations of tellu, covering approximated vertical forms, n
 ## Vertical forms are approximated
 
 Canvas 2D can't request a font's vertical glyph alternates (the OpenType `vert` feature). In [vertical text](./vertical), tellu rotates brackets and dashes and moves punctuation and small kana by their ink. That is close to Chrome's CSS rendering for typical Japanese fonts, but glyphs whose vertical forms differ more keep their horizontal shapes.
+
+## Text on a path is horizontal
+
+Only horizontal text can follow a [path](./text-path), and decorations aren't drawn along paths. Glyphs turn as a whole: they follow the path's direction but aren't bent along it.
 
 ## No ruby
 

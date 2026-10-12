@@ -23,6 +23,7 @@ export {
 export { parseMarkup } from "./markup";
 export { defaultKinsoku, defaultStyle, resolveStyle } from "./style/defaults";
 export {
+  arcPath,
   type BevelOptions,
   type BoxDecorationOptions,
   bevel,

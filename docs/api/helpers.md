@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond, shape), parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond, shape), arcPath, parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -133,6 +133,19 @@ All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `sha
 | `size` | `8` | Softness of the copies in px |
 | `invert` | `false` | Paint where the copies agree instead |
 | `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
+
+## Text paths
+
+### `arcPath()`
+
+```ts
+function arcPath(
+  radius: number,
+  options?: Omit<TextPathArc, "radius"> & Pick<TextPath, "startOffset" | "side">,
+): TextPath;
+```
+
+A circular [`TextPath`](./types#textpath) of `radius` px. By default the text runs clockwise over the top of a full circle; `{ center: 180, direction: "counterclockwise" }` runs it along the bottom, reading left to right. Guide: [Arcs](/guide/text-path#arcs).
 
 ## Decorations
 

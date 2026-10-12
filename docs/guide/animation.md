@@ -75,6 +75,7 @@ The function receives a [`GlyphContext`](/api/types#glyphcontext) for every char
 | `runIndex`, `tags` | Which [run](./rich-text) it came from, and its markup tags |
 | `isWhitespace` | |
 | `x`, `y`, `width`, `height` | The glyph's box in layout coordinates |
+| `angle` | The glyph's rotation in degrees on a [text path](./text-path), else `0` |
 
 ## The transform
 

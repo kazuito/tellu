@@ -452,6 +452,8 @@ export interface GlyphContext {
   width: number;
   /** Height of the glyph's cell. */
   height: number;
+  /** Clockwise rotation of the glyph in degrees, about the center of its cell: the path's direction with `textPath`, else `0`. */
+  angle: number;
 }
 
 /**
@@ -533,6 +535,44 @@ export interface LayoutOptions {
   autospace?: boolean | Length;
   /** Locale for `Intl.Segmenter` (graphemes, words and phrases). Default: `"ja"`. */
   locale?: string;
+  /**
+   * Sets the lines along a path instead of straight, horizontal text only. The path's length is the line length
+   * unless `maxWidth` is set. `arcPath()` builds a circular one.
+   */
+  textPath?: TextPath;
+}
+
+/** A circular arc around the origin, for `TextPath.arc`. */
+export interface TextPathArc {
+  /** Radius in px. */
+  radius: number;
+  /** Where the middle of the arc is, in degrees clockwise from the top. Default: `0` (the top). */
+  center?: number;
+  /** How much of the circle the arc spans, in degrees. Default: `360`. */
+  sweep?: number;
+  /**
+   * Direction the text runs. Clockwise reads left to right over the top of the circle; counterclockwise reads left to
+   * right along the bottom, with the glyphs' tops toward the center. Default: `"clockwise"`.
+   */
+  direction?: "clockwise" | "counterclockwise";
+}
+
+/**
+ * A path the lines run along (text on a path). Give either `d` or `arc`. The first line sits on the path; later lines
+ * follow it at their distance from the first line.
+ */
+export interface TextPath {
+  /** SVG path data in px, e.g. `"M0 100 Q200 0 400 100"`. Only its first subpath is used. */
+  d?: string;
+  /** A circular arc around the origin, instead of `d`. */
+  arc?: TextPathArc;
+  /** Where along the path the line starts, in px or em. Default: `0`. */
+  startOffset?: Length;
+  /**
+   * Which side of the path the glyphs stand on: `left` of the direction it runs (above a path running left to right),
+   * or `right`, which walks it backward. Default: `"left"`.
+   */
+  side?: "left" | "right";
 }
 
 /** Everything that describes a caption: its text and layout, a background plate and per-glyph transforms. */

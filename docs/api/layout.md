@@ -55,6 +55,7 @@ layout.fontScale;    // < 1 when overflow: "shrink" scaled the font
 | `index`, `text`, `runIndex`, `lineIndex`, `indexInLine`, `isWhitespace` | |
 | `x`, `y` | Where the glyph is drawn from: the start of its baseline, before `rotation` (baseline shift included). It lies before `box` when `tsume` or `punctuationTrim` removed space in front of the glyph |
 | `rotation` | `0`, or `90` for glyphs set sideways in vertical text |
+| `angle` | Further clockwise rotation in degrees about `x`, `y`: the path's direction with [`textPath`](/guide/text-path), else `0`. `box` is then the unturned cell, centered where the turned cell is |
 | `advance` | Advance along the line after scaling, `tsume` and `punctuationTrim`, excluding letter spacing |
 | `fontSize` | After `shrink` |
 | `scaleX`, `scaleY` | Scale on screen, including `squeeze` and 縦中横 condensing |

@@ -49,8 +49,29 @@ interface TextNodeProps extends LayoutOptions {
 | `punctuationTrim` | [`PunctuationTrim`](#punctuationtrim) | `"none"` | Trims the blank half of fullwidth punctuation at line edges (約物の半角取り) |
 | `autospace` | `boolean \| `[`Length`](#length) | `false` | Space between kana or kanji and Latin letters or digits (和欧間アキ). `true` is a quarter em of the smaller font |
 | `locale` | `string` | `"ja"` | Segmentation locale |
+| `textPath` | [`TextPath`](#textpath) | | Sets the lines along a path. Horizontal text only. The path's length is the line length unless `maxWidth` is set. [Guide](/guide/text-path) |
 
-Guides: [Line breaking](/guide/line-breaking), [Fitting text](/guide/fitting), [Vertical writing](/guide/vertical).
+Guides: [Line breaking](/guide/line-breaking), [Fitting text](/guide/fitting), [Vertical writing](/guide/vertical), [Text on a path](/guide/text-path).
+
+### `TextPath`
+
+A path the lines run along. Give `d` or `arc`; [`arcPath()`](./helpers#arcpath) builds an arc. The first line sits on the path, and later lines follow it at their distance from the first line.
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `d` | `string` | | SVG path data in px. Only the first subpath is used |
+| `arc` | [`TextPathArc`](#textpatharc) | | A circular arc around the origin, instead of `d` |
+| `startOffset` | [`Length`](#length) | `0` | Where along the path the line starts |
+| `side` | `"left" \| "right"` | `"left"` | Which side of the path the glyphs stand on, walking it from its start. `right` walks it backward |
+
+### `TextPathArc`
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `radius` | `number` | | Required, in px |
+| `center` | `number` | `0` | Where the middle of the arc is, in degrees clockwise from the top |
+| `sweep` | `number` | `360` | How much of the circle the arc spans, in degrees |
+| `direction` | `"clockwise" \| "counterclockwise"` | `"clockwise"` | Clockwise reads left to right over the top; counterclockwise reads left to right along the bottom |
 
 ### `WritingMode`
 
@@ -462,6 +483,7 @@ type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefin
 | `tags` | Markup tags of its run |
 | `isWhitespace` | |
 | `x`, `y`, `width`, `height` | The glyph's cell in layout coordinates: its advance along the line × the font's extent across it |
+| `angle` | Clockwise rotation in degrees about the cell's center: the path's direction with `textPath`, else `0` |
 
 ### `GlyphTransform`
 

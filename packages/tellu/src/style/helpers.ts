@@ -14,6 +14,8 @@ import type {
   RadialGradient,
   SatinShading,
   ShapeGradient,
+  TextPath,
+  TextPathArc,
 } from "./types";
 
 type LayerOptions = Omit<Layer, "paint" | "stroke">;
@@ -291,4 +293,22 @@ export function overline(options: Omit<LineDecorationOptions, "position"> = {}):
  */
 export function lineThrough(options: Omit<LineDecorationOptions, "position"> = {}): LineDecoration {
   return { type: "line", position: "through", ...options };
+}
+
+/**
+ * A circular text path of `radius` px (`textPath`). By default the text runs clockwise over the top of a full circle,
+ * centered at the top with `align: "center"`. For text along the bottom that reads left to right, use
+ * `{ center: 180, direction: "counterclockwise" }`.
+ *
+ * @example { text: "まもなく開店", textPath: arcPath(300, { sweep: 120 }), align: "center" }
+ */
+export function arcPath(
+  radius: number,
+  options: Omit<TextPathArc, "radius"> & Pick<TextPath, "startOffset" | "side"> = {},
+): TextPath {
+  const { startOffset, side, ...arc } = options;
+  const path: TextPath = { arc: { radius, ...arc } };
+  if (startOffset !== undefined) path.startOffset = startOffset;
+  if (side !== undefined) path.side = side;
+  return path;
 }

@@ -244,6 +244,7 @@ export class TextNode extends Container {
           scaleX: glyph.scaleX,
           scaleY: glyph.scaleY,
           rotation: glyph.rotation,
+          angle: glyph.angle,
           resolution: res,
           fracX,
           fracY,
@@ -255,6 +256,7 @@ export class TextNode extends Container {
           glyph.scaleX,
           glyph.scaleY,
           glyph.rotation,
+          Math.round(glyph.angle * 100) / 100,
           res,
           fracX,
           fracY,
@@ -373,10 +375,19 @@ export class TextNode extends Container {
         changed = placeSprite(sprite, [0, 0, baseX, baseY, 1, 1, 0, 0, 0, 1], true) || changed;
         continue;
       }
-      const { box } = layout.glyphs[index]!;
+      const { box, angle } = layout.glyphs[index]!;
       const [ox, oy] = t.origin ?? [0.5, 0.5];
-      const px = box.x + ox * box.width;
-      const py = box.y + oy * box.height;
+      let px = box.x + ox * box.width;
+      let py = box.y + oy * box.height;
+      if (angle !== 0) {
+        // The origin is a point of the cell, which turns with the glyph on a path.
+        const dx = (ox - 0.5) * box.width;
+        const dy = (oy - 0.5) * box.height;
+        const cos = Math.cos(angle * DEG);
+        const sin = Math.sin(angle * DEG);
+        px = box.x + box.width / 2 + dx * cos - dy * sin;
+        py = box.y + box.height / 2 + dx * sin + dy * cos;
+      }
       const scale = t.scale ?? 1;
       const placement: SpritePlacement = [
         px - baseX,
@@ -563,6 +574,7 @@ export function createGlyphContexts(layout: Layout): GlyphContext[] {
       tags: layout.runs[glyph.runIndex]!.tags,
       isWhitespace: glyph.isWhitespace,
       ...glyph.box,
+      angle: glyph.angle,
     };
   });
 }

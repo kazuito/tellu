@@ -102,6 +102,7 @@ export default defineConfig({
             { text: "Line breaking", link: "/guide/line-breaking" },
             { text: "Fitting text", link: "/guide/fitting" },
             { text: "Vertical writing", link: "/guide/vertical" },
+            { text: "Text on a path", link: "/guide/text-path" },
           ],
         },
         {

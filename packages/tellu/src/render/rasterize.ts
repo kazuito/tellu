@@ -21,6 +21,8 @@ export interface GlyphShape {
   scaleY: number;
   /** Clockwise, in degrees. */
   rotation: 0 | 90;
+  /** Clockwise rotation in degrees after scaling, e.g. along a text path. Default: `0`. */
+  angle?: number;
   resolution: number;
   /** Sub-pixel position of the glyph origin in device pixels, `[0, 1)`. */
   fracX: number;
@@ -54,11 +56,16 @@ const AA_MARGIN = 2;
 
 type Matrix = readonly [a: number, b: number, c: number, d: number];
 
-/** Glyph space → device pixels: rotate, then scale on screen. */
-function glyphMatrix({ scaleX, scaleY, rotation, resolution }: GlyphShape): Matrix {
-  return rotation === 90
-    ? [0, resolution * scaleY, -resolution * scaleX, 0]
-    : [resolution * scaleX, 0, 0, resolution * scaleY];
+/** Glyph space → device pixels: rotate, then scale on screen, then turn by `angle`. */
+function glyphMatrix({ scaleX, scaleY, rotation, angle = 0, resolution }: GlyphShape): Matrix {
+  const [a, b, c, d]: Matrix =
+    rotation === 90
+      ? [0, resolution * scaleY, -resolution * scaleX, 0]
+      : [resolution * scaleX, 0, 0, resolution * scaleY];
+  if (angle === 0) return [a, b, c, d];
+  const cos = Math.cos((angle * Math.PI) / 180);
+  const sin = Math.sin((angle * Math.PI) / 180);
+  return [cos * a - sin * b, sin * a + cos * b, cos * c - sin * d, sin * c + cos * d];
 }
 
 function transformBounds(bounds: GlyphBounds, [a, b, c, d]: Matrix): GlyphBounds {

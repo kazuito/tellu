@@ -17,6 +17,7 @@ import {
   isSquare,
   segmentRuns,
 } from "./segment";
+import { placeOnPath, textPathSampler } from "./textPath";
 import { combineUpright, isVertical, type VerticalOrientation, verticalOrientation, verticalShift } from "./vertical";
 
 /** A run of text with its full style. */
@@ -47,6 +48,11 @@ export interface LayoutGlyph {
   y: number;
   /** Clockwise rotation in degrees: `90` for glyphs set sideways in vertical text. */
   rotation: 0 | 90;
+  /**
+   * Further clockwise rotation in degrees about the glyph's origin: the direction of the path with `textPath`, else
+   * `0`. `box` is the cell before this rotation, centered where the turned cell is.
+   */
+  angle: number;
   /** Advance along the line after scaling, `tsume` and `punctuationTrim`, excluding letter spacing. */
   advance: number;
   /** Font size after `shrink`. */
@@ -156,6 +162,16 @@ interface LineRange {
  * layout.lines.length; // number of lines
  */
 export function layoutText(options: LayoutOptions, measurer: Measurer = getDefaultMeasurer()): Layout {
+  if (!options.textPath) return layoutLines(options, measurer);
+  if (isVertical(options.writingMode)) throw new Error("tellu: textPath only works with horizontal text");
+  const sampler = textPathSampler(options.textPath);
+  // The path is the line length unless maxWidth says otherwise.
+  const straight = layoutLines({ ...options, maxWidth: options.maxWidth ?? sampler.length }, measurer);
+  return placeOnPath(straight, sampler, options.textPath, resolveStyle(options.style).fontSize);
+}
+
+/** Lays out straight lines. */
+function layoutLines(options: LayoutOptions, measurer: Measurer): Layout {
   const base = resolveStyle(options.style);
   const runs = normalizeRuns(options.text, base);
   const locale = options.locale ?? "ja";
@@ -544,6 +560,7 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         x: pen - before * squeeze,
         y: baseline - shift,
         rotation: 0,
+        angle: 0,
         advance: cell * squeeze,
         fontSize,
         scaleX: style.scaleX * squeeze,
