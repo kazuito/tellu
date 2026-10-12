@@ -196,6 +196,10 @@ Everything else works the same way: layers, rich text, kinsoku, `shrink` / `sque
 - Glyphs are drawn one at a time, so ligatures (e.g. `fi`) are not formed.
 - Where outlines of different colors in the same slot overlap, the brighter one wins.
 
+## Third-party
+
+Font checks embed [Adobe Blank 2](https://github.com/adobe-fonts/adobe-blank-2), © 2013, 2015 Adobe Systems Incorporated, under the SIL Open Font License 1.1 ([`licenses/AdobeBlank2-OFL.txt`](https://github.com/kazuito/tellu/blob/main/packages/tellu/licenses/AdobeBlank2-OFL.txt)).
+
 ## Development
 
 The [repository](https://github.com/kazuito/tellu) is a Bun workspace: the library in `packages/tellu`, a Remotion sample in `examples/remotion`, a browser playground in `examples/playground` and the docs site in `docs`.

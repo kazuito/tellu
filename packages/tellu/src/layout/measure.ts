@@ -74,6 +74,22 @@ export function fontFamilyToCss(family: FontSpec["family"]): string {
 }
 
 /**
+ * The families of a font stack in order, unquoted. `generic` marks CSS generic families such as `sans-serif`; a quoted
+ * `"serif"` names a font and isn't generic.
+ */
+export function fontStack(family: FontSpec["family"]): { name: string; generic: boolean }[] {
+  const families = typeof family === "string" ? family.split(",") : family;
+  return families
+    .map((name) => name.trim())
+    .filter(Boolean)
+    .map((name) =>
+      /^["'].*["']$/.test(name)
+        ? { name: name.slice(1, -1).replace(/\\(["'])/g, "$1"), generic: false }
+        : { name, generic: GENERIC_FAMILIES.has(name) },
+    );
+}
+
+/**
  * A CSS `font` shorthand, e.g. `normal 900 64px "Noto Sans JP"`. Family names are quoted; generic families are left
  * as they are.
  */

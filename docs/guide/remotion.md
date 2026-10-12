@@ -114,6 +114,8 @@ Only the transforms change from frame to frame, so each frame costs a few sprite
 
 If later props need new fonts, it holds the frame again. Errors (for example, no WebGL) go to `cancelRender()`, which fails the render loudly instead of hanging. `delayRenderLabel` sets the label Remotion shows if it times out.
 
+With `fontCheck="error"`, `<Text>` also holds the frame until the [font check](./fonts#checking-fonts) is done, and fails the render when a font is missing instead of capturing it in a fallback font.
+
 ## Tips
 
 - **One WebGL context for everything.** Every `<Text>` shares one offscreen renderer, so hundreds of captions are fine.

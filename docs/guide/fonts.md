@@ -1,5 +1,5 @@
 ---
-description: How tellu loads web fonts, why the stylesheet must be declared before drawing, and the gating pattern for Remotion, React and plain canvases.
+description: How tellu loads web fonts, why the stylesheet must be declared before drawing, the gating pattern for Remotion, React and plain canvases, and checking that a caption gets the fonts it asks for.
 ---
 
 # Fonts
@@ -80,6 +80,8 @@ Wrap each composition in `<FontGate>`. Releasing the gate's handle in an effect 
 
 If you load fonts with `@remotion/google-fonts` or `@remotion/fonts`, the `@font-face` rules are added for you. Just make sure that happens before `<Text>` mounts.
 
+To make a render fail instead of shipping a frame in the wrong font, set [`fontCheck="error"`](#checking-fonts) on `<Text>`.
+
 ### React
 
 Same idea, without `delayRender`: render the captions once the stylesheet's `onload` has fired. If a caption does draw early, `<Text>` redraws when the fonts arrive, but you will see the fallback for a moment.
@@ -97,6 +99,51 @@ await new Promise((resolve) => {
 
 const caption = await createCanvasText(canvas, props); // loads the needed subsets, then draws
 ```
+
+## Checking fonts
+
+Once the fonts are loaded, tellu checks that the caption can actually be drawn with them, and reports what it finds:
+
+| Issue | When |
+| --- | --- |
+| `family-not-found` | No `@font-face` rule declares the family, and it isn't installed |
+| `face-unavailable` | The family is declared, but no face has the weight and style the style asks for. The browser picks the nearest face and may synthesize bold or italic |
+| `load-failed` | A face the text needs failed to load, e.g. a wrong URL |
+| `missing-glyphs` | No font in the stack has some of the characters, so they fall back |
+
+A stack that contains a generic family, such as `["Dela Gothic One", "sans-serif"]`, accepts any fallback, so its characters aren't checked. Its named families still are.
+
+`<Text>` and `createCanvasText()` check every caption. The `fontCheck` option decides what happens:
+
+- `"warn"` (the default) logs each issue once with `console.warn`.
+- `"error"` reports the issues as a [`FontIssueError`](/api/layout#fontissueerror): `<Text>` passes it to `onError` and stays pending, so in Remotion the render fails through `cancelRender()`, and `createCanvasText()` rejects. `<Text>` also waits for the check before drawing counts as done.
+- `"off"` skips the check.
+
+In Remotion, failing the render is usually what you want for final output, and a warning is enough in Studio:
+
+```tsx
+import { getRemotionEnvironment } from "remotion";
+import { Text } from "tellu/remotion";
+
+<Text
+  text="速報"
+  textStyle={{ fontFamily: "Noto Sans JP", fontWeight: 900 }}
+  fontCheck={getRemotionEnvironment().isRendering ? "error" : "warn"}
+/>;
+```
+
+`onFontIssues` receives the issues in `"warn"` and `"error"` mode, e.g. to show them in your own UI.
+
+With a raw `TextNode`, call [`checkFonts()`](/api/layout#checkfonts) yourself. It loads the fonts first, like `loadFonts()`:
+
+```ts
+import { checkFonts } from "tellu";
+
+const issues = await checkFonts(props);
+for (const issue of issues) console.warn(issue.message);
+```
+
+To find characters no font has, tellu measures them with a tiny font that draws nothing ([Adobe Blank 2](https://github.com/adobe-fonts/adobe-blank-2), embedded, SIL Open Font License) at the end of the stack. It is added to `document.fonts` as `tellu-blank-check` the first time a check runs.
 
 ## Choosing fonts
 
@@ -133,8 +180,10 @@ The examples request Google Fonts with `display=block`, so DOM text never flashe
 
 ## Troubleshooting
 
-**Text renders in the wrong font.** The stylesheet wasn't loaded when the caption was first drawn. Check the order: stylesheet `onload`, then mount or draw.
+**Text renders in the wrong font.** The stylesheet wasn't loaded when the caption was first drawn. Check the order: stylesheet `onload`, then mount or draw. The console shows a `family-not-found` or `load-failed` warning from the [font check](#checking-fonts).
 
 **The first frame is wrong, later frames are right.** Same cause. In interactive apps, `<Text>` recovers when the font arrives, but Remotion has already captured that frame.
 
-**Some characters fall back.** That `unicode-range` subset wasn't declared, or the font doesn't contain those glyphs (common for symbols and emoji in Japanese display fonts). Put a fallback family in `fontFamily`: `["Dela Gothic One", "Noto Sans JP"]`.
+**Some characters fall back.** That `unicode-range` subset wasn't declared, or the font doesn't contain those glyphs (common for symbols and emoji in Japanese display fonts). The font check reports them as `missing-glyphs`. Put a fallback family in `fontFamily`: `["Dela Gothic One", "Noto Sans JP"]`.
+
+**The text looks bolder or thinner than expected.** The weight isn't loaded, e.g. the stylesheet URL asks for `wght@400` but the style uses `fontWeight: 900`. The font check reports `face-unavailable`.

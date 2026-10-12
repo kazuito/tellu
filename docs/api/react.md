@@ -29,6 +29,8 @@ Every [`TextNodeProps`](./types#textnodeprops) option except `style`, plus:
 | `resolution` | `number` | `devicePixelRatio` | |
 | `alt` | `string` | The caption's text | Read by screen readers and find-in-page instead of the caption's text. `""` marks it as decorative. [Guide](/guide/react#accessibility) |
 | `waitForFonts` | `boolean` | `true` | Load fonts before drawing |
+| `fontCheck` | [`FontCheckMode`](./layout#fontcheckmode) | `"warn"` | Check the fonts once loaded: log issues, report them to `onError` as a [`FontIssueError`](./layout#fontissueerror) and stay pending (`"error"`), or skip the check. [Guide](/guide/fonts#checking-fonts) |
+| `onFontIssues` | `(issues: readonly FontIssue[]) => void` | | Called with the issues a font check found |
 | `renderer` | `TextRenderer` | From context, or `TextRenderer.shared()` | |
 | `measurer` | `Measurer` | Canvas 2D | |
 | `className` | `string` | | On the wrapper |

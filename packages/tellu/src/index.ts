@@ -1,4 +1,5 @@
 export { type CanvasText, type CreateCanvasTextOptions, createCanvasText } from "./createCanvasText";
+export { checkFonts, type FontCheckMode, type FontIssue, FontIssueError } from "./fontCheck";
 export { type FontRequest, fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "./fonts";
 export {
   type Layout,

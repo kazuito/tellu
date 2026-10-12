@@ -1,5 +1,5 @@
 ---
-description: API reference for layoutText, the Layout result, measurers, font descriptors and font loading functions.
+description: API reference for layoutText, the Layout result, measurers, font descriptors, font loading functions and font checks.
 ---
 
 # Layout & fonts
@@ -197,6 +197,51 @@ interface FontRequest {
   text: string;
 }
 ```
+
+### `checkFonts()`
+
+```ts
+function checkFonts(options: Pick<LayoutOptions, "text" | "style">): Promise<FontIssue[]>;
+```
+
+Loads the fonts a text needs, like `loadFonts()`, then checks that it can be drawn with them: every family is declared or installed, the faces for its weights and styles exist and loaded, and some font in each stack has every character. Resolves to the issues found, or `[]` outside the browser. Stacks with a generic family (`sans-serif`) accept any fallback, so their characters aren't checked. Guide: [Checking fonts](/guide/fonts#checking-fonts).
+
+### `FontIssue`
+
+```ts
+type FontIssue =
+  | { type: "family-not-found"; family: string; font: string; message: string }
+  | { type: "face-unavailable"; family: string; font: string; weight: number; style: FontStyle; message: string }
+  | { type: "load-failed"; family: string; font: string; message: string }
+  | { type: "missing-glyphs"; font: string; characters: string; message: string };
+```
+
+| `type` | |
+| --- | --- |
+| `family-not-found` | No `@font-face` rule declares `family`, and it isn't installed |
+| `face-unavailable` | `family` is declared, but no face has `weight` and `style` |
+| `load-failed` | A face of `family` the text needs failed to load |
+| `missing-glyphs` | No font in the stack has `characters` |
+
+`font` is the CSS font of the affected runs, at 16px. `message` describes the issue in English.
+
+### `FontIssueError`
+
+```ts
+class FontIssueError extends Error {
+  readonly issues: readonly FontIssue[];
+}
+```
+
+Reported when `fontCheck` is `"error"` and the fonts have issues: passed to `onError` by `<Text>`, and thrown by `createCanvasText()`. Its message lists each issue's `message`.
+
+### `FontCheckMode`
+
+```ts
+type FontCheckMode = "warn" | "error" | "off";
+```
+
+The `fontCheck` option of `<Text>` and `createCanvasText()`: log each issue once with `console.warn`, report the issues as a `FontIssueError`, or skip the check.
 
 ### `getFontEpoch()`
 

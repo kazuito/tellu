@@ -15,6 +15,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "licenses",
     "CHANGELOG.md"
   ],
   "keywords": [

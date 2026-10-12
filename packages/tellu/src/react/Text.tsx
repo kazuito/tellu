@@ -7,12 +7,14 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
-import { fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "../fonts";
+import { checkFonts, type FontCheckMode, type FontIssue, FontIssueError, warnFontIssues } from "../fontCheck";
+import { fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "../fonts";
 import type { Layout } from "../layout/layout";
 import type { Measurer } from "../layout/measure";
 import type { TextContent, TextNodeProps, TextStyle } from "../style/types";
 import { TextNode } from "../TextNode";
 import type { DrawResult, TextRenderer } from "../TextRenderer";
+import { stableKey } from "../utils/stableKey";
 import { useTextRenderer } from "./context";
 
 /**
@@ -88,6 +90,14 @@ export interface TextProps extends Omit<TextNodeProps, "style"> {
   alt?: string;
   /** Wait for web fonts before drawing so no fallback font is ever measured. Default: `true`. */
   waitForFonts?: boolean;
+  /**
+   * Checks the fonts once they are loaded (see `checkFonts()`): `"warn"` logs each issue once with `console.warn`,
+   * `"error"` stays pending until the check is done and reports issues to `onError` as a `FontIssueError`, and `"off"`
+   * skips the check. Default: `"warn"`.
+   */
+  fontCheck?: FontCheckMode;
+  /** Called with the issues a font check found, in `"warn"` and `"error"` mode. */
+  onFontIssues?: (issues: readonly FontIssue[]) => void;
   /** Default: the one from `<TextRendererProvider>`, or `TextRenderer.shared()`. */
   renderer?: TextRenderer;
   /** Text measurement backend. Only read when the component mounts. Default: `getDefaultMeasurer()`. */
@@ -121,6 +131,8 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
     resolution,
     alt,
     waitForFonts = true,
+    fontCheck = "warn",
+    onFontIssues,
     renderer: rendererProp,
     measurer,
     className,
@@ -146,8 +158,10 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
     canvas: HTMLCanvasElement;
     resolution: number;
   } | null>(null);
-  const callbacks = useRef({ onDraw, onPendingChange, onError });
-  callbacks.current = { onDraw, onPendingChange, onError };
+  const callbacks = useRef({ onDraw, onPendingChange, onError, onFontIssues });
+  callbacks.current = { onDraw, onPendingChange, onError, onFontIssues };
+  /** The font check of the current fonts and mode: started, or done with no issues to wait for. */
+  const fontCheckState = useRef<{ key: string; done: boolean } | null>(null);
 
   const setPending = (pending: boolean) => {
     if (pendingRef.current === pending) return;
@@ -156,6 +170,39 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
   };
 
   const nodeProps: TextNodeProps = { ...rest, style: textStyle };
+
+  /** Starts a font check unless one for these fonts already ran. Returns whether drawing must wait for it. */
+  const checkFontsOnce = (): boolean => {
+    if (fontCheck === "off" || typeof document === "undefined" || document.fonts?.status === "loading") return false;
+    const key = stableKey([fontRequests(nodeProps), fontEpoch, fontCheck]);
+    const state = fontCheckState.current;
+    if (state?.key === key) return fontCheck === "error" && !state.done;
+    const current = { key, done: false };
+    fontCheckState.current = current;
+    checkFonts(nodeProps).then(
+      (issues) => {
+        if (fontCheckState.current !== current) return;
+        if (issues.length > 0) callbacks.current.onFontIssues?.(issues);
+        if (fontCheck === "warn") {
+          warnFontIssues(issues);
+          current.done = true;
+          return;
+        }
+        if (issues.length > 0) {
+          // Stay pending: the canvas shows fallback fonts.
+          const error = new FontIssueError(issues);
+          if (callbacks.current.onError) callbacks.current.onError(error);
+          else console.error(error);
+          return;
+        }
+        current.done = true;
+        setPending(typeof document !== "undefined" && document.fonts?.status === "loading");
+      },
+      (error: unknown) => fontCheckState.current === current && callbacks.current.onError?.(error),
+    );
+    return fontCheck === "error";
+  };
+
   const draw = () => {
     const canvas = canvasRef.current;
     const wrapper = wrapperRef.current;
@@ -194,7 +241,8 @@ export const Text = forwardRef<HTMLDivElement, TextProps>(function Text(props, r
         callbacks.current.onDraw?.({ ...result, layout, node });
       }
       // A font that is still loading will bump the epoch and redraw; stay pending until then.
-      setPending(typeof document !== "undefined" && document.fonts?.status === "loading");
+      const loading = typeof document !== "undefined" && document.fonts?.status === "loading";
+      setPending(checkFontsOnce() || loading);
     } catch (error) {
       callbacks.current.onError?.(error);
       if (!callbacks.current.onError) throw error;

@@ -30,7 +30,7 @@ This rarely shows at normal letter spacing. When it does, give the overlapping r
 
 ## Fonts must be declared before drawing
 
-tellu loads the font faces and subsets a caption needs, but only from `@font-face` rules that already exist. If a caption is drawn before your font stylesheet loads, it silently uses a fallback font. See [Fonts](./fonts).
+tellu loads the font faces and subsets a caption needs, but only from `@font-face` rules that already exist. If a caption is drawn before your font stylesheet loads, it uses a fallback font. `<Text>` and `createCanvasText()` warn about it by default, and `fontCheck: "error"` makes it fail instead. See [Checking fonts](./fonts#checking-fonts).
 
 ## WebGL is required
 
