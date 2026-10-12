@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { layoutText } from "../src/layout/layout";
 import { parseMarkup } from "../src/markup";
+import { traceLine } from "../src/render/decorationShapes";
+import { planGroups } from "../src/render/groups";
 import { defaultStyle } from "../src/style/defaults";
-import { frame, marker } from "../src/style/helpers";
+import { fill, frame, lineThrough, marker, overline, stroke, underline } from "../src/style/helpers";
 import { applyOverride, mergeOverrides } from "../src/style/merge";
-import type { BoxDecoration, LayoutOptions } from "../src/style/types";
+import type { BoxDecoration, LayoutOptions, LineDecoration } from "../src/style/types";
 import { fakeMeasurer } from "./fakeMeasurer";
 
 // fakeMeasurer at 10px: CJK 10px wide, ASCII 5px, space 2.5px. The em box of a line runs from y 0 to 10 (baseline 8).
@@ -82,7 +84,7 @@ describe("decoration layout", () => {
         { text: "う", style: { decorations: [other] } },
       ],
     });
-    expect(result.decorations.map(({ decoration, start }) => [decoration.paint, start])).toEqual([
+    expect(result.decorations.map(({ decoration, start }) => [(decoration as BoxDecoration).paint, start])).toEqual([
       ["red", 0],
       ["red", 2],
       ["yellow", 1],
@@ -154,5 +156,156 @@ describe("merging decorations", () => {
     expect(mergeOverrides({ decorations: [underlay] }, { decorations: [box] })?.decorations).toEqual([underlay, box]);
     expect(mergeOverrides({ decorations: [underlay] }, { fontSize: 3 })?.decorations).toEqual([underlay]);
     expect(mergeOverrides({ fontSize: 3 }, { decorations: [box] })?.decorations).toEqual([box]);
+  });
+});
+
+describe("line decorations", () => {
+  // Em box from y 0 to 10; thickness 0.06em = 0.6px, offset 0.05em = 0.5px.
+  const bands = (options: LayoutOptions) => layout(options).decorations.map(({ box }) => box);
+
+  test("an underline sits below the em box, an overline above it", () => {
+    expect(bands({ text: "あい", style: { decorations: [underline()] } })[0]).toEqual({
+      x: 0,
+      y: 10.5,
+      width: 20,
+      height: expect.closeTo(0.6, 9),
+    });
+    const [over] = bands({ text: "あい", style: { decorations: [overline({ thickness: 2, offset: 1 })] } });
+    expect(over).toEqual({ x: 0, y: -3, width: 20, height: 2 });
+  });
+
+  test("a line-through crosses the middle of the em box", () => {
+    expect(bands({ text: "あ", style: { decorations: [lineThrough({ thickness: 2 })] } })[0]).toEqual({
+      x: 0,
+      y: 4,
+      width: 10,
+      height: 2,
+    });
+    expect(bands({ text: "あ", style: { decorations: [lineThrough({ thickness: 2, offset: 1 })] } })[0]!.y).toBe(5);
+  });
+
+  test("double and wavy lines take a band three strokes thick", () => {
+    expect(
+      bands({ text: "あ", style: { decorations: [underline({ thickness: 2, style: "double" })] } })[0]!.height,
+    ).toBe(6);
+    expect(bands({ text: "あ", style: { decorations: [underline({ thickness: 2, style: "wavy" })] } })[0]!.height).toBe(
+      6,
+    );
+    expect(
+      bands({ text: "あ", style: { decorations: [underline({ thickness: 2, style: "dotted" })] } })[0]!.height,
+    ).toBe(2);
+  });
+
+  test("em lengths use the largest font size of the stretch", () => {
+    const result = layout({
+      text: ["あ", { text: "い", style: { fontSize: 20 } }],
+      style: { decorations: [underline({ thickness: { em: 0.1 } })] },
+    });
+    expect(result.decorations[0]!.box.height).toBe(2);
+  });
+
+  test("in vertical text an underline goes on the right by default, under on the left", () => {
+    const vertical = (decoration: LineDecoration) =>
+      bands({ text: "あい", writingMode: "vertical-rl", style: { decorations: [decoration] } })[0];
+    // The column's em box runs from x 0 to 10.
+    expect(vertical(underline({ thickness: 2, offset: 1 }))).toEqual({ x: 11, y: 0, width: 2, height: 20 });
+    expect(vertical(underline({ thickness: 2, offset: 1, position: "under" }))).toEqual({
+      x: -3,
+      y: 0,
+      width: 2,
+      height: 20,
+    });
+  });
+
+  test("a line restarts where the run's layers change, and takes each run's layers", () => {
+    const result = layout({
+      text: ["あい", { text: "うえ", style: { layers: [fill("red")] } }, "お"],
+      style: { decorations: [underline()] },
+    });
+    expect(result.decorations.map(({ start, end, runIndex }) => [start, end, runIndex])).toEqual([
+      [0, 2, 0],
+      [2, 4, 1],
+      [4, 5, 2],
+    ]);
+    // A box decoration spans the runs regardless.
+    const boxed = layout({
+      text: ["あい", { text: "うえ", style: { layers: [fill("red")] } }],
+      style: { decorations: [highlight] },
+    });
+    expect(boxed.decorations).toHaveLength(1);
+  });
+
+  test("line decorations join the slot groups of their run's layers", () => {
+    const result = layout({
+      text: "あい",
+      style: { layers: [stroke(4, "black"), fill("white")], decorations: [underline(), highlight] },
+    });
+    const groups = planGroups(result);
+    expect(groups.map((group) => group.members.map((member) => ("glyph" in member ? member.glyph : "line")))).toEqual([
+      [0, 1, "line"],
+      [0, 1, "line"],
+    ]);
+  });
+});
+
+describe("traceLine", () => {
+  /** Records the points a shape visits. */
+  function trace(decoration: LineDecoration, width: number, height: number, thickness: number, vertical = false) {
+    const points: [number, number][] = [];
+    let subpaths = 0;
+    traceLine(
+      {
+        moveTo: (x, y) => {
+          subpaths++;
+          points.push([x, y]);
+        },
+        lineTo: (x, y) => points.push([x, y]),
+        arc: (x, y, r) => points.push([x - r, y - r], [x + r, y + r]),
+        closePath: () => {},
+      },
+      decoration,
+      width,
+      height,
+      thickness,
+      vertical,
+    );
+    const xs = points.map(([x]) => x);
+    const ys = points.map(([, y]) => y);
+    return { subpaths, bounds: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
+  }
+
+  test("every style stays inside its band", () => {
+    for (const style of ["solid", "double", "dotted", "dashed", "wavy"] as const) {
+      const height = style === "double" || style === "wavy" ? 6 : 2;
+      const { bounds } = trace(underline({ style }), 100, height, 2);
+      expect(bounds[0]).toBeGreaterThanOrEqual(0);
+      expect(bounds[1]).toBeGreaterThanOrEqual(-1e-9);
+      expect(bounds[2]).toBeLessThanOrEqual(100);
+      expect(bounds[3]).toBeLessThanOrEqual(height + 1e-9);
+    }
+  });
+
+  test("solid and double lines span the band", () => {
+    expect(trace(underline(), 100, 2, 2)).toEqual({ subpaths: 1, bounds: [0, 0, 100, 2] });
+    expect(trace(underline({ style: "double" }), 100, 6, 2)).toEqual({ subpaths: 2, bounds: [0, 0, 100, 6] });
+  });
+
+  test("dots and dashes fill the length exactly", () => {
+    const dots = trace(underline({ style: "dotted" }), 100, 2, 2);
+    // One dot every two thicknesses.
+    expect(dots.subpaths).toBe(25);
+    expect(dots.bounds).toEqual([0, 0, 100, 2]);
+    const dashes = trace(underline({ style: "dashed" }), 100, 2, 2);
+    expect(dashes.bounds).toEqual([0, 0, 100, 2]);
+    expect(dashes.subpaths).toBe(10);
+  });
+
+  test("vertical lines run down the band", () => {
+    expect(trace(underline({ style: "double" }), 6, 100, 2, true)).toEqual({ subpaths: 2, bounds: [0, 0, 6, 100] });
+  });
+
+  test("nothing for an empty band", () => {
+    expect(trace(underline(), 0, 2, 2).subpaths).toBe(0);
+    expect(trace(underline(), 100, 0, 0).subpaths).toBe(0);
   });
 });

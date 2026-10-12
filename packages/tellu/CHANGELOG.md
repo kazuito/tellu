@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Decorations: a style's `decorations` draws boxes along runs of text, such as markers (蛍光ペン), highlights and frames, built with `marker()` and `frame()` or as a `BoxDecoration`. Each box covers a chosen part of the em box (`inset`), with `padding`, `radius`, `skew`, a fill and a border, behind the glyphs or in front of them. Boxes follow line breaks (one per line), justification, `shrink` and vertical writing. A run's decorations add to the ones it inherits from the base style and enclosing markup tags, like CSS `text-decoration`, and `layout.decorations` reports where each one goes.
+- Decorations: a style's `decorations` draws lines and boxes along runs of text. Decorations follow line breaks (one per line), justification, `shrink` and vertical writing. A run's decorations add to the ones it inherits from the base style and enclosing markup tags, like CSS `text-decoration`, and `layout.decorations` reports where each one goes.
+  - Lines (`LineDecoration`, built with `underline()`, `overline()` and `lineThrough()`) are part of the text's shape: the run's layers paint them, so outlines wrap the text and the line together, and a line takes each run's colors. They can be solid, double, dotted, dashed or wavy. In vertical text an underline goes on the right (傍線) by default.
+  - Boxes (`BoxDecoration`, built with `marker()` and `frame()`) are markers (蛍光ペン), highlights and frames: each covers a chosen part of the em box (`inset`), with `padding`, `radius`, `skew`, a fill and a border, behind the glyphs or in front of them.
 - `skew` on plates, which slants them into parallelograms.
 
 - More gradients: `conicGradient()` for conic (angle) gradients, `diamondGradient()` for Photoshop's diamond gradient, and `reflect: true` on linear gradients for its reflected gradient, which runs the stops from the middle out to both ends. They paint layers and plates like the other gradients, with the same scopes.

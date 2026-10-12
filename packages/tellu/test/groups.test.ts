@@ -13,7 +13,7 @@ describe("planGroups", () => {
     );
     const groups = planGroups(layout);
     expect(groups.map((group) => group.slot)).toEqual([0, 1, 2]);
-    expect(groups[1]!.members.map((member) => member.glyph)).toEqual([0, 1, 3]);
+    expect(groups[1]!.members.map((member) => ("glyph" in member ? member.glyph : -1))).toEqual([0, 1, 3]);
   });
 
   test("splits a slot when a run changes its effects", () => {

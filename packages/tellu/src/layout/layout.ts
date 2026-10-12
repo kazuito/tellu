@@ -1,6 +1,7 @@
 import { resolveKinsoku, resolveLength, resolveLineHeight, resolveStyle } from "../style/defaults";
 import { applyOverride } from "../style/merge";
 import type { Box, KinsokuRules, LayoutOptions, TextContent, TextStyle, WritingMode } from "../style/types";
+import { stableKey } from "../utils/stableKey";
 import { type DecorationGlyph, type LayoutDecoration, layoutDecorations } from "./decorations";
 import { type FontMetrics, fontSpecOf, getDefaultMeasurer, type Measurer } from "./measure";
 import {
@@ -481,6 +482,7 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
   const lines: LayoutLine[] = [];
   const decorated = runs.some((run) => run.style.decorations?.length);
   const decorationGlyphs: DecorationGlyph[] = [];
+  const layersKeys = decorated ? runs.map((run) => stableKey(run.style.layers)) : [];
   let blockOffset = 0;
 
   ranges.forEach((range, lineIndex) => {
@@ -589,6 +591,8 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         }
         decorationGlyphs.push({
           lineIndex,
+          runIndex: cluster.runIndex,
+          layersKey: layersKeys[cluster.runIndex]!,
           isWhitespace: glyph.isWhitespace,
           decorations: style.decorations ?? [],
           box: glyph.box,

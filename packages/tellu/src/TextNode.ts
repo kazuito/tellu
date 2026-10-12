@@ -1,16 +1,26 @@
 import { AlphaFilter, BlurFilter, Container, type DestroyOptions, type Filter, Rectangle, Sprite } from "pixi.js";
-import { decorationKey } from "./layout/decorations";
+import { decorationKey, lineThickness } from "./layout/decorations";
 import { type Layout, layoutText } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
 import { isVertical } from "./layout/vertical";
 import { blurPadding } from "./render/blur";
+import { traceLine } from "./render/decorationShapes";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
-import { layerReach, layerShape } from "./render/rasterize";
+import { type GlyphShape, layerReach, layerShape, type PathSource } from "./render/rasterize";
 import { ScopeBoxes } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
-import type { Box, BoxDecoration, GlyphContext, GlyphTransform, Layer, PlateStyle, TextNodeProps } from "./style/types";
+import type {
+  Box,
+  BoxDecoration,
+  GlyphContext,
+  GlyphTransform,
+  Layer,
+  LineDecoration,
+  PlateStyle,
+  TextNodeProps,
+} from "./style/types";
 import { stableKey } from "./utils/stableKey";
 
 export interface TextNodeOptions {
@@ -184,9 +194,41 @@ export class TextNode extends Container {
       Math.max(0, ...layout.runs[glyph.runIndex]!.style.layers.map(layerReach)),
     );
 
+    const vertical = isVertical(layout.writingMode);
+    const lines = new Map<number, LineShape>();
     for (const group of planGroups(layout)) {
       const container = createEffectContainer(group.effects, `slot ${group.slot}`);
-      for (const { glyph: index, layer } of group.members) {
+      for (const member of group.members) {
+        const { layer } = member;
+        if ("decoration" in member) {
+          let line = lines.get(member.decoration);
+          if (!line) {
+            line = lineShape(layout, member.decoration, vertical, res);
+            lines.set(member.decoration, line);
+          }
+          const scopeBox = scopes.forBand(paintScope(layer.paint), line.lineIndex, line.band, vertical);
+          const paintBox = { ...scopeBox, x: scopeBox.x - line.originX, y: scopeBox.y - line.originY };
+          const key = [
+            line.shape.source.key,
+            res,
+            line.shape.fracX,
+            line.shape.fracY,
+            line.reach,
+            stableKey(layerShape(layer)),
+            stableKey(layer.shading ?? null),
+            paintKey(layer.paint),
+            paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
+          ].join("\u0000");
+          const cached = this.textures.get(key, res, () =>
+            rasterizer.rasterize(line.shape, layer, paintBox, line.reach),
+          );
+          // Decorations don't move with glyph transforms, so they aren't glyph sprites.
+          const sprite = new Sprite({ texture: cached.texture, blendMode: "max", roundPixels: false });
+          sprite.position.set((line.pixelX + cached.offsetX) / res, (line.pixelY + cached.offsetY) / res);
+          container.addChild(sprite);
+          continue;
+        }
+        const index = member.glyph;
         const glyph = layout.glyphs[index]!;
         const style = layout.runs[glyph.runIndex]!.style;
         const font = fontSpecOf(style, glyph.fontSize);
@@ -198,8 +240,7 @@ export class TextNode extends Container {
         const scopeBox = scopes.get(paintScope(layer.paint), glyph);
         const paintBox = { ...scopeBox, x: scopeBox.x - originX, y: scopeBox.y - originY };
         const shape = {
-          text: glyph.text,
-          font,
+          source: { text: glyph.text, font },
           scaleX: glyph.scaleX,
           scaleY: glyph.scaleY,
           rotation: glyph.rotation,
@@ -264,7 +305,10 @@ export class TextNode extends Container {
     this.plateLayer.addChild(container);
   }
 
-  /** Box decorations: one sprite per decoration, holding all its boxes, behind or in front of the glyphs. */
+  /**
+   * Box decorations: one sprite per decoration, holding all its boxes, behind or in front of the glyphs. Line
+   * decorations are drawn with the glyphs.
+   */
   private buildDecorations(layout: Layout): void {
     const res = this._resolution;
     const vertical = isVertical(layout.writingMode);
@@ -415,6 +459,51 @@ function snap(value: number): [pixel: number, fraction: number] {
 function roundBox(box: { x: number; y: number; width: number; height: number }) {
   const round = (value: number) => Math.round(value * 100) / 100;
   return [round(box.x), round(box.y), round(box.width), round(box.height)];
+}
+
+/** A line decoration ready to rasterize like a glyph, with the origin of its band snapped like a glyph's. */
+interface LineShape {
+  shape: GlyphShape & { source: PathSource };
+  lineIndex: number;
+  /** The band, in layout coordinates. */
+  band: Box;
+  pixelX: number;
+  pixelY: number;
+  /** The snapped origin in layout coordinates. */
+  originX: number;
+  originY: number;
+  /** Extra margin for the widest layer of its run. */
+  reach: number;
+}
+
+function lineShape(layout: Layout, index: number, vertical: boolean, res: number): LineShape {
+  const { decoration, box, fontSize, runIndex, lineIndex } = layout.decorations[index]!;
+  const line = decoration as LineDecoration;
+  const thickness = lineThickness(line, fontSize);
+  const path = new Path2D();
+  traceLine(path, line, box.width, box.height, thickness, vertical);
+  const [pixelX, fracX] = snap(box.x * res);
+  const [pixelY, fracY] = snap(box.y * res);
+  const round = (value: number) => Math.round(value * 1000) / 1000;
+  const key = `line\u0000${stableKey([line.style ?? "solid", round(box.width), round(box.height), round(thickness), vertical])}`;
+  return {
+    shape: {
+      source: { path, bounds: { left: 0, top: 0, right: box.width, bottom: box.height }, key },
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+      resolution: res,
+      fracX,
+      fracY,
+    },
+    lineIndex,
+    band: box,
+    pixelX,
+    pixelY,
+    originX: (pixelX + fracX) / res,
+    originY: (pixelY + fracY) / res,
+    reach: Math.max(0, ...layout.runs[runIndex]!.style.layers.map(layerReach)),
+  };
 }
 
 /** Filters created here are owned by the node; user filters are left alone. */

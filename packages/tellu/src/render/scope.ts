@@ -31,4 +31,17 @@ export class ScopeBoxes {
     if (scope === "block") return this.block;
     return glyph.box;
   }
+
+  /**
+   * The scope box of a line decoration's band. Its glyph scope spans the band along the line and the line's content
+   * across it, so a gradient meets the line where it would meet glyphs there.
+   */
+  forBand(scope: PaintScope | null, lineIndex: number, band: Box, vertical: boolean): Box {
+    const line = this.lines[lineIndex]!;
+    if (scope === "line") return line;
+    if (scope === "block") return this.block;
+    return vertical
+      ? { x: line.x, y: band.y, width: line.width, height: band.height }
+      : { x: band.x, y: line.y, width: band.width, height: line.height };
+  }
 }

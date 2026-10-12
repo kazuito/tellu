@@ -36,14 +36,18 @@ export {
   type InnerShadowOptions,
   innerGlow,
   innerShadow,
+  type LineDecorationOptions,
   linearGradient,
+  lineThrough,
   marker,
+  overline,
   radialGradient,
   type SatinOptions,
   type ShadowOptions,
   satin,
   shadow,
   stroke,
+  underline,
 } from "./style/helpers";
 export { applyOverride, mergeOverrides } from "./style/merge";
 export type * from "./style/types";

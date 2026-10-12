@@ -1,10 +1,10 @@
 ---
-description: Markers, highlights and frames along runs of text with decorations, which follow line breaks, justification and vertical writing, and add up across nested markup tags.
+description: Underlines, line-throughs, markers, highlights and frames along runs of text with decorations, which follow line breaks, justification and vertical writing, and add up across nested markup tags.
 ---
 
 # Decorations
 
-Decorations are drawn along runs of text: a marker (蛍光ペン) under the important words, a highlight behind a name, a frame around a keyword. Put them in a style's `decorations`, usually through a [markup](./rich-text#markup) tag:
+Decorations are drawn along runs of text: an underline, a marker (蛍光ペン) under the important words, a highlight behind a name, a frame around a keyword. Put them in a style's `decorations`, usually through a [markup](./rich-text#markup) tag:
 
 ```ts demo backdrop=light
 import { fill, marker, parseMarkup } from "tellu";
@@ -22,7 +22,70 @@ export default {
 };
 ```
 
-Each decoration is placed from the laid-out glyphs, so it follows everything the layout does: one box per line when the run wraps, the extra space of `justify`, `shrink`, and vertical writing.
+Each decoration is placed from the laid-out glyphs, so it follows everything the layout does: one per line when the run wraps, the extra space of `justify`, `shrink`, and vertical writing.
+
+There are two kinds: [lines](#lines), which are part of the text's shape, and [boxes](#markers-and-highlights), which are drawn behind or in front of it.
+
+## Lines
+
+`underline()`, `overline()` and `lineThrough()` draw lines along the run. A line is part of the text's shape: the run's layers paint it, so the outlines wrap the text and the line together:
+
+```ts demo
+import { fill, parseMarkup, shadow, stroke, underline } from "tellu";
+
+export default {
+  text: parseMarkup("ここは<u>テストに出る</u>ぞ", {
+    u: { decorations: [underline({ thickness: { em: 0.08 } })] },
+  }),
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 60,
+    layers: [
+      shadow({ offset: [5, 5], blur: 3, stroke: 14 }),
+      stroke(14, "#1b2a7a"),
+      stroke(7, "#ffffff"),
+      fill("#ffd400"),
+    ],
+  },
+};
+```
+
+Where the run's layers change, the line restarts with the new ones, so a line under a red word turns red there.
+
+`style` picks the line: `"solid"` (the default), `"double"`, `"dotted"`, `"dashed"` or `"wavy"`:
+
+```ts demo backdrop=light
+import { fill, parseMarkup, underline } from "tellu";
+
+export default {
+  text: parseMarkup(
+    "<a>実線</a> <b>二重</b> <c>点線</c> <d>破線</d> <e>波線</e>",
+    {
+      a: { decorations: [underline({ thickness: 3 })] },
+      b: { decorations: [underline({ thickness: 2, style: "double" })] },
+      c: { decorations: [underline({ thickness: 4, style: "dotted" })] },
+      d: { decorations: [underline({ thickness: 3, style: "dashed" })] },
+      e: { decorations: [underline({ thickness: 2.5, style: "wavy" })] },
+    },
+  ),
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 700,
+    fontSize: 44,
+    layers: [fill("#1b1b3a")],
+  },
+};
+```
+
+| Option | Default | |
+| --- | --- | --- |
+| `position` | `"auto"` | `"under"`, `"over"` or `"through"`. `"auto"` is `"under"` in horizontal text and `"over"` (the right side, 傍線) in vertical text |
+| `thickness` | `{ em: 0.06 }` | Thickness of the line. `{ em }` is relative to the largest font size of the run |
+| `offset` | `{ em: 0.05 }` | Gap between the em box and the line. For `"through"`, a shift toward the under side (default `0`) |
+| `style` | `"solid"` | `"double"` and `"wavy"` take three thicknesses across the line |
+
+Lines sit just outside the em box, not at the font's own underline position, so they clear Japanese glyphs.
 
 ## Markers and highlights
 
@@ -145,7 +208,7 @@ Whitespace at the start and end of a line is never decorated. Spaces inside a ru
 
 ## In front of the glyphs
 
-`placement: "front"` draws the box over the glyphs instead of behind them:
+A line-through is painted like the text, so it disappears across glyphs of the same color. For a strike in a contrasting color, use a box with `placement: "front"`, which draws it over the glyphs instead of behind them:
 
 ```ts demo
 import { fill, frame, parseMarkup, stroke } from "tellu";
@@ -184,9 +247,9 @@ parseMarkup("<em>とても<f>大事</f>な</em>話", {
 // 大事 gets the marker and the frame.
 ```
 
-Equal decorations are only drawn once, and neighbouring runs with equal decorations share one box, even when their other styles differ. A decoration in the base style decorates the whole text.
+Equal decorations are only drawn once, and neighbouring runs with equal decorations share one box, even when their other styles differ (lines restart where the layers change). A decoration in the base style decorates the whole text.
 
-## Options
+## Box options
 
 | Option | Default | |
 | --- | --- | --- |
@@ -201,4 +264,4 @@ Equal decorations are only drawn once, and neighbouring runs with equal decorati
 
 `marker()` sets `inset: [0.5, 1]` and `padding: [2, 0]`; `frame()` sets `padding: [4, 2]`. See [`BoxDecoration`](/api/types#boxdecoration).
 
-Decorations don't move with [glyph transforms](./animation), and don't add to the layout box. Their boxes are in [`layout.decorations`](/api/layout#layoutdecoration), for example to place your own elements along a run.
+Decorations don't move with [glyph transforms](./animation), and don't add to the layout box. Where each one goes is in [`layout.decorations`](/api/layout#layoutdecoration), for example to place your own elements along a run.

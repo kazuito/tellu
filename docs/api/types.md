@@ -154,7 +154,7 @@ Defaults: [`defaultKinsoku`](./helpers#defaultkinsoku).
 | `textOrientation` | [`TextOrientation`](#textorientation) | `"mixed"` | Vertical text only |
 | `textCombineUpright` | [`TextCombineUpright`](#textcombineupright) | `"digits 2"` | Vertical text only: 縦中横 |
 | `layers` | `readonly `[`Layer`](#layer)`[]` | `[{ paint: "#ffffff" }]` | Bottom → top |
-| `decorations` | `readonly `[`Decoration`](#decoration)`[]` | `[]` | Markers and frames along the text. A run's decorations add to the ones it inherits. [Guide](/guide/decorations) |
+| `decorations` | `readonly `[`Decoration`](#decoration)`[]` | `[]` | Lines, markers and frames along the text. A run's decorations add to the ones it inherits. [Guide](/guide/decorations) |
 
 Guide: [Typography](/guide/typography).
 
@@ -481,10 +481,22 @@ Guide: [Decorations](/guide/decorations).
 ### `Decoration`
 
 ```ts
-type Decoration = BoxDecoration;
+type Decoration = LineDecoration | BoxDecoration;
 ```
 
 Something drawn along runs of text, from a style's `decorations`.
+
+### `LineDecoration`
+
+An underline, overline or line-through. It is part of the text's shape: the run's layers paint it, and it restarts where they change. Built by [`underline()`](./helpers#underline), [`overline()`](./helpers#overline) and [`lineThrough()`](./helpers#linethrough).
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `type` | `"line"` | | Required |
+| `position` | `"auto" \| "under" \| "over" \| "through"` | `"auto"` | `under`: below the em box (left in vertical text). `over`: above it (right in vertical text). `through`: across its middle. `auto`: `under` in horizontal text, `over` in vertical text |
+| `thickness` | [`Length`](#length) | `{ em: 0.06 }` | `em` is relative to the largest font size of the stretch |
+| `offset` | `Length` | `{ em: 0.05 }`, `0` for `through` | Gap from the em box; for `through`, a shift toward the under side |
+| `style` | `"solid" \| "double" \| "dotted" \| "dashed" \| "wavy"` | `"solid"` | `double` and `wavy` take three thicknesses across the line |
 
 ### `BoxDecoration`
 

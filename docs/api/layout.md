@@ -63,14 +63,15 @@ layout.fontScale;    // < 1 when overflow: "shrink" scaled the font
 
 ### `LayoutDecoration`
 
-One [decoration](/guide/decorations) along a stretch of one line: consecutive glyphs that all carry it, without the whitespace at the line's edges.
+One [decoration](/guide/decorations) along a stretch of one line: consecutive glyphs that all carry it (with equal layers, for a line), without the whitespace at the line's edges.
 
 | Field | |
 | --- | --- |
 | `decoration` | The [`Decoration`](./types#decoration) |
 | `lineIndex` | |
 | `start`, `end` | Glyph index range `[start, end)` |
-| `box` | [`Box`](./types#box): what it covers, `inset` and `padding` applied |
+| `runIndex` | The run of its first glyph. A line decoration is painted with this run's layers |
+| `box` | [`Box`](./types#box): for a box decoration, the box with `inset` and `padding` applied; for a line, the band it is drawn in |
 | `fontSize` | Largest font size of its glyphs, after `shrink` |
 
 ### `ResolvedRun`

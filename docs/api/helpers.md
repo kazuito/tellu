@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (marker, frame), gradient helpers (linear, radial, conic, diamond), parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond), parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -135,6 +135,34 @@ All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `sha
 | `stroke` | `0` | Shade the glyph grown by this width, e.g. an outline |
 
 ## Decorations
+
+### `underline()`
+
+```ts
+function underline(options?: LineDecorationOptions): LineDecoration;
+```
+
+A line under the em box in horizontal text and on its right in vertical text (`position: "auto"`), painted with the run's layers. Guide: [Lines](/guide/decorations#lines).
+
+### `overline()`
+
+```ts
+function overline(options?: Omit<LineDecorationOptions, "position">): LineDecoration;
+```
+
+A line above the em box (on its right in vertical text).
+
+### `lineThrough()`
+
+```ts
+function lineThrough(options?: Omit<LineDecorationOptions, "position">): LineDecoration;
+```
+
+A line through the middle of the em box (打ち消し線).
+
+### `LineDecorationOptions`
+
+Every [`LineDecoration`](./types#linedecoration) option except `type`.
 
 ### `marker()`
 

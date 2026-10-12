@@ -563,5 +563,38 @@ export interface BoxDecoration {
   filters?: readonly Filter[];
 }
 
-/** Something drawn along runs of text. */
-export type Decoration = BoxDecoration;
+/**
+ * A line along a run of text: an underline, overline or line-through. It is part of the text's shape, so the run's
+ * layers paint it: outlines wrap the text and the line together, and a line under differently colored runs takes
+ * each run's colors. `underline()`, `overline()` and `lineThrough()` build these.
+ */
+export interface LineDecoration {
+  type: "line";
+  /**
+   * - `under`: below the em box (left of it in vertical text)
+   * - `over`: above the em box (right of it in vertical text, where Japanese puts 傍線)
+   * - `through`: across the middle of the em box
+   * - `auto`: `under` in horizontal text, `over` in vertical text
+   * Default: `"auto"`.
+   */
+  position?: "auto" | "under" | "over" | "through";
+  /** Thickness of the line. Default: `{ em: 0.06 }`. */
+  thickness?: Length;
+  /**
+   * Gap between the em box and the line for `under` and `over`; for `through`, a shift of the line toward the under
+   * side. Default: `{ em: 0.05 }` for `under` and `over`, `0` for `through`.
+   */
+  offset?: Length;
+  /**
+   * - `solid`: one line
+   * - `double`: two lines, a thickness apart
+   * - `dotted`: round dots
+   * - `dashed`: dashes
+   * - `wavy`: a wave, two thicknesses high
+   * Default: `"solid"`.
+   */
+  style?: "solid" | "double" | "dotted" | "dashed" | "wavy";
+}
+
+/** Something drawn along runs of text: a line (underline, line-through) or a box (marker, frame). */
+export type Decoration = LineDecoration | BoxDecoration;

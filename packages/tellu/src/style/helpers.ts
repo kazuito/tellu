@@ -7,6 +7,7 @@ import type {
   GradientStopInput,
   Layer,
   LinearGradient,
+  LineDecoration,
   Paint,
   PaintScope,
   RadialGradient,
@@ -247,4 +248,31 @@ export function frame(
 ): BoxDecoration {
   const { width = 3, ...rest } = options;
   return { type: "box", stroke: { width, paint }, padding: [4, 2], ...rest };
+}
+
+/** Options of `underline()`, `overline()` and `lineThrough()`: every `LineDecoration` option except `type`. */
+export type LineDecorationOptions = Omit<LineDecoration, "type">;
+
+/**
+ * An underline, painted with the run's layers, so its outline merges with the glyphs'. In vertical text it goes on the
+ * right (傍線) unless `position` says otherwise.
+ *
+ * @example parseMarkup("<u>要チェック</u>", { u: { decorations: [underline({ style: "wavy" })] } })
+ */
+export function underline(options: LineDecorationOptions = {}): LineDecoration {
+  return { type: "line", position: "auto", ...options };
+}
+
+/** A line over the text (on the right in vertical text), painted with the run's layers. */
+export function overline(options: Omit<LineDecorationOptions, "position"> = {}): LineDecoration {
+  return { type: "line", position: "over", ...options };
+}
+
+/**
+ * A line through the middle of the em box (打ち消し線), painted with the run's layers.
+ *
+ * @example { decorations: [lineThrough({ thickness: { em: 0.08 } })] }
+ */
+export function lineThrough(options: Omit<LineDecorationOptions, "position"> = {}): LineDecoration {
+  return { type: "line", position: "through", ...options };
 }

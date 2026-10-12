@@ -4,9 +4,18 @@ import type { Box, Layer, StrokePosition } from "../style/types";
 import { createPaintStyle } from "./paint";
 import { measureInside, signedDistanceField, strokeCoverage } from "./sdf";
 
+/** A path to rasterize like a glyph, such as a decoration line. */
+export interface PathSource {
+  path: Path2D;
+  /** Extent of the path in px from the shape's origin. */
+  bounds: GlyphBounds;
+  /** Identifies the path: equal keys must draw equal paths. */
+  key: string;
+}
+
 export interface GlyphShape {
-  text: string;
-  font: FontSpec;
+  /** A glyph of text in a font, drawn from its baseline origin, or a path. */
+  source: { text: string; font: FontSpec } | PathSource;
   /** Applied on screen, after `rotation`. */
   scaleX: number;
   scaleY: number;
@@ -25,7 +34,7 @@ export interface RasterResult {
   offsetY: number;
 }
 
-interface GlyphBounds {
+export interface GlyphBounds {
   left: number;
   top: number;
   right: number;
@@ -91,6 +100,19 @@ export function layerReach(layer: Layer): number {
   return join === "miter" ? half * Math.min(miterLimit, 4) : half;
 }
 
+/** Fills or strokes a shape at the origin with the context's current style, line width and transform. */
+function drawShape(ctx: Canvas2D, shape: GlyphShape, operation: "fill" | "stroke"): void {
+  const { source } = shape;
+  if ("path" in source) {
+    if (operation === "fill") ctx.fill(source.path);
+    else ctx.stroke(source.path);
+    return;
+  }
+  ctx.font = fontToCss(source.font);
+  if (operation === "fill") ctx.fillText(source.text, 0, 0);
+  else ctx.strokeText(source.text, 0, 0);
+}
+
 /** Draws glyph × layer bitmaps with the Canvas 2D API. */
 export class GlyphRasterizer {
   private measureContext: Canvas2D | undefined;
@@ -122,6 +144,11 @@ export class GlyphRasterizer {
     return bounds;
   }
 
+  /** Extent of a shape at scale 1, relative to its origin. */
+  private shapeBounds(shape: GlyphShape): GlyphBounds {
+    return "path" in shape.source ? shape.source.bounds : this.glyphBounds(shape.source.text, shape.source.font);
+  }
+
   /**
    * @param paintBox The paint's scope box relative to the glyph origin, in layout px.
    * @param reach Extra margin around the glyph; layers of one glyph share it so distance fields can be reused.
@@ -129,7 +156,7 @@ export class GlyphRasterizer {
   rasterize(shape: GlyphShape, layer: Layer, paintBox: Box, reach: number): RasterResult {
     const { resolution: res, scaleX, scaleY, fracX, fracY } = shape;
     const matrix = glyphMatrix(shape);
-    const bounds = transformBounds(this.glyphBounds(shape.text, shape.font), matrix);
+    const bounds = transformBounds(this.shapeBounds(shape), matrix);
     const margin = reach * res + AA_MARGIN;
     const left = Math.floor(fracX + bounds.left - margin);
     const top = Math.floor(fracY + bounds.top - margin);
@@ -148,7 +175,6 @@ export class GlyphRasterizer {
     // Shading is computed from the distance field too.
     if ((isFill || (join !== "round" && scaleX === scaleY)) && !layer.shading) {
       ctx.setTransform(...matrix, glyphX, glyphY);
-      ctx.font = fontToCss(shape.font);
       ctx.fillStyle = ctx.strokeStyle = "#000";
       ctx.lineJoin = join;
       ctx.miterLimit = miterLimit;
@@ -157,17 +183,17 @@ export class GlyphRasterizer {
       if (position === "outside") {
         if (strokeWidth > 0) {
           ctx.lineWidth = strokeWidth * 2 * unit;
-          ctx.strokeText(shape.text, 0, 0);
+          drawShape(ctx, shape, "stroke");
         }
-        ctx.fillText(shape.text, 0, 0);
+        drawShape(ctx, shape, "fill");
       } else if (position === "inside") {
-        ctx.fillText(shape.text, 0, 0);
+        drawShape(ctx, shape, "fill");
         ctx.globalCompositeOperation = "destination-in";
         ctx.lineWidth = strokeWidth * 2 * unit;
-        ctx.strokeText(shape.text, 0, 0);
+        drawShape(ctx, shape, "stroke");
       } else {
         ctx.lineWidth = strokeWidth * unit;
-        ctx.strokeText(shape.text, 0, 0);
+        drawShape(ctx, shape, "stroke");
       }
     } else {
       const inside = position !== "outside" || !!layer.shading;
@@ -202,8 +228,9 @@ export class GlyphRasterizer {
     height: number,
     inside: boolean,
   ): FieldEntry {
-    const css = fontToCss(shape.font);
-    const key = [css, shape.text, ...matrix, glyphX, glyphY, width, height].join("\u0000");
+    const source =
+      "path" in shape.source ? shape.source.key : `${fontToCss(shape.source.font)}\u0000${shape.source.text}`;
+    const key = [source, ...matrix, glyphX, glyphY, width, height].join("\u0000");
     let entry = this.fieldCache.get(key);
     if (entry) {
       if (inside && !entry.inside) {
@@ -225,9 +252,8 @@ export class GlyphRasterizer {
       glyphX * SUPERSAMPLE,
       glyphY * SUPERSAMPLE,
     );
-    ctx.font = css;
     ctx.fillStyle = "#000";
-    ctx.fillText(shape.text, 0, 0);
+    drawShape(ctx, shape, "fill");
     const { data } = ctx.getImageData(0, 0, fieldWidth, fieldHeight);
     entry = {
       field: signedDistanceField(data, fieldWidth, fieldHeight, inside),
