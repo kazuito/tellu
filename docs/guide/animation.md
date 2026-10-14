@@ -1,5 +1,5 @@
 ---
-description: Animate captions glyph by glyph with glyphTransform, covering position, scale, rotation, skew, opacity, visibility, tint and single layers, clipping and karaoke wipes, plus typewriter, word-by-word, bounce, wave and shake recipes.
+description: Animate captions glyph by glyph with glyphTransform and its helpers and presets, covering position, scale, rotation, skew, opacity, visibility, tint and single layers, clipping and karaoke wipes, plus typewriter, word-by-word, bounce, wave and shake recipes.
 ---
 
 # Glyph transforms
@@ -60,6 +60,63 @@ export default (frame: number): TextNodeProps => ({
 ```
 
 This is cheap. tellu rebuilds only when something *other than* `glyphTransform` changes. Every glyph layer is rasterized once, and each frame just moves the existing sprites. Keep everything else stable between frames (see [Performance](./performance)).
+
+## Animation helpers
+
+For the common entrances you don't need to write the math. The presets return a function of the time that gives the `glyphTransform` of that moment:
+
+```ts demo loop=90 still=60
+import { fill, popIn, stroke, type TextNodeProps } from "tellu";
+
+const animation = popIn({ stagger: 3 });
+
+export default (frame: number): TextNodeProps => ({
+  text: "ポンッと登場！",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 80,
+    layers: [stroke(14, "#e63946"), stroke(7, "#ffffff"), fill("#1d3557")],
+  },
+  glyphTransform: animation(frame),
+});
+```
+
+`fadeIn()`, `typewriter()`, `popIn()`, `slideIn()` and `dropIn()` animate each unit once; `wave()` and `shake()` loop forever. Every preset takes the timing: `by` (`"glyph"`, `"word"`, `"line"` or `"text"`), `delay`, `stagger`, `duration` and `order` (`"forward"`, `"backward"`, `"center"`, `"edges"` or `"random"`). Defaults are in frames at 30 fps.
+
+`animateText()` builds your own from two states, and `combineGlyphTransforms()` plays several at once. Here words rise in from the middle out while the whole caption waves:
+
+```ts demo loop=120 still=70
+import {
+  animateText,
+  combineGlyphTransforms,
+  fill,
+  stroke,
+  type TextNodeProps,
+  wave,
+} from "tellu";
+
+const rise = animateText({
+  by: "word",
+  order: "center",
+  stagger: 8,
+  duration: 16,
+  from: { y: 40, opacity: 0, tint: "#ffd400" },
+});
+const bob = wave({ amplitude: 6, period: 40 });
+
+export default (frame: number): TextNodeProps => ({
+  text: "真ん中から順番に浮かび上がる",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 52,
+    layers: [stroke(10, "#0b132b"), fill("#ffffff")],
+  },
+  glyphTransform: combineGlyphTransforms(rise(frame), bob(frame)),
+});
+```
+
+With `direction: "out"` an animation plays backward, from `to` to `from`, to take a caption off screen. `animationDuration(timing, glyph)` tells how long one takes, and `unitProgress(glyph, time, timing)` gives each glyph's progress for animations of your own. See the [animation API](/api/animation).
 
 ## The glyph
 

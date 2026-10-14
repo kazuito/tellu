@@ -1,3 +1,26 @@
+export {
+  type AnimationOrder,
+  type AnimationPresetOptions,
+  type AnimationUnit,
+  animateText,
+  animationDuration,
+  combineGlyphTransforms,
+  dropIn,
+  easings,
+  fadeIn,
+  type GlyphKeyframe,
+  popIn,
+  type ShakeOptions,
+  type StaggerTiming,
+  shake,
+  slideIn,
+  type TextAnimation,
+  type TextAnimationFn,
+  typewriter,
+  unitProgress,
+  type WaveOptions,
+  wave,
+} from "./animation";
 export { type CanvasText, type CreateCanvasTextOptions, createCanvasText } from "./createCanvasText";
 export { checkFonts, type FontCheckMode, type FontIssue, FontIssueError } from "./fontCheck";
 export { type FontRequest, fontRequests, fontsReady, getFontEpoch, loadFonts, subscribeFontEpoch } from "./fonts";

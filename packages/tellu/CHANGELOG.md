@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Words in glyph transforms: `GlyphContext.wordIndex` and `wordCount` number the words of a caption (`LayoutGlyph.wordIndex` in the layout), for animating word by word. Words are phrases (文節) such as 「今日は」 in Japanese and words with their punctuation in spaced text; brackets stay with the words they enclose.
 - Tint and single layers in glyph transforms: `GlyphTransform.tint` multiplies a glyph's colors, and `GlyphTransform.layers` changes the `opacity`, `tint` and `visible` of single layers of a glyph by index or `id` (`LayerTransform`), e.g. to light up the word being spoken. Neither rebuilds the caption.
 - Clipping: `clip` shows the glyphs and decorations only inside boxes, given as boxes or as a function of the layout (`ClipRegion`), without rebuilding the caption. `wipeClip()` builds the boxes of a wipe along the lines in reading order, so karaoke captions can wipe across several lines, horizontal or vertical.
+- Animation helpers: `animateText()` animates glyphs from one state to another unit by unit (glyphs, words, lines or the whole text, in forward, backward, center, edges or random order), `unitProgress()` gives each glyph's progress for animations of your own, `animationDuration()` tells when one ends, `combineGlyphTransforms()` plays several at once, and `easings` holds common curves. Presets: `fadeIn()`, `typewriter()`, `popIn()`, `slideIn()`, `dropIn()`, `wave()` and `shake()`.
 
 ### Changed
 

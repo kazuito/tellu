@@ -147,6 +147,7 @@ export default defineConfig({
             { text: "Overview", link: "/api/" },
             { text: "Rendering", link: "/api/rendering" },
             { text: "Style helpers", link: "/api/helpers" },
+            { text: "Animation", link: "/api/animation" },
             { text: "Layout & fonts", link: "/api/layout" },
             { text: "Types", link: "/api/types" },
             { text: "tellu/react", link: "/api/react" },

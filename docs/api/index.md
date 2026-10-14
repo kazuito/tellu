@@ -29,6 +29,9 @@ import { Text } from "tellu/remotion"; // React component wired to Remotion's de
 | [`parseMarkup()`](./helpers#parsemarkup) | `<tag>` markup to runs |
 | [`applyOverride()`](./helpers#applyoverride) · [`mergeOverrides()`](./helpers#mergeoverrides) | Style override utilities |
 | [`defaultStyle`](./helpers#defaultstyle) · [`defaultKinsoku`](./helpers#defaultkinsoku) · [`resolveStyle()`](./helpers#resolvestyle) | Defaults |
+| **Animation** | |
+| [`animateText()`](./animation#animatetext) · [`unitProgress()`](./animation#unitprogress) · [`combineGlyphTransforms()`](./animation#combineglyphtransforms) | Build glyph animations |
+| [`fadeIn()`](./animation#fadein) · [`typewriter()`](./animation#typewriter) · [`popIn()`](./animation#popin) · [`slideIn()`](./animation#slidein) · [`dropIn()`](./animation#dropin) · [`wave()`](./animation#wave) · [`shake()`](./animation#shake) | Presets |
 | **Layout & fonts** | |
 | [`layoutText()`](./layout#layouttext) · [`normalizeRuns()`](./layout#normalizeruns) | Lay out text without rendering |
 | [`loadFonts()`](./layout#loadfonts) · [`fontsReady()`](./layout#fontsready) · [`fontRequests()`](./layout#fontrequests) | Font loading |
