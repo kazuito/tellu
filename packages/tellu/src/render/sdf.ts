@@ -1,4 +1,5 @@
-import type { Shading, StrokePosition } from "../style/types";
+import type { ResolvedShading } from "../style/resolve";
+import type { StrokePosition } from "../style/types";
 import { readContour, sampleContour } from "./contour";
 
 const FAR = 1e20;
@@ -105,7 +106,7 @@ export function strokeCoverage(
   factor: number,
   strokeWidth: number,
   position: StrokePosition,
-  shading?: Shading,
+  shading?: ResolvedShading,
   unit = 1,
 ): Uint8ClampedArray<ArrayBuffer> {
   const width = Math.floor(fieldWidth / factor);
@@ -243,7 +244,7 @@ function shadingSampler(
   height: number,
   strokeWidth: number,
   position: StrokePosition,
-  shading: Shading,
+  shading: ResolvedShading,
   unit: number,
 ): (x: number, y: number) => number {
   const toShape = (distance: number) =>

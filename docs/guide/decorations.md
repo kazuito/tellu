@@ -256,7 +256,7 @@ Equal decorations are only drawn once, and neighbouring runs with equal decorati
 | `paint` | | Fill. Gradients and patterns span each box |
 | `stroke` | | `{ width, paint }`: a border centered on the box's edge |
 | `inset` | `[0, 1]` | The part of the em box covered across the line, from the over side (`0`) to the under side (`1`) |
-| `padding` | `0` | `[along, across]` the line in px, or one value for both |
+| `padding` | `0` | `[along, across]` the line, or one value for both, in px or `{ em }` of the run's font size |
 | `radius` | `0` | Corner radius, clamped to half the box's size |
 | `skew` | `0` | Slant in degrees |
 | `placement` | `"behind"` | `"behind"` the glyphs or in `"front"` of them |

@@ -253,7 +253,7 @@ type FontStyle = "normal" | "italic" | "oblique";
 type Length = number | { em: number };
 ```
 
-Pixels, or a multiple of the font size.
+Pixels, or a multiple of the font size. Layer, shading, plate and decoration lengths accept it too, so effects can scale with the text: `{ em }` follows the run's font size after [`shrink`](/guide/fitting#shrink).
 
 ### `LineHeight`
 
@@ -269,13 +269,13 @@ A multiple of the font size, or absolute pixels.
 | --- | --- | --- | --- |
 | `paint` | [`LayerPaint`](#layerpaint) | | Required |
 | `colorGlyphs` | `"keep" \| "paint"` | `"paint"` | `"keep"` draws emoji and other color glyphs in their own colors, on layers that paint the glyph itself. [Guide](/guide/layers#emoji-and-color-glyphs) |
-| `stroke` | `number` | `0` | Growth in px |
+| `stroke` | [`Length`](#length) | `0` | Growth: px, or `{ em }` of the run's font size |
 | `strokePosition` | [`StrokePosition`](#strokeposition) | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | Non-uniform scaling always uses round joins |
 | `miterLimit` | `number` | `10` | |
 | `shading` | [`Shading`](#shading) | | Paints the shape with a varying strength. Always uses round joins |
-| `offset` | `readonly [x, y]` | `[0, 0]` | |
-| `blur` | `number` | `0` | PixiJS `BlurFilter` strength |
+| `offset` | `readonly [x: Length, y: Length]` | `[0, 0]` | |
+| `blur` | [`Length`](#length) | `0` | PixiJS `BlurFilter` strength |
 | `blurQuality` | `number` | `4` | |
 | `contour` | [`Contour`](#contour) | | Remaps the merged layer's opacity after the blur. [Guide](/guide/layers#contours) |
 | `noise` | `number` | `0` | `0`–`1`: speckles the opacity, after the contour. [Guide](/guide/layers#noise) |
@@ -311,7 +311,7 @@ type StrokePosition = "outside" | "inside" | "center";
 type Shading = InsetShading | BevelShading | SatinShading;
 ```
 
-Varies how strongly a layer paints its shape, computed from the distance to the shape's edge. The shape is the layer's: the glyph grown by `stroke`, at its `strokePosition`. Lengths are in px, in screen space, so they stay put when glyphs are rotated in vertical text.
+Varies how strongly a layer paints its shape, computed from the distance to the shape's edge. The shape is the layer's: the glyph grown by `stroke`, at its `strokePosition`. Lengths are on screen, so they stay put when glyphs are rotated in vertical text, and `{ em }` lengths follow the run's font size.
 
 Guide: [Inner shadows and glows](/guide/layers#inner-shadows-and-glows), [Bevels](/guide/layers#bevels), [Satin](/guide/layers#satin).
 
@@ -337,8 +337,8 @@ Paints the edge of the shape, fading toward its inside (inner shadow, inner glow
 | Property | Type | Default | |
 | --- | --- | --- | --- |
 | `type` | `"inset"` | | Required |
-| `offset` | `readonly [x, y]` | `[0, 0]` | Shift of the edge the fade starts from |
-| `size` | `number` | `4` | Width of the fade. `0` is a hard edge |
+| `offset` | `readonly [x: Length, y: Length]` | `[0, 0]` | Shift of the edge the fade starts from |
+| `size` | [`Length`](#length) | `4` | Width of the fade. `0` is a hard edge |
 | `contour` | [`Contour`](#contour) | | Remaps the strength through a curve |
 
 ### `BevelShading`
@@ -349,7 +349,7 @@ Lights the shape as if its edge were beveled, and paints its lit or its shaded s
 | --- | --- | --- | --- |
 | `type` | `"bevel"` | | Required |
 | `side` | `"highlight" \| "shadow"` | `"highlight"` | Faces turned toward or away from the light |
-| `size` | `number` | `4` | Width of the bevel |
+| `size` | [`Length`](#length) | `4` | Width of the bevel |
 | `angle` | `number` | `315` | Direction the light comes from, in degrees clockwise from the top (`315` = top left) |
 | `depth` | `number` | `1` | Steepness; higher values make the lighting stronger |
 | `technique` | `"smooth" \| "chisel"` | `"smooth"` | Rounded, or flat faces with a sharp ridge |
@@ -362,8 +362,8 @@ Silky bands inside the shape, where two copies of the softened shape, shifted by
 | Property | Type | Default | |
 | --- | --- | --- | --- |
 | `type` | `"satin"` | | Required |
-| `offset` | `readonly [x, y]` | `[4, 4]` | Shift of each copy |
-| `size` | `number` | `8` | Softness of the copies |
+| `offset` | `readonly [x: Length, y: Length]` | `[4, 4]` | Shift of each copy |
+| `size` | [`Length`](#length) | `8` | Softness of the copies |
 | `invert` | `boolean` | `false` | Paint where the copies agree instead |
 | `contour` | [`Contour`](#contour) | | Remaps the strength through a curve |
 
@@ -419,7 +419,7 @@ A gradient that follows the layer's shape (Photoshop's shape burst). Built by [`
 | --- | --- | --- | --- |
 | `type` | `"shape"` | | |
 | `stops` | `readonly GradientStopInput[]` | | From the glyph's edge (`0`) to the far edge of the layer (`1`): the outer edge of an outside stroke, the inner edge of an inside one, and the outer edge of a centered one, from its inner edge |
-| `size` | `number` | `8` | For a layer with no `stroke`: how far inside the glyph the stops end, in px |
+| `size` | [`Length`](#length) | `8` | For a layer with no `stroke`: how far inside the glyph the stops end |
 | `reverse` | `boolean` | `false` | Run the stops from the far edge back to the glyph's edge |
 
 ### `ConicGradient`
@@ -523,13 +523,13 @@ Guide: [Patching layers](/guide/rich-text#patching-layers).
 | Property | Type | Default | |
 | --- | --- | --- | --- |
 | `paint` | `Paint` | | Required |
-| `padding` | `number \| readonly [x, y]` | 24 along the lines, 12 across | `[24, 12]` in horizontal text, `[12, 24]` in vertical |
-| `radius` | `number` | `0` | Clamped to half the plate size |
+| `padding` | [`Length`](#length)` \| readonly [x, y]` | 24 along the lines, 12 across | `[24, 12]` in horizontal text, `[12, 24]` in vertical. `{ em }` lengths of a plate follow the base font size after `shrink` |
+| `radius` | [`Length`](#length) | `0` | Clamped to half the plate size |
 | `skew` | `number` | `0` | Slant in degrees: the edge on the over side (top, or right in vertical text) moves toward the end of the lines |
-| `stroke` | `{ width: number; paint: Paint }` | | |
+| `stroke` | `{ width: Length; paint: Paint }` | | |
 | `mode` | `"block" \| "line"` | `"block"` | One plate, or one per line |
-| `offset` | `readonly [x, y]` | `[0, 0]` | |
-| `blur` | `number` | `0` | |
+| `offset` | `readonly [x: Length, y: Length]` | `[0, 0]` | |
+| `blur` | [`Length`](#length) | `0` | |
 | `opacity` | `number` | `1` | |
 | `filters` | `readonly Filter[]` | | |
 
@@ -620,14 +620,14 @@ A box along a run, one per line the run spans. Built by [`marker()`](./helpers#m
 | --- | --- | --- | --- |
 | `type` | `"box"` | | Required |
 | `paint` | [`Paint`](#paint) | | Fill. Gradients and patterns span each box |
-| `stroke` | `{ width: number; paint: Paint }` | | Border centered on the box's edge |
+| `stroke` | `{ width: Length; paint: Paint }` | | Border centered on the box's edge |
 | `inset` | `readonly [from, to]` | `[0, 1]` | The part of the em box covered across the line, as fractions from its over side (top, or right in vertical text) to its under side |
-| `padding` | `number \| readonly [along, across]` | `0` | Added around the box, in px |
-| `radius` | `number` | `0` | Clamped to half the box's size |
+| `padding` | [`Length`](#length)` \| readonly [along, across]` | `0` | Added around the box. `{ em }` lengths of a box follow the largest font size of its glyphs |
+| `radius` | [`Length`](#length) | `0` | Clamped to half the box's size |
 | `skew` | `number` | `0` | Slant in degrees, as for plates |
 | `placement` | `"behind" \| "front"` | `"behind"` | Behind the glyphs (above the plate), or in front of them |
-| `offset` | `readonly [x, y]` | `[0, 0]` | |
-| `blur` | `number` | `0` | |
+| `offset` | `readonly [x: Length, y: Length]` | `[0, 0]` | |
+| `blur` | [`Length`](#length) | `0` | |
 | `opacity` | `number` | `1` | |
 | `blendMode` | [`BlendMode`](#blendmode) | `"normal"` | |
 | `filters` | `readonly Filter[]` | | PixiJS filters |

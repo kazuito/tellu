@@ -1,17 +1,18 @@
 import { type AnyCanvas, type Canvas2D, context2d, createCanvas } from "../canvas";
 import type { Layout } from "../layout/layout";
 import { isVertical } from "../layout/vertical";
-import type { Box, Paint, PlateStyle, WritingMode } from "../style/types";
+import type { ResolvedPlate } from "../style/resolve";
+import type { Box, Paint, WritingMode } from "../style/types";
 import { createPaintStyle } from "./paint";
 import { unionBox } from "./scope";
 
-export function platePadding(style: PlateStyle, writingMode?: WritingMode): [number, number] {
+export function platePadding(style: ResolvedPlate, writingMode?: WritingMode): [number, number] {
   const { padding = isVertical(writingMode) ? [12, 24] : [24, 12] } = style;
   return typeof padding === "number" ? [padding, padding] : [padding[0], padding[1]];
 }
 
 /** Plate rectangles in layout coordinates. */
-export function plateBoxes(layout: Layout, style: PlateStyle): Box[] {
+export function plateBoxes(layout: Layout, style: ResolvedPlate): Box[] {
   const [px, py] = platePadding(style, layout.writingMode);
   const lines = layout.lines.filter((line) => line.end > line.start).map((line) => line.contentBox);
   if (lines.length === 0) return [];
@@ -135,7 +136,7 @@ export function rasterizeBoxes(
 }
 
 export function rasterizePlate(
-  style: PlateStyle,
+  style: ResolvedPlate,
   boxes: readonly Box[],
   resolution: number,
   vertical = false,

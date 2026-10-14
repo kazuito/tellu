@@ -113,8 +113,8 @@ export type Paint = ColorValue | LinearGradient | RadialGradient | ConicGradient
 export interface ShapeGradient {
   type: "shape";
   stops: readonly GradientStopInput[];
-  /** For layers with no `stroke`: how far inside the glyph the stops end (`1`), in px. Default: `8`. */
-  size?: number;
+  /** For layers with no `stroke`: how far inside the glyph the stops end (`1`). Default: `8` (px). */
+  size?: Length;
   /** Runs the stops from the far edge (`0`) back to the glyph's edge (`1`). Default: `false`. */
   reverse?: boolean;
 }
@@ -136,9 +136,9 @@ export type StrokePosition = "outside" | "inside" | "center";
 export interface InsetShading {
   type: "inset";
   /** `[x, y]` shift of the edge the fade starts from. Default: `[0, 0]`. */
-  offset?: readonly [x: number, y: number];
-  /** Width of the fade in px. `0` is a hard edge. Default: `4`. */
-  size?: number;
+  offset?: readonly [x: Length, y: Length];
+  /** Width of the fade. `0` is a hard edge. Default: `4` (px). */
+  size?: Length;
   /** Remaps the strength of the shading through a curve, like the contour of Photoshop's layer styles. Default: none. */
   contour?: Contour;
 }
@@ -151,8 +151,8 @@ export interface BevelShading {
   type: "bevel";
   /** `highlight` paints the faces turned toward the light, `shadow` the faces turned away. Default: `"highlight"`. */
   side?: "highlight" | "shadow";
-  /** Width of the bevel in px. Default: `4`. */
-  size?: number;
+  /** Width of the bevel. Default: `4` (px). */
+  size?: Length;
   /** Direction the light comes from, in degrees clockwise from the top (`315` = top left). Default: `315`. */
   angle?: number;
   /** Steepness of the bevel; higher values make the lighting stronger. Default: `1`. */
@@ -173,10 +173,10 @@ export interface BevelShading {
  */
 export interface SatinShading {
   type: "satin";
-  /** `[x, y]` shift of each copy. Default: `[4, 4]`. */
-  offset?: readonly [x: number, y: number];
-  /** Softness of the copies in px. Default: `8`. */
-  size?: number;
+  /** `[x, y]` shift of each copy. Default: `[4, 4]` (px). */
+  offset?: readonly [x: Length, y: Length];
+  /** Softness of the copies. Default: `8` (px). */
+  size?: Length;
   /** Paint where the copies agree instead. Default: `false`. */
   invert?: boolean;
   /** Remaps the strength of the shading through a curve, like the contour of Photoshop's layer styles. Default: none. */
@@ -202,8 +202,9 @@ export type Contour = ContourPreset | readonly (readonly [input: number, output:
 
 /**
  * Varies how strongly a layer paints its shape, computed from the distance to the shape's edge. The shape is the
- * layer's own (the glyph grown by `stroke`), and lengths are in screen px, so they don't turn with sideways glyphs in
- * vertical text. Shading is computed per glyph: shaded outlines of overlapping neighbours show a seam.
+ * layer's own (the glyph grown by `stroke`), and lengths are on screen, so they don't turn with sideways glyphs in
+ * vertical text; `{ em }` lengths are relative to the run's font size. Shading is computed per glyph: shaded outlines
+ * of overlapping neighbours show a seam.
  */
 export type Shading = InsetShading | BevelShading | SatinShading;
 
@@ -263,10 +264,10 @@ export interface Layer {
    */
   colorGlyphs?: "keep" | "paint";
   /**
-   * How far the glyph shape grows in px, or the band width for `"inside"` and `"center"`. `0` paints the glyph itself.
-   * Default: `0`.
+   * How far the glyph shape grows, or the band width for `"inside"` and `"center"`. `0` paints the glyph itself.
+   * `{ em }` is relative to the run's font size, so the outline follows `shrink` and mixed font sizes. Default: `0`.
    */
-  stroke?: number;
+  stroke?: Length;
   /** Default: `"outside"`. */
   strokePosition?: StrokePosition;
   /** Corner shape of the stroke. Default: `"round"`. Non-uniform `scaleX`/`scaleY` always renders round joins. */
@@ -275,13 +276,13 @@ export interface Layer {
   miterLimit?: number;
   /** Paints the shape with a varying strength (inner shadow, inner glow, bevel, satin). Always renders round joins. */
   shading?: Shading;
-  /** `[x, y]` shift of the layer in px, e.g. for a drop shadow. Default: `[0, 0]`. */
-  offset?: readonly [x: number, y: number];
+  /** `[x, y]` shift of the layer, e.g. for a drop shadow. `{ em }` is relative to the run's font size. Default: `[0, 0]`. */
+  offset?: readonly [x: Length, y: Length];
   /**
-   * Blur strength in px (PixiJS `BlurFilter` strength), the same at any resolution. The drawn area grows to fit the
-   * whole blur. Default: `0`.
+   * Blur strength (PixiJS `BlurFilter` strength in px, or `{ em }` relative to the run's font size), the same at any
+   * resolution. The drawn area grows to fit the whole blur. Default: `0`.
    */
-  blur?: number;
+  blur?: Length;
   /** PixiJS `BlurFilter` quality (number of passes). Default: `4`. */
   blurQuality?: number;
   /**
@@ -473,25 +474,26 @@ export interface PlateStyle {
   /** Gradients and patterns span the whole plate, or each line's plate in `mode: "line"`. */
   paint: Paint;
   /**
-   * `[x, y]` padding around the text in px, or one value for both. Default: 24 along the lines and 12 across them
-   * (`[24, 12]` in horizontal text, `[12, 24]` in vertical text).
+   * `[x, y]` padding around the text, or one value for both. `{ em }` lengths here and below are relative to the base
+   * style's font size after `shrink`. Default: 24 px along the lines and 12 px across them (`[24, 12]` in horizontal
+   * text, `[12, 24]` in vertical text).
    */
-  padding?: number | readonly [x: number, y: number];
-  /** Corner radius in px, clamped to half the plate's size. Default: `0`. */
-  radius?: number;
+  padding?: Length | readonly [x: Length, y: Length];
+  /** Corner radius, clamped to half the plate's size. Default: `0`. */
+  radius?: Length;
   /**
    * Slants the plate into a parallelogram, in degrees: its edge on the over side (the top, or the right in vertical
    * text) moves toward the end of the lines. Default: `0`.
    */
   skew?: number;
   /** A border centered on the plate's edge. */
-  stroke?: { width: number; paint: Paint };
+  stroke?: { width: Length; paint: Paint };
   /** One plate around the whole block, or one per line. Default: `"block"`. */
   mode?: "block" | "line";
-  /** `[x, y]` shift in px. Default: `[0, 0]`. */
-  offset?: readonly [x: number, y: number];
-  /** Blur strength in px, as for layers. Default: `0`. */
-  blur?: number;
+  /** `[x, y]` shift. Default: `[0, 0]`. */
+  offset?: readonly [x: Length, y: Length];
+  /** Blur strength, as for layers. Default: `0`. */
+  blur?: Length;
   /** Default: `1`. */
   opacity?: number;
   /** Extra PixiJS filters, compared by identity like `Layer.filters`. */
@@ -719,24 +721,27 @@ export interface BoxDecoration {
   /** Fill of the box. Gradients and patterns span each box. Default: none. */
   paint?: Paint;
   /** A border centered on the box's edge. */
-  stroke?: { width: number; paint: Paint };
+  stroke?: { width: Length; paint: Paint };
   /**
    * The part of the em box the box covers across the line, as fractions from its over side (`0`, the top, or the right
    * in vertical text) to its under side (`1`). `[0.5, 1]` covers the lower half. Default: `[0, 1]`.
    */
   inset?: readonly [from: number, to: number];
-  /** `[along, across]` the line in px, or one value for both, added around the box. Default: `0`. */
-  padding?: number | readonly [along: number, across: number];
-  /** Corner radius in px, clamped to half the box's size. Default: `0`. */
-  radius?: number;
+  /**
+   * `[along, across]` the line, or one value for both, added around the box. `{ em }` lengths here and below are
+   * relative to the largest font size of the run's glyphs on the line. Default: `0`.
+   */
+  padding?: Length | readonly [along: Length, across: Length];
+  /** Corner radius, clamped to half the box's size. Default: `0`. */
+  radius?: Length;
   /** Slants the box into a parallelogram, in degrees, like `PlateStyle.skew`. Default: `0`. */
   skew?: number;
   /** Behind the glyphs (above the plate), or in front of them. Default: `"behind"`. */
   placement?: "behind" | "front";
-  /** `[x, y]` shift in px. Default: `[0, 0]`. */
-  offset?: readonly [x: number, y: number];
-  /** Blur strength in px, as for layers. Default: `0`. */
-  blur?: number;
+  /** `[x, y]` shift. Default: `[0, 0]`. */
+  offset?: readonly [x: Length, y: Length];
+  /** Blur strength, as for layers. Default: `0`. */
+  blur?: Length;
   /** Default: `1`. */
   opacity?: number;
   /** How the box blends with what is below it in the caption, as for layers. Default: `"normal"`. */

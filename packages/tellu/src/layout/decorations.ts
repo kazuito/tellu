@@ -1,4 +1,5 @@
 import { resolveLength } from "../style/defaults";
+import { boxDecorationPadding } from "../style/resolve";
 import type { Box, Decoration, LineDecoration } from "../style/types";
 import { stableKey } from "../utils/stableKey";
 
@@ -159,8 +160,7 @@ function place(
     const [from, to] = decoration.inset ?? [0, 1];
     const size = under - over;
     [over, under] = [over + from * size, over + to * size];
-    const { padding = 0 } = decoration;
-    const [along, across] = typeof padding === "number" ? [padding, padding] : padding;
+    const [along, across] = boxDecorationPadding(decoration, fontSize);
     inlineStart -= along;
     inlineEnd += along;
     over -= across;

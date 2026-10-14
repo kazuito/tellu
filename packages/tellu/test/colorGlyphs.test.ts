@@ -1,8 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { hasColorPixels, keepsGlyphColors } from "../src/render/rasterize";
+import { hasColorPixels, keepsGlyphColors as resolvedKeepsGlyphColors } from "../src/render/rasterize";
 import { defaultStyle } from "../src/style/defaults";
 import { fill, innerShadow, shapeGradient, stroke } from "../src/style/helpers";
+import { resolveLayer } from "../src/style/resolve";
+import type { Layer } from "../src/style/types";
 
+const keepsGlyphColors = (layer: Layer) => resolvedKeepsGlyphColors(resolveLayer(layer, 64));
 const pixels = (...rgba: number[][]) => new Uint8ClampedArray(rgba.flat());
 
 describe("hasColorPixels", () => {

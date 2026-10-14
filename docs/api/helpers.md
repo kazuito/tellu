@@ -17,10 +17,10 @@ A layer that paints the glyph itself (`stroke: 0`). Emoji and other color glyphs
 ### `stroke()`
 
 ```ts
-function stroke(width: number, paint: LayerPaint, options?: Omit<Layer, "paint" | "stroke">): Layer;
+function stroke(width: Length, paint: LayerPaint, options?: Omit<Layer, "paint" | "stroke">): Layer;
 ```
 
-The glyph grown by `width` px. See [`strokePosition`](/guide/layers#stroke-position) for inside and centred strokes.
+The glyph grown by `width`: px, or `{ em }` of the font size, which follows [`shrink`](/guide/fitting#shrink). See [`strokePosition`](/guide/layers#stroke-position) for inside and centred strokes.
 
 ### `shadow()`
 
@@ -192,7 +192,7 @@ A box painted with `paint` behind the lower half of the em box: `inset: [0.5, 1]
 ### `frame()`
 
 ```ts
-function frame(paint: Paint, options?: Omit<BoxDecorationOptions, "stroke"> & { width?: number }): BoxDecoration;
+function frame(paint: Paint, options?: Omit<BoxDecorationOptions, "stroke"> & { width?: Length }): BoxDecoration;
 ```
 
 A box with a border of `width` px (default `3`) painted with `paint`, and no fill: `padding: [4, 2]`. Guide: [Frames](/guide/decorations#frames).
@@ -230,7 +230,7 @@ function radialGradient(
 ```ts
 function shapeGradient(
   stops: readonly ColorValue[] | readonly GradientStopInput[],
-  options?: { size?: number; reverse?: boolean },
+  options?: { size?: Length; reverse?: boolean },
 ): ShapeGradient;
 ```
 

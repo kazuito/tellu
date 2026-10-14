@@ -1,6 +1,7 @@
 import { type AnyCanvas, type Canvas2D, context2d, createCanvas } from "../canvas";
 import { type FontSpec, fontToCss } from "../layout/measure";
-import type { Box, Layer, ShapeGradient, StrokePosition } from "../style/types";
+import type { ResolvedLayer, ResolvedShapeGradient } from "../style/resolve";
+import type { Box, Paint, StrokePosition } from "../style/types";
 import { colorRamp, createPaintStyle, rampIndex } from "./paint";
 import { measureInside, shapeOffsets, signedDistanceField, strokeCoverage } from "./sdf";
 import { type WarpMapping, warpedBounds } from "./warp";
@@ -93,7 +94,7 @@ function transformBounds(bounds: GlyphBounds, [a, b, c, d]: Matrix): GlyphBounds
   return result;
 }
 
-export function layerShape(layer: Layer): {
+export function layerShape(layer: ResolvedLayer): {
   width: number;
   position: StrokePosition;
   join: CanvasLineJoin;
@@ -108,7 +109,7 @@ export function layerShape(layer: Layer): {
 }
 
 /** How far a layer's shape extends past the glyph outline, in layout px. */
-export function layerReach(layer: Layer): number {
+export function layerReach(layer: ResolvedLayer): number {
   const { width, position, join, miterLimit } = layerShape(layer);
   if (position === "inside") return 0;
   const half = position === "center" ? width / 2 : width;
@@ -116,7 +117,7 @@ export function layerReach(layer: Layer): number {
 }
 
 /** Whether a layer reads distances inside the shape: inside or centered strokes, shading, or a shape gradient fill. */
-function needsInside(layer: Layer): boolean {
+function needsInside(layer: ResolvedLayer): boolean {
   const { width, position } = layerShape(layer);
   const shapePaint = typeof layer.paint === "object" && layer.paint.type === "shape";
   return position !== "outside" || !!layer.shading || (shapePaint && width === 0);
@@ -134,7 +135,7 @@ export function hasColorPixels(data: Uint8ClampedArray): boolean {
 }
 
 /** Whether a layer keeps the colors of color glyphs: `colorGlyphs: "keep"` on a layer that paints the glyph itself. */
-export function keepsGlyphColors(layer: Layer): boolean {
+export function keepsGlyphColors(layer: ResolvedLayer): boolean {
   if (layer.colorGlyphs !== "keep" || layer.shading) return false;
   const { width, position } = layerShape(layer);
   const shapePaint = typeof layer.paint === "object" && layer.paint.type === "shape";
@@ -142,7 +143,14 @@ export function keepsGlyphColors(layer: Layer): boolean {
 }
 
 /** Puts a layer's coverage (colored, for a shape gradient) from a distance field into the canvas. */
-function putCoverage(ctx: Canvas2D, entry: FieldEntry, layer: Layer, res: number, width: number, height: number): void {
+function putCoverage(
+  ctx: Canvas2D,
+  entry: FieldEntry,
+  layer: ResolvedLayer,
+  res: number,
+  width: number,
+  height: number,
+): void {
   const { width: strokeWidth, position } = layerShape(layer);
   const pixels = strokeCoverage(
     entry.field,
@@ -163,7 +171,7 @@ function putCoverage(ctx: Canvas2D, entry: FieldEntry, layer: Layer, res: number
 /** Paints the coverage in the canvas with the layer's paint, stretched over `paintBox` relative to the origin. */
 function paintCoverage(
   ctx: Canvas2D,
-  layer: Layer,
+  layer: ResolvedLayer,
   paintBox: Box,
   res: number,
   originX: number,
@@ -173,7 +181,7 @@ function paintCoverage(
 ): void {
   ctx.globalCompositeOperation = "source-in";
   ctx.setTransform(res, 0, 0, res, originX, originY);
-  ctx.fillStyle = createPaintStyle(ctx, layer.paint as Exclude<Layer["paint"], ShapeGradient>, paintBox);
+  ctx.fillStyle = createPaintStyle(ctx, layer.paint as Paint, paintBox);
   ctx.fillRect(-originX / res, -originY / res, width / res, height / res);
 }
 
@@ -184,7 +192,7 @@ function paintCoverage(
 function colorByShape(
   pixels: Uint8ClampedArray,
   entry: FieldEntry,
-  paint: ShapeGradient,
+  paint: ResolvedShapeGradient,
   strokeWidth: number,
   position: StrokePosition,
   res: number,
@@ -264,7 +272,7 @@ export class GlyphRasterizer {
    * @param paintBox The paint's scope box relative to the glyph origin, in layout px.
    * @param reach Extra margin around the glyph; layers of one glyph share it so distance fields can be reused.
    */
-  rasterize(shape: GlyphShape, layer: Layer, paintBox: Box, reach: number): RasterResult {
+  rasterize(shape: GlyphShape, layer: ResolvedLayer, paintBox: Box, reach: number): RasterResult {
     if (shape.warp) return this.rasterizeWarped(shape, shape.warp, layer, paintBox, reach);
     const { resolution: res, scaleX, scaleY, fracX, fracY } = shape;
     const matrix = glyphMatrix(shape);
@@ -328,7 +336,7 @@ export class GlyphRasterizer {
   private rasterizeWarped(
     shape: GlyphShape,
     warp: NonNullable<GlyphShape["warp"]>,
-    layer: Layer,
+    layer: ResolvedLayer,
     paintBox: Box,
     reach: number,
   ): RasterResult {

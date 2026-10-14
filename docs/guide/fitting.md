@@ -44,7 +44,45 @@ export default {
 
 ### Shrink
 
-`"shrink"` binary-searches the largest font scale at which everything fits. It scales the font size, letter spacing and line height together (except a line height given in `{ px }`). Layer stroke widths stay as they are, so outlines look relatively bolder on shrunken text. The applied scale is exposed as `layout.fontScale`.
+`"shrink"` binary-searches the largest font scale at which everything fits. It scales the font size, letter spacing and line height together (except a line height given in `{ px }`). The applied scale is exposed as `layout.fontScale`.
+
+Outlines, shadows and plates given in px keep their size, so they look bolder on shrunken text. Give them in `{ em }` instead, a multiple of the font size, and they shrink with it:
+
+```ts demo compare
+import { fill, shadow, stroke, type TextNodeProps } from "tellu";
+
+const caption = (outline: TextNodeProps["style"]): TextNodeProps => ({
+  text: "長いテロップも一行に収める",
+  maxWidth: 380,
+  wrap: "none",
+  overflow: "shrink",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 72,
+    ...outline,
+  },
+});
+
+export default {
+  "stroke(14, …)": caption({
+    layers: [
+      shadow({ stroke: 14, offset: [0, 6] }),
+      stroke(14, "#c0003a"),
+      fill("#fff"),
+    ],
+  }),
+  "stroke({ em: 0.2 }, …)": caption({
+    layers: [
+      shadow({ stroke: { em: 0.2 }, offset: [0, { em: 0.08 }] }),
+      stroke({ em: 0.2 }, "#c0003a"),
+      fill("#fff"),
+    ],
+  }),
+};
+```
+
+`{ em }` works for every length of a layer (`stroke`, `offset`, `blur`, and the `size` and `offset` of shading and shape gradients), of a [plate](./plates) and of a [box decoration](./decorations). A layer's `em` is the font size of its run, so a larger run in [rich text](./rich-text) also gets a proportionally thicker outline; a plate's is the base font size.
 
 Combined with wrapping and `maxLines`, it fits text into a box of N lines:
 

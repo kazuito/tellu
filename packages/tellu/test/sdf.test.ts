@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { measureInside, signedDistanceField, strokeCoverage } from "../src/render/sdf";
-import type { Shading } from "../src/style/types";
+import type { ResolvedShading } from "../src/style/resolve";
 
 test("signed distance field measures distance to a square's edge", () => {
   const size = 21;
@@ -71,7 +71,7 @@ describe("shading", () => {
   const alpha = new Uint8ClampedArray(size * size * 4);
   for (let y = 10; y <= 30; y++) for (let x = 10; x <= 30; x++) alpha[(y * size + x) * 4 + 3] = 255;
   const field = signedDistanceField(alpha, size, size);
-  const shade = (shading: Shading) => {
+  const shade = (shading: ResolvedShading) => {
     const coverage = strokeCoverage(field, size, size, 1, 0, "outside", shading);
     return (x: number, y: number) => coverage[(y * size + x) * 4 + 3]!;
   };

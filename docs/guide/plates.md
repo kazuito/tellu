@@ -135,7 +135,7 @@ export default {
 | Option | Default | |
 | --- | --- | --- |
 | `paint` | | Any [paint](./paint). Gradients span the plate (or each line plate) |
-| `padding` | `[24, 12]` | `[x, y]` or one number for both. In vertical text the default is `[12, 24]` |
+| `padding` | `[24, 12]` | `[x, y]` or one value for both, in px or `{ em }` of the base font size. In vertical text the default is `[12, 24]` |
 | `radius` | `0` | Corner radius, clamped to half the plate's size |
 | `skew` | `0` | Slant in degrees |
 | `stroke` | | `{ width, paint }` |

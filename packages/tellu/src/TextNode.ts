@@ -17,23 +17,22 @@ import { shaderBlendMode } from "./render/blendModes";
 import { blurPadding } from "./render/blur";
 import { ContourFilter } from "./render/contourFilter";
 import { traceLine } from "./render/decorationShapes";
-import { planGroups } from "./render/groups";
+import { planGroups, runLayers } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
 import { type GlyphShape, keepsGlyphColors, layerReach, layerShape, type PathSource } from "./render/rasterize";
 import { ScopeBoxes, unionBox } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
 import { type WarpMapping, warpedBounds, warpMapping } from "./render/warp";
-import type {
-  Box,
-  BoxDecoration,
-  GlyphContext,
-  GlyphTransform,
-  Layer,
-  LineDecoration,
-  PlateStyle,
-  TextNodeProps,
-} from "./style/types";
+import { resolveStyle } from "./style/defaults";
+import {
+  boxDecorationUsesEm,
+  type ResolvedBoxDecoration,
+  type ResolvedLayer,
+  resolveBoxDecoration,
+  resolvePlate,
+} from "./style/resolve";
+import type { Box, GlyphContext, GlyphTransform, LineDecoration, PlateStyle, TextNodeProps } from "./style/types";
 import { stableKey } from "./utils/stableKey";
 
 export interface TextNodeOptions {
@@ -214,9 +213,9 @@ export class TextNode extends Container {
 
     const res = this._resolution;
     const scopes = new ScopeBoxes(layout);
-    const reach = layout.glyphs.map((glyph) =>
-      Math.max(0, ...layout.runs[glyph.runIndex]!.style.layers.map(layerReach)),
-    );
+    // Every run's layers with their lengths in px.
+    const layers = runLayers(layout);
+    const reach = layout.glyphs.map((glyph) => Math.max(0, ...layers[glyph.runIndex]!.map(layerReach)));
     const warp = this.buildWarp(layout);
     // Paint spans the warped scope box, so gradients cover the bent text.
     const warpedScopes = new Map<Box, Box>();
@@ -232,14 +231,14 @@ export class TextNode extends Container {
 
     const vertical = isVertical(layout.writingMode);
     const lines = new Map<number, LineShape>();
-    for (const group of planGroups(layout)) {
+    for (const group of planGroups(layout, layers)) {
       const { group: container, root } = createEffectContainer(group.effects, `slot ${group.slot}`);
       for (const member of group.members) {
         const { layer } = member;
         if ("decoration" in member) {
           let line = lines.get(member.decoration);
           if (!line) {
-            line = lineShape(layout, member.decoration, vertical, res, warp);
+            line = lineShape(layout, layers, member.decoration, vertical, res, warp);
             lines.set(member.decoration, line);
           }
           const scopeBox = scopeOf(scopes.forBand(paintScope(layer.paint), line.lineIndex, line.band, vertical));
@@ -326,7 +325,9 @@ export class TextNode extends Container {
     rasterizer.releaseFields();
   }
 
-  private buildPlate(layout: Layout, style: PlateStyle): void {
+  private buildPlate(layout: Layout, plate: PlateStyle): void {
+    // `{ em }` lengths follow the base font size after `shrink`.
+    const style = resolvePlate(plate, resolveStyle(this._props.style).fontSize * layout.fontScale);
     const boxes = plateBoxes(layout, style);
     if (boxes.length === 0) return;
     const res = this._resolution;
@@ -369,12 +370,14 @@ export class TextNode extends Container {
   private buildDecorations(layout: Layout): void {
     const res = this._resolution;
     const vertical = isVertical(layout.writingMode);
-    // Equal decorations from different runs draw together.
-    const boxes = new Map<string, { decoration: BoxDecoration; list: Box[] }>();
-    for (const { decoration, box } of layout.decorations) {
+    // Equal decorations from different runs draw together, unless `{ em }` lengths make them differ.
+    const boxes = new Map<string, { decoration: ResolvedBoxDecoration; list: Box[] }>();
+    for (const { decoration, box, fontSize } of layout.decorations) {
       if (decoration.type !== "box" || (decoration.paint === undefined && !decoration.stroke)) continue;
-      const key = decorationKey(decoration);
-      const entry = boxes.get(key) ?? { decoration, list: [] };
+      const key = boxDecorationUsesEm(decoration)
+        ? `${decorationKey(decoration)}\u0000${fontSize}`
+        : decorationKey(decoration);
+      const entry = boxes.get(key) ?? { decoration: resolveBoxDecoration(decoration, fontSize), list: [] };
       entry.list.push(box);
       boxes.set(key, entry);
     }
@@ -550,6 +553,7 @@ interface LineShape {
 
 function lineShape(
   layout: Layout,
+  layers: readonly (readonly ResolvedLayer[])[],
   index: number,
   vertical: boolean,
   res: number,
@@ -581,7 +585,7 @@ function lineShape(
     pixelY,
     originX: (pixelX + fracX) / res,
     originY: (pixelY + fracY) / res,
-    reach: Math.max(0, ...layout.runs[runIndex]!.style.layers.map(layerReach)),
+    reach: Math.max(0, ...layers[runIndex]!.map(layerReach)),
   };
 }
 
@@ -592,7 +596,7 @@ const ownedFilters = new WeakSet<Filter>();
  * The container of a group's sprites, with its effects, and the root to add to the scene: the group itself, or a
  * container that blends it with what is below.
  */
-function createEffectContainer(effects: Layer, label: string): { group: Container; root: Container } {
+function createEffectContainer(effects: ResolvedLayer, label: string): { group: Container; root: Container } {
   const container = new Container({ label });
   const [dx, dy] = effects.offset ?? [0, 0];
   container.position.set(dx, dy);

@@ -29,6 +29,8 @@ export default {
 
 Each outline must be wider than the one above it, or it is hidden underneath. Think of it as stacking paper cutouts, from largest to smallest.
 
+Widths, offsets and blurs are in px, or `{ em }` of the font size: `stroke({ em: 0.1 }, "#000")` keeps the outline in proportion when the text [shrinks to fit](./fitting#shrink) or a run is larger.
+
 ## Layer helpers
 
 Layers are plain objects, and four helpers cover the common cases:
@@ -604,13 +606,13 @@ fill("#ffffff", { colorGlyphs: "paint" });
 | --- | --- | --- | --- |
 | `paint` | [`LayerPaint`](/api/types#layerpaint) | | Color, gradient, pattern or [shape gradient](./paint#shape-gradients) |
 | `colorGlyphs` | `"keep" \| "paint"` | `"paint"` (`"keep"` with `fill()`) | Whether emoji keep their colors. [Emoji and color glyphs](#emoji-and-color-glyphs) |
-| `stroke` | `number` | `0` | Growth in px. `0` paints the glyph itself |
+| `stroke` | [`Length`](/api/types#length) | `0` | Growth in px, or `{ em }` of the font size. `0` paints the glyph itself |
 | `strokePosition` | `"outside" \| "inside" \| "center"` | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | |
 | `miterLimit` | `number` | `10` | |
 | `shading` | [`Shading`](/api/types#shading) | | Inner shadow, inner glow, bevel or satin |
-| `offset` | `[x, y]` | `[0, 0]` | |
-| `blur` | `number` | `0` | PixiJS `BlurFilter` strength, in CSS px |
+| `offset` | `[x, y]` of [`Length`](/api/types#length) | `[0, 0]` | |
+| `blur` | [`Length`](/api/types#length) | `0` | PixiJS `BlurFilter` strength, in CSS px |
 | `blurQuality` | `number` | `4` | Blur passes |
 | `contour` | [`Contour`](/api/types#contour) | | Remaps the opacity after the blur. [Contours](#contours) |
 | `noise` | `number` | `0` | Speckles the opacity, `0`–`1`. [Noise](#noise) |

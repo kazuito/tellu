@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { CONTOUR_SAMPLES, contourFunction, curveThrough, readContour, sampleContour } from "../src/render/contour";
-import { effectsKey } from "../src/render/groups";
+import { effectsKey as resolvedEffectsKey } from "../src/render/groups";
 import { bevel, glow, innerGlow, innerShadow, satin } from "../src/style/helpers";
-import type { ContourPreset } from "../src/style/types";
+import { resolveLayer } from "../src/style/resolve";
+import type { ContourPreset, Layer } from "../src/style/types";
 import { stableKey } from "../src/utils/stableKey";
+
+const effectsKey = (layer: Layer) => resolvedEffectsKey(resolveLayer(layer, 64));
 
 describe("contour presets", () => {
   const presets: ContourPreset[] = [

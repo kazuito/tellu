@@ -8,6 +8,7 @@ import type {
   GradientStopInput,
   Layer,
   LayerPaint,
+  Length,
   LinearGradient,
   LineDecoration,
   Paint,
@@ -38,24 +39,24 @@ export function fill(paint: LayerPaint, options?: LayerOptions): Layer {
 }
 
 /**
- * An outline: the glyph grown by `width` px. Put it below the fill; `options.strokePosition` makes inside or centered
+ * An outline: the glyph grown by `width` (px, or `{ em }` relative to the font size). Put it below the fill; `options.strokePosition` makes inside or centered
  * strokes.
  *
  * @example layers: [stroke(16, "#000"), stroke(8, "#e60033"), fill("#fff")]
  */
-export function stroke(width: number, paint: LayerPaint, options?: LayerOptions): Layer {
+export function stroke(width: Length, paint: LayerPaint, options?: LayerOptions): Layer {
   return { ...options, paint, stroke: width };
 }
 
 export interface ShadowOptions extends Omit<LayerOptions, "offset"> {
   /** Default: `"rgba(0,0,0,0.6)"`. */
   color?: LayerPaint;
-  /** `[x, y]` offset in px. Default: `[4, 4]`. */
-  offset?: readonly [number, number];
+  /** `[x, y]` offset. Default: `[4, 4]` (px). */
+  offset?: readonly [Length, Length];
   /** Grow the shadow shape, e.g. to cast the shadow of an outline. Default: `0`. */
-  stroke?: number;
-  /** Default: `4`. */
-  blur?: number;
+  stroke?: Length;
+  /** Default: `4` (px). */
+  blur?: Length;
 }
 
 /**
@@ -76,10 +77,10 @@ export function shadow({
 export interface GlowOptions extends LayerOptions {
   /** Default: `"#ffffff"`. */
   color?: LayerPaint;
-  /** How far the glow reaches out from the glyph, in px, before the blur. Default: `8`. */
-  stroke?: number;
-  /** Default: `8`. */
-  blur?: number;
+  /** How far the glow reaches out from the glyph before the blur. Default: `8` (px). */
+  stroke?: Length;
+  /** Default: `8` (px). */
+  blur?: Length;
 }
 
 /** A soft halo around the glyph: the glyph grown by `stroke` and blurred. Put it below the fill. */
@@ -90,12 +91,12 @@ export function glow({ color = "#ffffff", stroke = 8, ...options }: GlowOptions 
 export interface InnerShadowOptions extends Omit<LayerOptions, "offset" | "shading"> {
   /** Default: `"rgba(0,0,0,0.6)"`. */
   color?: LayerPaint;
-  /** `[x, y]` offset of the shadow inside the shape (the layer itself stays in place). Default: `[4, 4]`. */
-  offset?: readonly [number, number];
-  /** Width of the fade in px. `0` is a hard edge. Default: `4`. */
-  size?: number;
-  /** Shade the glyph grown by this many px, e.g. an outline. Default: `0`. */
-  stroke?: number;
+  /** `[x, y]` offset of the shadow inside the shape (the layer itself stays in place). Default: `[4, 4]` (px). */
+  offset?: readonly [Length, Length];
+  /** Width of the fade. `0` is a hard edge. Default: `4` (px). */
+  size?: Length;
+  /** Shade the glyph grown by this much, e.g. an outline. Default: `0`. */
+  stroke?: Length;
   /** Remaps the strength of the shading through a curve (see `Shading.contour`). Default: none. */
   contour?: Contour;
 }
@@ -118,10 +119,10 @@ export function innerShadow({
 export interface InnerGlowOptions extends Omit<LayerOptions, "shading"> {
   /** Default: `"#ffffff"`. */
   color?: LayerPaint;
-  /** Width of the fade in px. Default: `8`. */
-  size?: number;
-  /** Light the glyph grown by this many px, e.g. an outline. Default: `0`. */
-  stroke?: number;
+  /** Width of the fade. Default: `8` (px). */
+  size?: Length;
+  /** Light the glyph grown by this much, e.g. an outline. Default: `0`. */
+  stroke?: Length;
   /** Remaps the strength of the shading through a curve (see `Shading.contour`). Default: none. */
   contour?: Contour;
 }
@@ -142,8 +143,8 @@ export interface BevelOptions extends Omit<LayerOptions, "shading">, Omit<BevelS
   highlight?: LayerPaint;
   /** Paint of the faces turned away from the light. Default: `"rgba(0,0,0,0.5)"`. */
   shadow?: LayerPaint;
-  /** Bevel the glyph grown by this many px, e.g. an outline. Default: `0`. */
-  stroke?: number;
+  /** Bevel the glyph grown by this much, e.g. an outline. Default: `0`. */
+  stroke?: Length;
 }
 
 /**
@@ -172,8 +173,8 @@ export function bevel({
 export interface SatinOptions extends Omit<LayerOptions, "offset" | "shading">, Omit<SatinShading, "type"> {
   /** Default: `"rgba(0,0,0,0.5)"`. */
   color?: LayerPaint;
-  /** Shade the glyph grown by this many px, e.g. an outline. Default: `0`. */
-  stroke?: number;
+  /** Shade the glyph grown by this much, e.g. an outline. Default: `0`. */
+  stroke?: Length;
 }
 
 /** Silky bands of `color` inside the glyph, like Photoshop's satin. Put it above the fill it shades. */
@@ -248,7 +249,7 @@ export function diamondGradient(
  */
 export function shapeGradient(
   stops: readonly GradientStopInput[] | readonly ColorValue[],
-  options: { size?: number; reverse?: boolean } = {},
+  options: { size?: Length; reverse?: boolean } = {},
 ): ShapeGradient {
   return { type: "shape", ...options, stops: normalizeStopInput(stops) };
 }
@@ -283,7 +284,7 @@ export function marker(paint: Paint, options: Omit<BoxDecorationOptions, "paint"
  */
 export function frame(
   paint: Paint,
-  options: Omit<BoxDecorationOptions, "stroke"> & { width?: number } = {},
+  options: Omit<BoxDecorationOptions, "stroke"> & { width?: Length } = {},
 ): BoxDecoration {
   const { width = 3, ...rest } = options;
   return { type: "box", stroke: { width, paint }, padding: [4, 2], ...rest };
