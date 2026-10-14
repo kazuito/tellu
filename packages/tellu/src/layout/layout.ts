@@ -175,7 +175,7 @@ export function layoutText(options: LayoutOptions, measurer: Measurer = getDefau
   const sampler = textPathSampler(options.textPath);
   // The path is the line length unless maxWidth says otherwise.
   const straight = layoutLines({ ...options, maxWidth: options.maxWidth ?? sampler.length }, measurer);
-  return placeOnPath(straight, sampler, options.textPath, resolveStyle(options.style).fontSize);
+  return placeOnPath(straight, sampler, options.textPath, resolveStyle(options.style).fontSize * straight.fontScale);
 }
 
 /** Lays out straight lines. */

@@ -22,12 +22,23 @@ describe("applyOverride", () => {
   test("ignores undefined fields", () => {
     expect(applyOverride(base, { fontSize: undefined }).fontSize).toBe(defaultStyle.fontSize);
   });
+
+  test("an em font size is relative to the base font size", () => {
+    expect(applyOverride({ ...base, fontSize: 40 }, { fontSize: { em: 1.5 } }).fontSize).toBe(60);
+  });
 });
 
 describe("mergeOverrides", () => {
   test("applies an inner patch onto outer replacement layers", () => {
     const merged = mergeOverrides({ layers: [fill("blue"), fill("green")] }, { layers: { 1: { paint: "pink" } } });
     expect(merged!.layers).toEqual([fill("blue"), fill("pink")]);
+  });
+
+  test("an inner em font size is relative to the outer one", () => {
+    expect(mergeOverrides({ fontSize: 40 }, { fontSize: { em: 0.5 } })!.fontSize).toBe(20);
+    expect(mergeOverrides({ fontSize: { em: 2 } }, { fontSize: { em: 0.5 } })!.fontSize).toEqual({ em: 1 });
+    expect(mergeOverrides({ fontSize: { em: 2 } }, { fontSize: 30 })!.fontSize).toBe(30);
+    expect(mergeOverrides({ fontSize: { em: 2 } }, { letterSpacing: 2 })!.fontSize).toEqual({ em: 2 });
   });
 });
 

@@ -796,6 +796,7 @@ export function createGlyphContexts(layout: Layout): GlyphContext[] {
       isWhitespace: glyph.isWhitespace,
       ...glyph.box,
       angle: glyph.angle,
+      fontSize: glyph.fontSize,
     };
   });
 }

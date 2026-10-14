@@ -319,7 +319,7 @@ Guide: [Rich text](/guide/rich-text#markup).
 function applyOverride(base: TextStyle, override: StyleOverride | undefined): TextStyle;
 ```
 
-Applies a run's override to a full style. `layers` replaces when it is an array and patches by index or `id` when it is an object. `decorations` are added after the base style's, skipping equal ones. `undefined` values are ignored.
+Applies a run's override to a full style. `layers` replaces when it is an array and patches by index or `id` when it is an object. `decorations` are added after the base style's, skipping equal ones. An `{ em }` `fontSize` is relative to the base style's. `undefined` values are ignored.
 
 ### `mergeOverrides()`
 
@@ -327,7 +327,7 @@ Applies a run's override to a full style. `layers` replaces when it is an array 
 function mergeOverrides(outer: StyleOverride | undefined, inner: StyleOverride | undefined): StyleOverride | undefined;
 ```
 
-Combines two overrides, with `inner` winning. Layer patches are merged key by key, and decorations add up, outer first. This is how nested markup tags combine.
+Combines two overrides, with `inner` winning. Layer patches are merged key by key, and decorations add up, outer first. An inner `{ em }` `fontSize` is relative to the outer one: `{ em: 0.5 }` inside `48` is `24`, and inside `{ em: 2 }` is `{ em: 1 }`. This is how nested markup tags combine.
 
 ## Defaults
 

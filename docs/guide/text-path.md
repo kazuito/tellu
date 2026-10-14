@@ -85,7 +85,7 @@ export default {
 };
 ```
 
-The glyphs stand on the left of the direction the path runs: above a path drawn left to right. `side: "right"` walks the path backward, which puts them on the other side. `startOffset` moves the start of the line along the path, in px or `{ em }`.
+The glyphs stand on the left of the direction the path runs: above a path drawn left to right. `side: "right"` walks the path backward, which puts them on the other side. `startOffset` moves the start of the line along the path, in px or `{ em }` of the base font size.
 
 ## Alignment and fitting
 

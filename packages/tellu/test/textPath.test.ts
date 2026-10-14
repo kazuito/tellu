@@ -84,6 +84,15 @@ describe("textPath", () => {
   test("startOffset and side", () => {
     const offset = layout({ text: "あ", textPath: { d: "M0 0 H100 V100", startOffset: 100 } });
     expect(offset.glyphs[0]!.angle).toBe(90);
+    // An em offset follows shrink: 10em is 60px at a font scale of 0.6, before the corner at 80px.
+    const shrunk = layout({
+      text: "あいうえお",
+      textPath: { d: "M0 0 H80 V100", startOffset: { em: 10 } },
+      maxWidth: 30,
+      overflow: "shrink",
+      maxLines: 1,
+    });
+    expect(shrunk.glyphs[0]!.angle).toBe(0);
     const right = layout({ text: "あい", textPath: { d: "M0 0 H100", side: "right" } });
     expect(right.glyphs.map((glyph) => glyph.angle)).toEqual([180, 180]);
     // Walked backward: the first glyph is at the right end.

@@ -263,7 +263,7 @@ type FontStyle = "normal" | "italic" | "oblique";
 type Length = number | { em: number };
 ```
 
-Pixels, or a multiple of the font size. Layer, shading, plate and decoration lengths accept it too, so effects can scale with the text: `{ em }` follows the run's font size after [`shrink`](/guide/fitting#shrink).
+Pixels, or a multiple of the font size. Layer, shading, plate and decoration lengths accept it too, so effects can scale with the text: `{ em }` follows the run's font size after [`shrink`](/guide/fitting#shrink). A run's [`fontSize`](#styleoverride) takes it relative to the base font size, and the shifts of [animation keyframes](./animation#glyphkeyframe) relative to each glyph's.
 
 ### `LineHeight`
 
@@ -524,11 +524,15 @@ type Run = string | RunObject;
 ### `StyleOverride`
 
 ```ts
-type StyleOverride = Partial<Omit<TextStyle, "layers">> & {
+type StyleOverride = Partial<Omit<TextStyle, "fontSize" | "layers">> & {
+  /** Font size in px, or `{ em }` relative to the base style's. */
+  fontSize?: Length;
   /** An array replaces all layers; an object patches layers by index or `id`. */
   layers?: readonly Layer[] | LayerPatch;
 };
 ```
+
+`fontSize: { em: 1.5 }` makes a run half again as large as the base style's font size, so it follows the base size when that changes. In nested [markup](/guide/rich-text#markup) tags, an `{ em }` size is relative to the enclosing tag's, as in CSS.
 
 ### `LayerPatch`
 
@@ -580,6 +584,7 @@ type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefin
 | `isWhitespace` | |
 | `x`, `y`, `width`, `height` | The glyph's cell in layout coordinates: its advance along the line × the font's extent across it |
 | `angle` | Clockwise rotation in degrees about the cell's center: the path's direction with `textPath`, else `0` |
+| `fontSize` | Font size in px after [`shrink`](/guide/fitting#shrink), e.g. to move glyphs by a fraction of their size |
 
 ### `GlyphTransform`
 

@@ -82,7 +82,7 @@ export default {
 };
 ```
 
-`{ em }` works for every length of a layer (`stroke`, `offset`, `blur`, and the `size` and `offset` of shading and shape gradients), of a [plate](./plates) and of a [box decoration](./decorations). A layer's `em` is the font size of its run, so a larger run in [rich text](./rich-text) also gets a proportionally thicker outline; a plate's is the base font size.
+`{ em }` works for every length of a layer (`stroke`, `offset`, `blur`, and the `size` and `offset` of shading and shape gradients), of a [plate](./plates) and of a [box decoration](./decorations), and for the `startOffset` of a [text path](./text-path). A layer's `em` is the font size of its run, so a larger run in [rich text](./rich-text) also gets a proportionally thicker outline; a plate's is the base font size.
 
 Combined with wrapping and `maxLines`, it fits text into a box of N lines:
 

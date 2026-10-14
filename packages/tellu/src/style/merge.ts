@@ -1,6 +1,15 @@
 import { stableKey } from "../utils/stableKey";
-import { stripUndefined } from "./defaults";
-import type { Decoration, GlyphTransform, Layer, LayerPatch, LayerTransform, StyleOverride, TextStyle } from "./types";
+import { resolveLength, stripUndefined } from "./defaults";
+import type {
+  Decoration,
+  GlyphTransform,
+  Layer,
+  LayerPatch,
+  LayerTransform,
+  Length,
+  StyleOverride,
+  TextStyle,
+} from "./types";
 
 export function isLayerPatch(layers: readonly Layer[] | LayerPatch): layers is LayerPatch {
   return !Array.isArray(layers);
@@ -27,10 +36,16 @@ function addDecorations(
   return added.length === 0 ? outer : [...outer, ...added];
 }
 
+/** An inner font size on top of an outer one: an `{ em }` size is relative to the outer size. */
+function nestFontSize(outer: Length | undefined, inner: Length | undefined): Length | undefined {
+  if (outer === undefined || inner === undefined || typeof inner === "number") return inner ?? outer;
+  return typeof outer === "number" ? inner.em * outer : { em: inner.em * outer.em };
+}
+
 /**
  * Combines an outer override with an inner one; the inner one wins. Layer patches merge key by key, and an inner patch
- * applies to an outer layer array. Decorations add up: the inner override's follow the outer one's. This is how nested
- * markup tags combine.
+ * applies to an outer layer array. Decorations add up: the inner override's follow the outer one's. An inner
+ * `{ em }` font size is relative to the outer one. This is how nested markup tags combine.
  */
 export function mergeOverrides(
   outer: StyleOverride | undefined,
@@ -39,6 +54,8 @@ export function mergeOverrides(
   if (!outer) return inner;
   if (!inner) return outer;
   const merged: StyleOverride = { ...outer, ...stripUndefined(inner) };
+  const fontSize = nestFontSize(outer.fontSize, inner.fontSize);
+  if (fontSize !== undefined) merged.fontSize = fontSize;
   const decorations = addDecorations(outer.decorations, inner.decorations);
   if (decorations) merged.decorations = decorations;
   if (outer.layers && inner.layers && isLayerPatch(inner.layers)) {
@@ -59,12 +76,14 @@ function mergeLayerPatches(outer: LayerPatch, inner: LayerPatch): LayerPatch {
 
 /**
  * Applies a run's override to a full style: an array of `layers` replaces them, an object patches them by index or
- * `id`, and `decorations` are added after the base style's. `undefined` values are ignored.
+ * `id`, `decorations` are added after the base style's, and an `{ em }` font size is relative to the base style's.
+ * `undefined` values are ignored.
  */
 export function applyOverride(base: TextStyle, override: StyleOverride | undefined): TextStyle {
   if (!override) return base;
-  const { layers, decorations, ...rest } = override;
+  const { fontSize, layers, decorations, ...rest } = override;
   const style: TextStyle = { ...base, ...stripUndefined(rest) };
+  if (fontSize !== undefined) style.fontSize = resolveLength(fontSize, base.fontSize);
   if (layers) style.layers = isLayerPatch(layers) ? applyLayerPatch(base.layers, layers) : layers;
   if (decorations) style.decorations = addDecorations(base.decorations, decorations) ?? [];
   return style;

@@ -420,7 +420,12 @@ export interface TextStyle {
 export type LayerPatch = { readonly [indexOrId: string]: Partial<Layer> };
 
 /** Changes a run makes to the base style. Unset fields keep the base style's values. */
-export type StyleOverride = Partial<Omit<TextStyle, "layers">> & {
+export type StyleOverride = Partial<Omit<TextStyle, "fontSize" | "layers">> & {
+  /**
+   * Font size in px, or `{ em }` relative to the base style's font size: `{ em: 1.5 }` is half again as large. In
+   * nested markup tags, `{ em }` is relative to the enclosing tag's size, as in CSS.
+   */
+  fontSize?: Length;
   /** An array replaces all layers; an object patches layers by index or `id`. */
   layers?: readonly Layer[] | LayerPatch;
 };
@@ -564,6 +569,8 @@ export interface GlyphContext {
   height: number;
   /** Clockwise rotation of the glyph in degrees, about the center of its cell: the path's direction with `textPath`, else `0`. */
   angle: number;
+  /** Font size in px after `shrink`, e.g. to move glyphs by a fraction of their size. */
+  fontSize: number;
 }
 
 /**

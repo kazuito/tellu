@@ -135,7 +135,7 @@ Gradients and patterns are stretched over `scope`: `"glyph"` (each character), `
 | Option | Default | |
 | --- | --- | --- |
 | `fontFamily` | `"sans-serif"` | string or list |
-| `fontSize` | `64` | |
+| `fontSize` | `64` | px; a run can also give `{ em }` of the base size |
 | `fontWeight` / `fontStyle` | `"normal"` | |
 | `letterSpacing` | `0` | px or `{ em }` |
 | `scaleX` / `scaleY` | `1` | 長体 / 平体; outlines stay uniform |

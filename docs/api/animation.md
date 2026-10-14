@@ -46,8 +46,13 @@ type TextAnimationFn = (time: number) => GlyphTransformFn;
 ### `GlyphKeyframe`
 
 ```ts
-type GlyphKeyframe = Omit<GlyphTransform, "origin">;
+type GlyphKeyframe = Omit<GlyphTransform, "origin" | "x" | "y"> & {
+  x?: Length;
+  y?: Length;
+};
 ```
+
+A [`GlyphTransform`](./types#glyphtransform) without `origin`, whose `x` and `y` are a [`Length`](./types#length): px, or `{ em }` of each glyph's font size after [`shrink`](/guide/fitting#shrink). `{ em }` shifts move large and small glyphs in proportion: `from: { y: { em: 0.5 } }` slides every glyph in from half its size below.
 
 ### `StaggerTiming`
 
@@ -143,18 +148,18 @@ Scales each unit up from nothing with a slight overshoot. Defaults: by glyph, `s
 ### `slideIn()`
 
 ```ts
-function slideIn(options?: AnimationPresetOptions & { offset?: readonly [x: number, y: number] }): TextAnimationFn;
+function slideIn(options?: AnimationPresetOptions & { offset?: readonly [x: Length, y: Length] }): TextAnimationFn;
 ```
 
-Slides each unit in from `offset` px away while fading it in. Defaults: from `[0, 40]` (below), `stagger: 2`, `duration: 14`.
+Slides each unit in from `offset` away (px, or `{ em }` of each glyph's font size) while fading it in. Defaults: from `[0, 40]` (below), `stagger: 2`, `duration: 14`.
 
 ### `dropIn()`
 
 ```ts
-function dropIn(options?: AnimationPresetOptions & { height?: number }): TextAnimationFn;
+function dropIn(options?: AnimationPresetOptions & { height?: Length }): TextAnimationFn;
 ```
 
-Drops each unit from `height` px above with a bounce. Defaults: `height: 80`, `stagger: 3`, `duration: 20`, `easeOutBounce`.
+Drops each unit from `height` above (px, or `{ em }` of each glyph's font size) with a bounce. Defaults: `height: 80`, `stagger: 3`, `duration: 20`, `easeOutBounce`.
 
 ### `AnimationPresetOptions`
 
@@ -173,7 +178,7 @@ Bobs units up and down in a wave that runs along the text, forever.
 | Option | Type | Default | |
 | --- | --- | --- | --- |
 | `by` | [`AnimationUnit`](#animationunit) | `"glyph"` | |
-| `amplitude` | `number` | `10` | How far units move, in px |
+| `amplitude` | [`Length`](./types#length) | `10` | How far units move, in px or `{ em }` of each glyph's font size |
 | `period` | `number` | `60` | Time of one wave |
 | `lag` | `number` | `0.08` | How far behind the previous unit each one is, in waves |
 
@@ -190,7 +195,7 @@ Jitters units in random poses, forever. Each unit moves on its own.
 | Option | Type | Default | |
 | --- | --- | --- | --- |
 | `by` | [`AnimationUnit`](#animationunit) | `"glyph"` | |
-| `amount` | `number` | `4` | Largest offset in px |
+| `amount` | [`Length`](./types#length) | `4` | Largest offset, in px or `{ em }` of each glyph's font size |
 | `rotation` | `number` | `6` | Largest rotation in degrees |
 | `interval` | `number` | `2` | Time each pose is held |
 | `seed` | `number` | `0` | Changes the poses |

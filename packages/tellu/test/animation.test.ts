@@ -3,6 +3,7 @@ import {
   animateText,
   animationDuration,
   combineGlyphTransforms,
+  dropIn,
   easings,
   fadeIn,
   shake,
@@ -76,6 +77,17 @@ describe("animateText", () => {
     expect(slide(30)(a)).toBeUndefined();
   });
 
+  test("resolves em shifts against the glyph's font size", () => {
+    const rise = animateText({
+      duration: 10,
+      easing: easings.linear,
+      from: { x: 4, y: { em: 2 } },
+      to: { y: { em: 1 } },
+    });
+    expect(rise(5)(a)).toEqual({ x: 2, y: 15 });
+    expect(dropIn({ height: { em: 3 } })(0)(a)).toMatchObject({ y: -30 });
+  });
+
   test("plays backward with direction: out", () => {
     const out = animateText({ duration: 10, easing: easings.linear, from: { opacity: 0 }, direction: "out" });
     expect(out(0)(a)).toBeUndefined();
@@ -134,6 +146,7 @@ describe("loops", () => {
     expect(at(a)!.y).toBeCloseTo(10);
     expect(at(i)!.y).toBeCloseTo(0);
     expect(at(glyphs[2]!)).toBeUndefined();
+    expect(wave({ amplitude: { em: 1 }, period: 4, lag: 0.25 })(1)(a)!.y).toBeCloseTo(10);
   });
 
   test("shake holds a pose for an interval and stays in bounds", () => {

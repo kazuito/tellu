@@ -100,9 +100,9 @@ const rise = animateText({
   order: "center",
   stagger: 8,
   duration: 16,
-  from: { y: 40, opacity: 0, tint: "#ffd400" },
+  from: { y: { em: 0.8 }, opacity: 0, tint: "#ffd400" },
 });
-const bob = wave({ amplitude: 6, period: 40 });
+const bob = wave({ amplitude: { em: 0.12 }, period: 40 });
 
 export default (frame: number): TextNodeProps => ({
   text: "真ん中から順番に浮かび上がる",
@@ -115,6 +115,8 @@ export default (frame: number): TextNodeProps => ({
   glyphTransform: combineGlyphTransforms(rise(frame), bob(frame)),
 });
 ```
+
+Distances take px or `{ em }` of each glyph's font size: `x` and `y` in `animateText()` states, `slideIn()`'s `offset`, `dropIn()`'s `height`, `wave()`'s `amplitude` and `shake()`'s `amount`. In `{ em }`, the same animation moves large and small glyphs in proportion and follows [`shrink`](./fitting#shrink). The presets' defaults are in px.
 
 With `direction: "out"` an animation plays backward, from `to` to `from`, to take a caption off screen. `animationDuration(timing, glyph)` tells how long one takes, and `unitProgress(glyph, time, timing)` gives each glyph's progress for animations of your own. See the [animation API](/api/animation).
 
@@ -134,12 +136,13 @@ The function receives a [`GlyphContext`](/api/types#glyphcontext) for every char
 | `isWhitespace` | |
 | `x`, `y`, `width`, `height` | The glyph's box in layout coordinates |
 | `angle` | The glyph's rotation in degrees on a [text path](./text-path), else `0` |
+| `fontSize` | The glyph's font size in px, after [shrinking](./fitting#shrink) |
 
 ## The transform
 
 | Field | Default | |
 | --- | --- | --- |
-| `x`, `y` | `0` | Offset in px |
+| `x`, `y` | `0` | Offset in px. For a fraction of the glyph's size, multiply `glyph.fontSize` |
 | `scale` | `1` | Uniform scale, multiplied with `scaleX` / `scaleY` |
 | `scaleX`, `scaleY` | `1` | |
 | `rotation` | `0` | Degrees, clockwise |

@@ -1,5 +1,6 @@
 import { mixTints, multiplyTints, tintOf } from "./render/tint";
-import type { ColorValue, GlyphContext, GlyphTransform, GlyphTransformFn, LayerTransform } from "./style/types";
+import { resolveLength } from "./style/defaults";
+import type { ColorValue, GlyphContext, GlyphTransform, GlyphTransformFn, LayerTransform, Length } from "./style/types";
 
 /** What animates as one: each visible glyph, word or line, or the whole text at once. */
 export type AnimationUnit = "glyph" | "word" | "line" | "text";
@@ -33,8 +34,16 @@ export interface StaggerTiming {
   seed?: number;
 }
 
-/** A state of a glyph to animate from or to: any `GlyphTransform` field except `origin`. */
-export type GlyphKeyframe = Omit<GlyphTransform, "origin">;
+/**
+ * A state of a glyph to animate from or to: any `GlyphTransform` field except `origin`, with shifts in px or `{ em }`
+ * of the glyph's font size.
+ */
+export type GlyphKeyframe = Omit<GlyphTransform, "origin" | "x" | "y"> & {
+  /** Shift in px, or `{ em }` of the glyph's font size. Default: `0`. */
+  x?: Length;
+  /** Shift in px, or `{ em }` of the glyph's font size. Default: `0`. */
+  y?: Length;
+};
 
 /** An animation of every glyph from one state to another, unit by unit. */
 export interface TextAnimation extends StaggerTiming {
@@ -171,8 +180,6 @@ function lerpTint(from: ColorValue | undefined, to: ColorValue | undefined, t: n
 }
 
 const NUMBERS = [
-  ["x", 0],
-  ["y", 0],
   ["scale", 1],
   ["scaleX", 1],
   ["scaleY", 1],
@@ -182,9 +189,16 @@ const NUMBERS = [
   ["opacity", 1],
 ] as const;
 
-/** The state `t` of the way from `from` to `to` (`t` eased); `visible` switches as soon as `progress` leaves 0. */
-function between(from: GlyphKeyframe, to: GlyphKeyframe, t: number, progress: number): GlyphTransform {
+/**
+ * The state `t` of the way from `from` to `to` (`t` eased) at the font size `em`; `visible` switches as soon as
+ * `progress` leaves 0.
+ */
+function between(from: GlyphKeyframe, to: GlyphKeyframe, t: number, progress: number, em: number): GlyphTransform {
   const result: GlyphTransform = {};
+  for (const field of ["x", "y"] as const) {
+    if (from[field] !== undefined || to[field] !== undefined)
+      result[field] = lerp(resolveLength(from[field] ?? 0, em), resolveLength(to[field] ?? 0, em), t);
+  }
   for (const [field, rest] of NUMBERS) {
     if (from[field] !== undefined || to[field] !== undefined)
       result[field] = lerp(from[field] ?? rest, to[field] ?? rest, t);
@@ -228,7 +242,7 @@ export function animateText(animation: TextAnimation): TextAnimationFn {
   return (time) => (glyph) => {
     const progress = unitProgress(glyph, time, animation);
     if (atRest(progress)) return undefined;
-    const transform = between(start, end, easing(progress), progress);
+    const transform = between(start, end, easing(progress), progress, glyph.fontSize);
     if (origin) transform.origin = origin;
     return transform;
   };
@@ -308,25 +322,28 @@ export function popIn(options: AnimationPresetOptions = {}): TextAnimationFn {
 }
 
 /**
- * Slides each unit in from `offset` px away while fading it in. Defaults: by glyph, from 40 px below, 2 frames apart,
- * 14 frames each.
+ * Slides each unit in from `offset` away (px, or `{ em }` of the glyph's font size) while fading it in. Defaults: by
+ * glyph, from 40 px below, 2 frames apart, 14 frames each.
  */
 export function slideIn(
-  options: AnimationPresetOptions & { offset?: readonly [x: number, y: number] } = {},
+  options: AnimationPresetOptions & { offset?: readonly [x: Length, y: Length] } = {},
 ): TextAnimationFn {
   const { offset = [0, 40], ...rest } = options;
   return animateText({ stagger: 2, duration: 14, ...rest, from: { x: offset[0], y: offset[1], opacity: 0 } });
 }
 
-/** Drops each unit from `height` px above with a bounce. Defaults: by glyph, from 80 px, 3 frames apart, 20 frames each. */
-export function dropIn(options: AnimationPresetOptions & { height?: number } = {}): TextAnimationFn {
+/**
+ * Drops each unit from `height` above (px, or `{ em }` of the glyph's font size) with a bounce. Defaults: by glyph,
+ * from 80 px, 3 frames apart, 20 frames each.
+ */
+export function dropIn(options: AnimationPresetOptions & { height?: Length } = {}): TextAnimationFn {
   const { height = 80, ...rest } = options;
   return animateText({
     stagger: 3,
     duration: 20,
     easing: easings.easeOutBounce,
     ...rest,
-    from: { y: -height, opacity: 0 },
+    from: { y: typeof height === "number" ? -height : { em: -height.em }, opacity: 0 },
   });
 }
 
@@ -334,8 +351,8 @@ export function dropIn(options: AnimationPresetOptions & { height?: number } = {
 export interface WaveOptions {
   /** Default: `"glyph"`. */
   by?: AnimationUnit;
-  /** How far units move up and down, in px. Default: `10`. */
-  amplitude?: number;
+  /** How far units move up and down, in px or `{ em }` of the glyph's font size. Default: `10`. */
+  amplitude?: Length;
   /** Time of one wave. Default: `60`. */
   period?: number;
   /** How far behind the previous one each unit is, in waves (`1` = a whole wave). Default: `0.08`. */
@@ -348,7 +365,7 @@ export function wave(options: WaveOptions = {}): TextAnimationFn {
   return (time) => (glyph) => {
     const unit = unitOf(glyph, by);
     if (!unit) return undefined;
-    return { y: Math.sin(2 * Math.PI * (time / period - unit[0] * lag)) * amplitude };
+    return { y: Math.sin(2 * Math.PI * (time / period - unit[0] * lag)) * resolveLength(amplitude, glyph.fontSize) };
   };
 }
 
@@ -356,8 +373,8 @@ export function wave(options: WaveOptions = {}): TextAnimationFn {
 export interface ShakeOptions {
   /** Default: `"glyph"`. */
   by?: AnimationUnit;
-  /** Largest offset in px. Default: `4`. */
-  amount?: number;
+  /** Largest offset, in px or `{ em }` of the glyph's font size. Default: `4`. */
+  amount?: Length;
   /** Largest rotation in degrees. Default: `6`. */
   rotation?: number;
   /** Time each pose is held. Default: `2`. */
@@ -379,6 +396,7 @@ export function shake(options: ShakeOptions = {}): TextAnimationFn {
     const unit = unitOf(glyph, by);
     if (!unit) return undefined;
     const base = unit[0] * 31 + Math.floor(time / Math.max(interval, 1e-6)) * 7 + seed * 101;
-    return { x: noise(base) * amount, y: noise(base + 1) * amount, rotation: noise(base + 2) * rotation };
+    const offset = resolveLength(amount, glyph.fontSize);
+    return { x: noise(base) * offset, y: noise(base + 1) * offset, rotation: noise(base + 2) * rotation };
   };
 }

@@ -22,6 +22,11 @@ describe("parseMarkup", () => {
     });
   });
 
+  test("compounds em font sizes of nested tags", () => {
+    const runs = parseMarkup("<big>a<big>b</big></big>", { big: { fontSize: { em: 1.5 } } });
+    expect(runs.map((run) => run.style?.fontSize)).toEqual([{ em: 1.5 }, { em: 2.25 }]);
+  });
+
   test("keeps unknown tags for glyphTransform and supports <br/> and entities", () => {
     expect(parseMarkup("<x>a</x><br/>&lt;b&gt; &amp;")).toEqual([
       { text: "a", tags: ["x"] },

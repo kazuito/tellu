@@ -105,7 +105,7 @@ The syntax is deliberately small:
 | Markup | Meaning |
 | --- | --- |
 | `<name>…</name>` | Applies the `name` style. Any tag name works, and tags without a style are allowed |
-| Nested tags | Inner styles win, and layer patches merge |
+| Nested tags | Inner styles win, layer patches merge, and [`{ em }` font sizes](#relative-font-sizes) multiply |
 | `<br/>` | Line break (so does `\n`) |
 | `&lt;` `&gt;` `&amp;` `&quot;` `&#39;` | Escaped characters |
 
@@ -117,6 +117,32 @@ Tag names also reach [`glyphTransform`](./animation#target-glyphs-by-tag) as `gl
 parseMarkup("突然の<shake>ドッキリ</shake>！", { shake: { fontSize: 88 } });
 // glyphTransform: (glyph) => glyph.tags.includes("shake") ? { … } : undefined
 ```
+
+## Relative font sizes
+
+A run's `fontSize` can be `{ em }`, a multiple of the base font size:
+
+```ts demo
+import { fill, parseMarkup, stroke } from "tellu";
+
+export default {
+  text: parseMarkup(
+    "<small>なんと</small>全品<big>50%<small>OFF</small></big>",
+    {
+      big: { fontSize: { em: 1.6 } },
+      small: { fontSize: { em: 0.5 } },
+    },
+  ),
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 64,
+    layers: [stroke({ em: 0.2 }, "#7a0019"), fill("#fff3c4")],
+  },
+};
+```
+
+Changing the base `fontSize` then resizes every run in proportion, so one set of tags works at any caption size. Inside another tag, `{ em }` is relative to that tag's size, as in CSS: `OFF` above is half of `big`, 0.8 × the base. Give outlines in [`{ em }`](./fitting#shrink) too and they keep in proportion with each run.
 
 ## Line breaks
 
