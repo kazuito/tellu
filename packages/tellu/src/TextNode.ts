@@ -9,7 +9,7 @@ import { traceLine } from "./render/decorationShapes";
 import { planGroups } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
-import { type GlyphShape, layerReach, layerShape, type PathSource } from "./render/rasterize";
+import { type GlyphShape, keepsGlyphColors, layerReach, layerShape, type PathSource } from "./render/rasterize";
 import { ScopeBoxes, unionBox } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
 import { type WarpMapping, warpedBounds, warpMapping } from "./render/warp";
@@ -282,6 +282,7 @@ export class TextNode extends Container {
           warp ? `${warp.key}\u0000${roundPoint(glyph.x, glyph.y)}` : "",
           reach[index],
           stableKey(layerShape(layer)),
+          keepsGlyphColors(layer) ? "own colors" : "",
           stableKey(layer.shading ?? null),
           paintKey(layer.paint),
           paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),

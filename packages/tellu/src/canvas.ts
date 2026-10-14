@@ -9,8 +9,8 @@ export function createCanvas(width: number, height: number): AnyCanvas {
   return canvas;
 }
 
-export function context2d(canvas: AnyCanvas): Canvas2D {
-  const ctx = canvas.getContext("2d") as Canvas2D | null;
+export function context2d(canvas: AnyCanvas, settings?: CanvasRenderingContext2DSettings): Canvas2D {
+  const ctx = canvas.getContext("2d", settings) as Canvas2D | null;
   if (!ctx) throw new Error("tellu: failed to get a 2D canvas context");
   return ctx;
 }

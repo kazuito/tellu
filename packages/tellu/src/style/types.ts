@@ -220,6 +220,13 @@ export interface Layer {
   /** Any paint, or a `ShapeGradient` colored by the distance from the glyph's edge. */
   paint: LayerPaint;
   /**
+   * How a layer that paints the glyph itself (no `stroke`, `shading` or shape gradient) draws color glyphs, such as
+   * emoji and the glyphs of color fonts: `"keep"` draws them in their own colors, `"paint"` paints their shape with
+   * `paint` like any other glyph. Outlines, shadows and other grown or shaded layers always use the glyph's shape.
+   * `fill()` sets `"keep"`. Default: `"paint"`.
+   */
+  colorGlyphs?: "keep" | "paint";
+  /**
    * How far the glyph shape grows in px, or the band width for `"inside"` and `"center"`. `0` paints the glyph itself.
    * Default: `0`.
    */
@@ -330,7 +337,10 @@ export interface TextStyle {
   textOrientation: TextOrientation;
   /** 縦中横 in vertical text. Default: `"digits 2"` (numbers of up to two digits). */
   textCombineUpright: TextCombineUpright;
-  /** Decoration layers, bottom → top. Default: `[{ paint: "#ffffff" }]` (a white fill). */
+  /**
+   * Decoration layers, bottom → top. Default: `[{ paint: "#ffffff", colorGlyphs: "keep" }]` (a white fill that keeps
+   * emoji in color).
+   */
   layers: readonly Layer[];
   /**
    * Lines and boxes along the text: underlines, markers, frames. A run's override adds its decorations to the ones it

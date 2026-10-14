@@ -1,6 +1,6 @@
 import type { KinsokuRules, Length, LineHeight, TextStyle } from "./types";
 
-/** The style every run starts from: white 64px `sans-serif` text with no outline. */
+/** The style every run starts from: white 64px `sans-serif` text with no outline, emoji in their own colors. */
 export const defaultStyle: TextStyle = {
   fontFamily: "sans-serif",
   fontSize: 64,
@@ -15,7 +15,7 @@ export const defaultStyle: TextStyle = {
   baselineShift: 0,
   textOrientation: "mixed",
   textCombineUpright: "digits 2",
-  layers: [{ paint: "#ffffff" }],
+  layers: [{ paint: "#ffffff", colorGlyphs: "keep" }],
   decorations: [],
 };
 

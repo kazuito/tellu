@@ -28,12 +28,13 @@ function withContour<T extends Shading>(shading: T, contour: Contour | undefined
 }
 
 /**
- * A layer that paints the glyph itself.
+ * A layer that paints the glyph itself. Emoji and other color glyphs keep their own colors (`colorGlyphs: "keep"`);
+ * pass `colorGlyphs: "paint"` to paint them too.
  *
  * @example fill(linearGradient(["#fff6c0", "#f5b400"]))
  */
 export function fill(paint: LayerPaint, options?: LayerOptions): Layer {
-  return { ...options, paint, stroke: 0 };
+  return { colorGlyphs: "keep", ...options, paint, stroke: 0 };
 }
 
 /**

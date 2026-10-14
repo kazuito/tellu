@@ -1,5 +1,5 @@
 ---
-description: The layer model behind every fill, outline, shadow and glow, with inner shadows, bevels and satin, stroke position, joins, offsets, blur, opacity, blend modes and PixiJS filters.
+description: The layer model behind every fill, outline, shadow and glow, with inner shadows, bevels and satin, stroke position, joins, offsets, blur, opacity, blend modes, PixiJS filters and emoji.
 ---
 
 # Layers
@@ -35,7 +35,7 @@ Layers are plain objects, and four helpers cover the common cases:
 
 | Helper | Same as |
 | --- | --- |
-| `fill(paint, options?)` | `{ paint, stroke: 0, ...options }` |
+| `fill(paint, options?)` | `{ paint, stroke: 0, colorGlyphs: "keep", ...options }` |
 | `stroke(width, paint, options?)` | `{ paint, stroke: width, ...options }` |
 | `shadow({ color, offset, blur, stroke })` | A layer offset by `[4, 4]` and blurred by `4`, in `rgba(0,0,0,0.6)` by default |
 | `glow({ color, stroke, blur })` | A white layer grown by `8` and blurred by `8` by default |
@@ -515,11 +515,42 @@ tellu compares filters by identity. Create them outside your render function or 
 - `visible: false` skips a layer without removing it, for example to toggle a shadow.
 - `id` names a layer so [rich-text runs](./rich-text#patching-layers) can target it by name instead of by index.
 
+## Emoji and color glyphs
+
+Emoji and the glyphs of color fonts have colors of their own. A fill made with `fill()` keeps them, while outlines, shadows and glows still follow the glyph's shape:
+
+```ts demo
+import { fill, shadow, stroke } from "tellu";
+
+export default {
+  text: "今日も最高😆🎉",
+  style: {
+    fontFamily: "Noto Sans JP, Noto Color Emoji",
+    fontWeight: 900,
+    fontSize: 80,
+    layers: [
+      shadow({ stroke: 10, offset: [0, 6] }),
+      stroke(10, "#1b2a7a"),
+      fill("#ffe14d"),
+    ],
+  },
+};
+```
+
+This is the layer's `colorGlyphs` option. `fill()` and the default style set it to `"keep"`; a layer written as a plain object paints color glyphs like any other glyph unless it sets `colorGlyphs: "keep"` too. To paint emoji in the fill color, as silhouettes, pass `colorGlyphs: "paint"`:
+
+```ts
+fill("#ffffff", { colorGlyphs: "paint" });
+```
+
+`colorGlyphs` only affects layers that paint the glyph itself: no `stroke`, `shading` or [shape gradient](./paint#shape-gradients). A glyph counts as a color glyph when its font draws any of it in a color of its own. Parts of a color font's glyph that take the text color are drawn in black.
+
 ## Options
 
 | Option | Type | Default | |
 | --- | --- | --- | --- |
 | `paint` | [`LayerPaint`](/api/types#layerpaint) | | Color, gradient, pattern or [shape gradient](./paint#shape-gradients) |
+| `colorGlyphs` | `"keep" \| "paint"` | `"paint"` (`"keep"` with `fill()`) | Whether emoji keep their colors. [Emoji and color glyphs](#emoji-and-color-glyphs) |
 | `stroke` | `number` | `0` | Growth in px. `0` paints the glyph itself |
 | `strokePosition` | `"outside" \| "inside" \| "center"` | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | |

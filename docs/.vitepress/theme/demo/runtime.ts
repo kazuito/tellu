@@ -8,7 +8,7 @@ const DEFAULT_LOOP = 120;
 const FONT_STYLESHEET =
   "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Noto+Serif+JP:wght@700;900" +
   "&family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@700;900&family=RocknRoll+One&family=Reggae+One" +
-  "&family=Montserrat:wght@800;900&display=block";
+  "&family=Montserrat:wght@800;900&family=Noto+Color+Emoji&display=block";
 
 let stylesheet: Promise<void> | undefined;
 

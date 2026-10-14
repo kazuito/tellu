@@ -11,7 +11,7 @@ describe("applyOverride", () => {
     expect(style.fontSize).toBe(99);
     expect(style.layers).toEqual([
       { id: "edge", paint: "black", stroke: 12 },
-      { paint: "red", stroke: 0 },
+      { colorGlyphs: "keep", paint: "red", stroke: 0 },
     ]);
   });
 

@@ -12,7 +12,7 @@ description: API reference for layer helpers (fill, stroke, shadow, glow, innerS
 function fill(paint: LayerPaint, options?: Omit<Layer, "paint" | "stroke">): Layer;
 ```
 
-A layer that paints the glyph itself (`stroke: 0`).
+A layer that paints the glyph itself (`stroke: 0`). Emoji and other color glyphs keep their own colors (`colorGlyphs: "keep"`); pass `colorGlyphs: "paint"` to paint them as silhouettes. See [Emoji and color glyphs](/guide/layers#emoji-and-color-glyphs).
 
 ### `stroke()`
 
@@ -307,7 +307,7 @@ const defaultStyle: TextStyle = {
   baselineShift: 0,
   textOrientation: "mixed",
   textCombineUpright: "digits 2",
-  layers: [{ paint: "#ffffff" }],
+  layers: [{ paint: "#ffffff", colorGlyphs: "keep" }],
   decorations: [],
 };
 ```

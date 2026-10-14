@@ -214,7 +214,7 @@ Defaults: [`defaultKinsoku`](./helpers#defaultkinsoku).
 | `baselineShift` | [`Length`](#length) | `0` | Raises glyphs (moves them right in vertical text) |
 | `textOrientation` | [`TextOrientation`](#textorientation) | `"mixed"` | Vertical text only |
 | `textCombineUpright` | [`TextCombineUpright`](#textcombineupright) | `"digits 2"` | Vertical text only: 縦中横 |
-| `layers` | `readonly `[`Layer`](#layer)`[]` | `[{ paint: "#ffffff" }]` | Bottom → top |
+| `layers` | `readonly `[`Layer`](#layer)`[]` | `[{ paint: "#ffffff", colorGlyphs: "keep" }]` | Bottom → top |
 | `decorations` | `readonly `[`Decoration`](#decoration)`[]` | `[]` | Lines, markers and frames along the text. A run's decorations add to the ones it inherits. [Guide](/guide/decorations) |
 
 Guide: [Typography](/guide/typography).
@@ -268,6 +268,7 @@ A multiple of the font size, or absolute pixels.
 | Property | Type | Default | |
 | --- | --- | --- | --- |
 | `paint` | [`LayerPaint`](#layerpaint) | | Required |
+| `colorGlyphs` | `"keep" \| "paint"` | `"paint"` | `"keep"` draws emoji and other color glyphs in their own colors, on layers that paint the glyph itself. [Guide](/guide/layers#emoji-and-color-glyphs) |
 | `stroke` | `number` | `0` | Growth in px |
 | `strokePosition` | [`StrokePosition`](#strokeposition) | `"outside"` | |
 | `join` | `CanvasLineJoin` | `"round"` | Non-uniform scaling always uses round joins |
