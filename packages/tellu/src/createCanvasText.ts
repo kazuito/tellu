@@ -15,7 +15,7 @@ export interface CanvasText {
    */
   readonly lastDraw: DrawResult;
   /**
-   * Merges props and redraws synchronously. Changing only `glyphTransform` is cheap, so this can run every frame.
+   * Merges props and redraws synchronously. Changing only `glyphTransform` or `clip` is cheap, so this can run every frame.
    * When new fonts or characters appear, `await loadFonts(...)` first.
    */
   update(props: Partial<TextNodeProps>): DrawResult;

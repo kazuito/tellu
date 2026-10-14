@@ -46,7 +46,7 @@ Bitmaps become PixiJS sprites grouped by **layer slot** and effects (offset, blu
 - Inside a group, sprites combine with `max` blending, so overlapping outlines merge instead of stacking.
 - Each group is isolated, then blurred, filtered, faded and blended as one image. That's why a semi-transparent outline doesn't darken where glyphs overlap.
 
-Glyph transforms move, scale and rotate these sprites. When only `glyphTransform` changes, nothing is laid out or rasterized again.
+Glyph transforms move, scale and rotate these sprites. When only `glyphTransform` or `clip` changes, nothing is laid out or rasterized again.
 
 ## Output
 

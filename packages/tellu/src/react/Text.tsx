@@ -119,8 +119,8 @@ export interface TextProps extends Omit<TextNodeProps, "style"> {
  * glyphs may paint outside of it. It waits for the fonts it needs, re-measures when web fonts finish loading, and keeps
  * the caption's text readable by screen readers and find-in-page. The ref is the wrapper `<div>`.
  *
- * Re-rendering is cheap: unchanged props don't redraw, and a new `glyphTransform` alone only moves the existing glyphs,
- * so it can change every frame.
+ * Re-rendering is cheap: unchanged props don't redraw, and a new `glyphTransform` or `clip` alone only moves or clips
+ * the existing glyphs, so they can change every frame.
  *
  * @example <Text text="テロップ" textStyle={{ fontSize: 64 }} maxWidth={800} anchor="bottom" />
  */

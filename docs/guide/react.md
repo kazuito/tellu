@@ -46,8 +46,8 @@ Rich text is read as its plain text, without markup. `alt` replaces what is read
 
 `<Text>` draws synchronously in a layout effect on every render, so the canvas always matches the props. Repeated renders with the same props are cheap:
 
-- props are compared structurally, apart from `glyphTransform`,
-- when only `glyphTransform` changes, existing sprites are moved,
+- props are compared structurally, apart from `glyphTransform` and `clip`,
+- when only `glyphTransform` or `clip` changes, existing sprites are moved or clipped,
 - glyph textures are cached per node.
 
 ## Fonts

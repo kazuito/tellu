@@ -70,8 +70,8 @@ const SUBPIXEL_STEPS = 4;
  * The local origin is the top-left of the layout box.
  *
  * Text is laid out and rasterized synchronously, in the constructor and whenever the props change, so
- * `await loadFonts(props)` first. Setting equal props again doesn't rebuild, and a change to `glyphTransform` alone
- * only moves the existing glyphs. Call `destroy()` when done to release the shared glyph bitmaps.
+ * `await loadFonts(props)` first. Setting equal props again doesn't rebuild, and a change to `glyphTransform` or `clip`
+ * alone only moves or clips the existing glyphs. Call `destroy()` when done to release the shared glyph bitmaps.
  *
  * @example
  * await loadFonts(props);
