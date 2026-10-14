@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.4] - 2026-10-14
+
 ### Added
 
 - Decorations: a style's `decorations` draws lines and boxes along runs of text. Decorations follow line breaks (one per line), justification, `shrink` and vertical writing. A run's decorations add to the ones it inherits from the base style and enclosing markup tags, like CSS `text-decoration`, and `layout.decorations` reports where each one goes.
@@ -85,6 +87,7 @@ The first public release.
 - `tellu/react`: `<Text>`, `TextRendererProvider` and `useTextRenderer()`.
 - `tellu/remotion`: `<Text>`, which holds each frame with `delayRender` until the renderer, the fonts and the drawing are ready.
 
-[Unreleased]: https://github.com/kazuito/tellu/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/kazuito/tellu/compare/v0.0.4...HEAD
+[0.0.4]: https://github.com/kazuito/tellu/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/kazuito/tellu/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/kazuito/tellu/releases/tag/v0.0.2
