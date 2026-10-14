@@ -126,11 +126,11 @@ export default {
 
 ## Karaoke subtitles
 
-A karaoke wipe colors the text left to right as it is spoken. Stack two identical captions and reveal the colored one with `clip-path`. tellu lays both out identically, so they line up to the pixel:
+A karaoke wipe colors the text along its lines as it is spoken. Stack two identical captions and reveal the colored one with `clip` and [`wipeClip()`](/api/layout#wipeclip). tellu lays both out identically, so they line up to the pixel, and the wipe moves on to the next line when a line is done:
 
 ```tsx
 import { interpolate, useCurrentFrame } from "remotion";
-import { fill, shadow, stroke } from "tellu";
+import { fill, shadow, stroke, wipeClip } from "tellu";
 import { Text } from "tellu/remotion";
 
 const base = {
@@ -146,20 +146,17 @@ export const KaraokeLine = ({ text, duration }: { text: string; duration: number
   const progress = interpolate(frame, [0, duration], [0, 1], { extrapolateRight: "clamp" });
   return (
     <div style={{ position: "relative" }}>
-      <Text text={text} textStyle={base} />
+      <Text text={text} textStyle={base} maxWidth={900} />
       <Text
         text={text}
         textStyle={sung}
-        style={{
-          position: "absolute",
-          inset: 0,
-          // Generous negative insets keep the outline and shadow inside the clip.
-          clipPath: `inset(-60px ${(1 - progress) * 100}% -60px -60px)`,
-        }}
+        maxWidth={900}
+        clip={(layout) => wipeClip(layout, progress)}
+        style={{ position: "absolute", inset: 0 }}
       />
     </div>
   );
 };
 ```
 
-The colored copy changes only its fill. Because `clip-path` is CSS, the wipe costs nothing per frame on the tellu side.
+The colored copy changes only its fill. Like `glyphTransform`, a new `clip` doesn't rebuild the caption, so the wipe only redraws the canvas each frame. `wipeClip(layout, progress, { by: "glyph" })` gives every character the same share of the time instead of every pixel of length.

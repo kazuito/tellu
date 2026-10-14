@@ -1,6 +1,6 @@
 import { stableKey } from "../utils/stableKey";
 import { stripUndefined } from "./defaults";
-import type { Decoration, Layer, LayerPatch, StyleOverride, TextStyle } from "./types";
+import type { Decoration, GlyphTransform, Layer, LayerPatch, LayerTransform, StyleOverride, TextStyle } from "./types";
 
 export function isLayerPatch(layers: readonly Layer[] | LayerPatch): layers is LayerPatch {
   return !Array.isArray(layers);
@@ -68,4 +68,20 @@ export function applyOverride(base: TextStyle, override: StyleOverride | undefin
   if (layers) style.layers = isLayerPatch(layers) ? applyLayerPatch(base.layers, layers) : layers;
   if (decorations) style.decorations = addDecorations(base.decorations, decorations) ?? [];
   return style;
+}
+
+/**
+ * A glyph's transform of one layer, from `GlyphTransform.layers`: the entry for the layer's index merged with the entry
+ * for its `id`, which wins.
+ */
+export function layerTransformFor(
+  layers: GlyphTransform["layers"],
+  slot: number,
+  id: string | undefined,
+): LayerTransform | undefined {
+  if (!layers) return undefined;
+  const byIndex = layers[slot];
+  const byId = id === undefined ? undefined : layers[id];
+  if (!byIndex || !byId) return byId ?? byIndex;
+  return { ...byIndex, ...stripUndefined(byId) };
 }

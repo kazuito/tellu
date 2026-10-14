@@ -5,6 +5,7 @@ import {
   Container,
   type DestroyOptions,
   type Filter,
+  Graphics,
   Rectangle,
   Sprite,
 } from "pixi.js";
@@ -23,8 +24,10 @@ import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
 import { type GlyphShape, keepsGlyphColors, layerReach, layerShape, type PathSource } from "./render/rasterize";
 import { ScopeBoxes, unionBox } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
+import { multiplyTints, tintOf, WHITE } from "./render/tint";
 import { type WarpMapping, warpedBounds, warpMapping } from "./render/warp";
 import { resolveStyle } from "./style/defaults";
+import { layerTransformFor } from "./style/merge";
 import {
   boxDecorationUsesEm,
   type ResolvedBoxDecoration,
@@ -47,6 +50,9 @@ interface GlyphSprite {
   glyph: number;
   baseX: number;
   baseY: number;
+  /** The layer it draws: its index and `id`, which `GlyphTransform.layers` target. */
+  slot: number;
+  layerId: string | undefined;
 }
 
 const DEG = Math.PI / 180;
@@ -83,13 +89,19 @@ export class TextNode extends Container {
   private readonly backDecorationLayer = new Container({ label: "decorations behind" });
   private readonly glyphLayer = new Container({ label: "glyphs" });
   private readonly frontDecorationLayer = new Container({ label: "decorations in front" });
+  /** Everything `clip` clips: glyphs and decorations, not the plate. */
+  private readonly content = new Container({ label: "content" });
+  private readonly clipMask = new Graphics({ label: "clip" });
+  /** The clip boxes drawn into `clipMask`, or `null` for no clip. */
+  private clipKey: string | null = null;
 
   constructor(props: TextNodeProps, options: TextNodeOptions = {}) {
     super({ label: "text" });
     this._props = props;
     this.measurer = options.measurer ?? getDefaultMeasurer();
     this._resolution = options.resolution ?? (typeof devicePixelRatio === "number" ? devicePixelRatio : 1);
-    this.addChild(this.plateLayer, this.backDecorationLayer, this.glyphLayer, this.frontDecorationLayer);
+    this.content.addChild(this.backDecorationLayer, this.glyphLayer, this.frontDecorationLayer);
+    this.addChild(this.plateLayer, this.content);
     this.refresh();
   }
 
@@ -183,11 +195,12 @@ export class TextNode extends Container {
   }
 
   /**
-   * Rebuilds if anything but `glyphTransform` changed, then reapplies glyph transforms. Setting props calls it; call it
-   * yourself when `glyphTransform` reads state that changed, such as the current frame.
+   * Rebuilds if anything but `glyphTransform` and `clip` changed, then reapplies glyph transforms and the clip. Setting
+   * props calls it; call it yourself when `glyphTransform` or `clip` reads state that changed, such as the current
+   * frame.
    */
   refresh(): void {
-    const { glyphTransform: _, ...rest } = this._props;
+    const { glyphTransform: _, clip: __, ...rest } = this._props;
     const key = stableKey([rest, this._resolution]);
     if (key !== this.builtKey) {
       this.build();
@@ -196,6 +209,31 @@ export class TextNode extends Container {
       this._revision++;
     }
     this.applyGlyphTransforms();
+    this.applyClip();
+  }
+
+  /** Clips the glyphs and decorations to the boxes of `clip`, redrawing the mask only when they change. */
+  private applyClip(): void {
+    const { clip } = this._props;
+    const boxes = typeof clip === "function" ? clip(this.layout) : clip;
+    const key = boxes ? stableKey(boxes.map(roundBox)) : null;
+    if (key === this.clipKey) return;
+    this.clipKey = key;
+    this._revision++;
+    this.clipMask.clear();
+    if (!boxes || boxes.length === 0) {
+      // No boxes hide everything; no clip shows everything.
+      this.content.visible = !boxes;
+      this.content.mask = null;
+      this.clipMask.removeFromParent();
+      return;
+    }
+    for (const box of boxes) this.clipMask.rect(box.x, box.y, box.width, box.height);
+    this.clipMask.fill(0xffffff);
+    this.content.visible = true;
+    // The mask is a child of the node, so it moves with it, but not of a layer, so it isn't part of the ink bounds.
+    this.addChild(this.clipMask);
+    this.content.mask = this.clipMask;
   }
 
   private build(): void {
@@ -313,7 +351,7 @@ export class TextNode extends Container {
         const baseY = (pixelY + cached.offsetY) / res;
         sprite.position.set(baseX, baseY);
         container.addChild(sprite);
-        this.glyphSprites.push({ sprite, glyph: index, baseX, baseY });
+        this.glyphSprites.push({ sprite, glyph: index, baseX, baseY, slot: group.slot, layerId: layer.id });
       }
       this.glyphLayer.addChild(root);
     }
@@ -427,10 +465,10 @@ export class TextNode extends Container {
     const transforms: (GlyphTransform | null)[] = this.contexts.map((context) => fn?.(context) || null);
 
     let changed = false;
-    for (const { sprite, glyph: index, baseX, baseY } of this.glyphSprites) {
+    for (const { sprite, glyph: index, baseX, baseY, slot, layerId } of this.glyphSprites) {
       const t = transforms[index];
       if (!t) {
-        changed = placeSprite(sprite, [0, 0, baseX, baseY, 1, 1, 0, 0, 0, 1], true) || changed;
+        changed = placeSprite(sprite, [0, 0, baseX, baseY, 1, 1, 0, 0, 0, 1, WHITE], true) || changed;
         continue;
       }
       const { box, angle } = layout.glyphs[index]!;
@@ -449,6 +487,7 @@ export class TextNode extends Container {
       // And it bends with the glyph under a warp.
       if (this.warp) [px, py] = this.warp.forward(px, py);
       const scale = t.scale ?? 1;
+      const layer = layerTransformFor(t.layers, slot, layerId);
       const placement: SpritePlacement = [
         px - baseX,
         py - baseY,
@@ -459,9 +498,10 @@ export class TextNode extends Container {
         (t.rotation ?? 0) * DEG,
         (t.skewX ?? 0) * DEG,
         (t.skewY ?? 0) * DEG,
-        t.opacity ?? 1,
+        (t.opacity ?? 1) * (layer?.opacity ?? 1),
+        multiplyTints(tintOf(t.tint), tintOf(layer?.tint)),
       ];
-      changed = placeSprite(sprite, placement, t.visible ?? true) || changed;
+      changed = placeSprite(sprite, placement, (t.visible ?? true) && (layer?.visible ?? true)) || changed;
     }
     if (changed) this._revision++;
     this.transformed = !!fn;
@@ -474,6 +514,9 @@ export class TextNode extends Container {
   override destroy(_options?: DestroyOptions): void {
     for (const child of this.groups()) destroyFilters(child);
     this.textures.clear();
+    this.content.mask = null;
+    // The clip mask is only a child while a clip is set.
+    if (!this.clipMask.parent) this.clipMask.destroy();
     super.destroy({ children: true });
   }
 }
@@ -489,11 +532,12 @@ type SpritePlacement = [
   skewX: number,
   skewY: number,
   alpha: number,
+  tint: number,
 ];
 
 /** Applies a glyph transform to its sprite. Returns whether anything changed. */
 function placeSprite(sprite: Sprite, placement: SpritePlacement, visible: boolean): boolean {
-  const [pivotX, pivotY, x, y, scaleX, scaleY, rotation, skewX, skewY, alpha] = placement;
+  const [pivotX, pivotY, x, y, scaleX, scaleY, rotation, skewX, skewY, alpha, tint] = placement;
   const changed =
     sprite.pivot.x !== pivotX ||
     sprite.pivot.y !== pivotY ||
@@ -505,6 +549,7 @@ function placeSprite(sprite: Sprite, placement: SpritePlacement, visible: boolea
     sprite.skew.x !== skewX ||
     sprite.skew.y !== skewY ||
     sprite.alpha !== alpha ||
+    sprite.tint !== tint ||
     sprite.visible !== visible;
   if (!changed) return false;
   sprite.pivot.set(pivotX, pivotY);
@@ -513,6 +558,7 @@ function placeSprite(sprite: Sprite, placement: SpritePlacement, visible: boolea
   sprite.rotation = rotation;
   sprite.skew.set(skewX, skewY);
   sprite.alpha = alpha;
+  sprite.tint = tint;
   sprite.visible = visible;
   return true;
 }

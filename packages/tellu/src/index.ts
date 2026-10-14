@@ -20,6 +20,7 @@ export {
   type InkBounds,
   type Measurer,
 } from "./layout/measure";
+export { type WipeClipOptions, wipeClip } from "./layout/wipe";
 export { parseMarkup } from "./markup";
 export { defaultKinsoku, defaultStyle, resolveStyle } from "./style/defaults";
 export {

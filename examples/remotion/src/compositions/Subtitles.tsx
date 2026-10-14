@@ -1,5 +1,5 @@
 import { AbsoluteFill, interpolate, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
-import { fill, shadow, stroke } from "tellu";
+import { fill, shadow, stroke, wipeClip } from "tellu";
 import { Text } from "tellu/remotion";
 import { Background } from "../components/Background";
 import { FONTS } from "../fonts";
@@ -31,7 +31,7 @@ export const SCRIPT: Line[] = [
 
 export const SUBTITLES_DURATION = Math.ceil(11.4 * 30);
 
-/** Two identical texts; the colored copy is revealed left to right with clip-path. */
+/** Two identical texts; the colored copy is revealed along the line with `clip`. */
 const KaraokeLine = ({ line }: { line: Line }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -63,12 +63,8 @@ const KaraokeLine = ({ line }: { line: Line }) => {
               fill(color),
             ],
           }}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            clipPath: `inset(-60px ${progress >= 1 ? "-60px" : `${(1 - progress) * 100}%`} -60px -60px)`,
-          }}
+          clip={(layout) => wipeClip(layout, progress)}
+          style={{ position: "absolute", left: 0, top: 0 }}
         />
       </div>
     </div>

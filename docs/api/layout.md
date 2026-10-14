@@ -1,5 +1,5 @@
 ---
-description: API reference for layoutText, the Layout result, measurers, font descriptors, font loading functions and font checks.
+description: API reference for layoutText, the Layout result, wipeClip, measurers, font descriptors, font loading functions and font checks.
 ---
 
 # Layout & fonts
@@ -75,6 +75,21 @@ One [decoration](/guide/decorations) along a stretch of one line: consecutive gl
 | `runIndex` | The run of its first glyph. A line decoration is painted with this run's layers |
 | `box` | [`Box`](./types#box): for a box decoration, the box with `inset` and `padding` applied; for a line, the band it is drawn in |
 | `fontSize` | Largest font size of its glyphs, after `shrink` |
+
+### `wipeClip()`
+
+```ts
+function wipeClip(layout: Layout, progress: number, options?: WipeClipOptions): Box[];
+```
+
+Boxes for [`clip`](./types#clipregion) that reveal a caption along its lines, in reading order, like a karaoke wipe: lines `progress` (`0`–`1`) has passed show in full, the line it is in shows up to it, and later lines are hidden. Each line's box reaches halfway to its neighbours, and `margin` font sizes past the text at the ends of the lines and outside the first and last line. Straight text only: it follows the lines, not a text path or a warp. Guide: [Clipping](/guide/animation#clipping).
+
+### `WipeClipOptions`
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `by` | `"length" \| "glyph"` | `"length"` | `"length"` wipes at an even speed along the lines; `"glyph"` gives every visible glyph the same share of `progress` |
+| `margin` | `number` | `2` | How far past the text the boxes reach, as a factor of the line's font size |
 
 ### `ResolvedRun`
 

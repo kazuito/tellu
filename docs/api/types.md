@@ -21,6 +21,7 @@ interface TextNodeProps extends LayoutOptions {
   background?: PlateStyle;
   glyphTransform?: GlyphTransformFn;
   warp?: Warp;
+  clip?: ClipRegion;
 }
 ```
 
@@ -29,6 +30,15 @@ interface TextNodeProps extends LayoutOptions {
 | `background` | [`PlateStyle`](#platestyle) | A plate behind the text. [Guide](/guide/plates) |
 | `glyphTransform` | [`GlyphTransformFn`](#glyphtransformfn) | Per-glyph transform. [Guide](/guide/animation) |
 | `warp` | [`Warp`](#warp) | Bends the glyphs. [Guide](/guide/warp) |
+| `clip` | [`ClipRegion`](#clipregion) | Shows the glyphs and decorations only inside boxes, without a rebuild. [Guide](/guide/animation#clipping) |
+
+### `ClipRegion`
+
+```ts
+type ClipRegion = readonly Box[] | ((layout: Layout) => readonly Box[] | null | undefined);
+```
+
+Boxes in layout coordinates, or a function of the [layout](./layout#layout) that returns them. `[]` hides the glyphs and decorations; `null` or `undefined` from the function shows everything. The plate isn't clipped. [`wipeClip()`](./layout#wipeclip) builds a wipe along the lines.
 
 …plus every option of [`LayoutOptions`](#layoutoptions).
 
@@ -571,8 +581,20 @@ type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefin
 | `opacity` | `1` | |
 | `visible` | `true` | |
 | `origin` | `[0.5, 0.5]` | Relative to the glyph box |
+| `tint` | | [`ColorValue`](#colorvalue) multiplied into every layer of the glyph. Its alpha is ignored |
+| `layers` | | `{ [indexOrId]: LayerTransform }`: changes to single layers of the glyph, keyed like a [`LayerPatch`](#layerpatch) |
 
 Guide: [Glyph transforms](/guide/animation).
+
+### `LayerTransform`
+
+| Field | Default | |
+| --- | --- | --- |
+| `opacity` | `1` | Multiplies the layer's opacity for the glyph |
+| `tint` | | Multiplies the layer's colors for the glyph |
+| `visible` | `true` | `false` hides the layer for the glyph |
+
+Guide: [Tint and single layers](/guide/animation#tint-and-single-layers).
 
 ## Geometry
 

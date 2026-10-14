@@ -1,5 +1,5 @@
 ---
-description: Animate captions glyph by glyph with glyphTransform, covering position, scale, rotation, skew, opacity and visibility, plus typewriter, word-by-word, bounce, wave and shake recipes.
+description: Animate captions glyph by glyph with glyphTransform, covering position, scale, rotation, skew, opacity, visibility, tint and single layers, clipping and karaoke wipes, plus typewriter, word-by-word, bounce, wave and shake recipes.
 ---
 
 # Glyph transforms
@@ -90,6 +90,8 @@ The function receives a [`GlyphContext`](/api/types#glyphcontext) for every char
 | `opacity` | `1` | |
 | `visible` | `true` | |
 | `origin` | `[0.5, 0.5]` | Transform origin within the glyph box. `[0.5, 1]` is the bottom centre |
+| `tint` | | Multiplies the glyph's colors. A white fill takes the tint's color. [Tint and single layers](#tint-and-single-layers) |
+| `layers` | | `opacity`, `tint` and `visible` of single layers, by index or `id` |
 
 ## Recipes
 
@@ -264,6 +266,61 @@ export default (frame: number): TextNodeProps => ({
 
 Because the gradient's scope is `"block"`, it stays fixed in place while the glyphs move through it.
 
+## Tint and single layers
+
+`tint` multiplies a glyph's colors, so a white fill takes the tint's color and other colors darken toward it. `layers` changes single layers of a glyph by index or `id`, as [layer patches](./rich-text#patching-layers) do: their `opacity`, `tint` and `visible`. Neither rebuilds the caption, so they can follow the speech every frame:
+
+```ts demo loop=120 still=50
+import { fill, glow, stroke, type TextNodeProps } from "tellu";
+
+export default (frame: number): TextNodeProps => {
+  const spoken = Math.floor(frame / 20);
+  return {
+    text: "今日は最高の天気ですね",
+    style: {
+      fontFamily: "Noto Sans JP",
+      fontWeight: 900,
+      fontSize: 60,
+      layers: [
+        glow({ id: "glow", color: "#ffd400", stroke: 8, blur: 12 }),
+        stroke(10, "#1b1b3a"),
+        fill("#ffffff"),
+      ],
+    },
+    glyphTransform: (glyph) => {
+      const current = glyph.wordIndex === spoken % glyph.wordCount;
+      return {
+        tint: current ? "#ffe14d" : undefined,
+        layers: { glow: { visible: current } },
+      };
+    },
+  };
+};
+```
+
+A tint's alpha is ignored; fade with `opacity`. Tints multiply, so a black outline stays black.
+
+## Clipping
+
+`clip` shows the glyphs and decorations only inside boxes, in layout coordinates; the plate stays whole. Like `glyphTransform`, it can change every frame without a rebuild. It takes the boxes, or a function of the [layout](/api/layout#layout) that returns them. [`wipeClip(layout, progress)`](/api/layout#wipeclip) builds the boxes of a wipe along the lines, in reading order, which across several lines is beyond what CSS `clip-path` can do:
+
+```ts demo loop=120 still=80
+import { fill, stroke, type TextNodeProps, wipeClip } from "tellu";
+
+export default (frame: number): TextNodeProps => ({
+  text: "カラオケのワイプは\n二行目にも続きます",
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 56,
+    layers: [stroke(10, "#1a237e"), fill("#ffe14d")],
+  },
+  clip: (layout) => wipeClip(layout, frame / 100),
+});
+```
+
+Stack it over a copy in its unsung colors for a karaoke caption: see [Karaoke subtitles](/examples/broadcast#karaoke-subtitles). Each line's box reaches halfway to the next line and `margin` (2) font sizes past the text elsewhere, so outlines and shadows are wiped with their glyphs.
+
 ## Whole-caption motion
 
-To move, fade or clip the whole caption, transform its container instead: CSS on `<Text>`, or the `TextNode`'s own position in PixiJS. A karaoke wipe, for example, is two copies of the same caption with the colored one revealed by `clip-path`. See the [Subtitles example](/examples/broadcast#karaoke-subtitles).
+To move or fade the whole caption, transform its container instead: CSS on `<Text>`, or the `TextNode`'s own position in PixiJS.

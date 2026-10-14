@@ -1,4 +1,5 @@
 import type { Filter } from "pixi.js";
+import type { Layout } from "../layout/layout";
 
 /** Any CSS color string, or a number as `0xRRGGBB`. Numbers have no alpha: use a string such as `rgba()` for that. */
 export type ColorValue = string | number;
@@ -571,6 +572,28 @@ export interface GlyphTransform {
   visible?: boolean;
   /** Transform origin as fractions of the glyph's cell. Default: `[0.5, 0.5]` (its center). */
   origin?: readonly [number, number];
+  /**
+   * Multiplies the colors of every layer of the glyph: `"#ffffff"` leaves them as they are, and a white fill takes the
+   * tint's color. Its alpha is ignored; use `opacity`. Default: none.
+   */
+  tint?: ColorValue;
+  /**
+   * Changes to single layers of this glyph, keyed by layer index or `id` like a `LayerPatch`, e.g. to light up the
+   * glow of the word being spoken. When both keys match a layer, the `id` entry wins.
+   *
+   * @example { layers: { glow: { opacity: 0 }, 2: { tint: "#ffe14d" } } }
+   */
+  layers?: { readonly [indexOrId: string]: LayerTransform };
+}
+
+/** Changes to one layer of one glyph, in `GlyphTransform.layers`. They combine with the glyph's own transform. */
+export interface LayerTransform {
+  /** Multiplies the layer's opacity for this glyph, `0`–`1`. Default: `1`. */
+  opacity?: number;
+  /** Multiplies the layer's colors for this glyph, as `GlyphTransform.tint` does. Default: none. */
+  tint?: ColorValue;
+  /** `false` hides the layer for this glyph. Default: `true`. */
+  visible?: boolean;
 }
 
 /**
@@ -677,7 +700,19 @@ export interface TextNodeProps extends LayoutOptions {
    * after the warp, so they stay even. Plates and box decorations aren't warped.
    */
   warp?: Warp;
+  /**
+   * Shows the glyphs and decorations only inside these boxes, in layout coordinates; the plate isn't clipped. Like
+   * `glyphTransform`, a new value doesn't rebuild the text, so it can change every frame. `wipeClip()` builds the
+   * boxes of a wipe along the lines, e.g. for a karaoke caption.
+   */
+  clip?: ClipRegion;
 }
+
+/**
+ * Where a caption shows: boxes in layout coordinates, or a function of the layout that returns them. `[]` hides
+ * everything; `null` or `undefined` from the function shows everything.
+ */
+export type ClipRegion = readonly Box[] | ((layout: Layout) => readonly Box[] | null | undefined);
 
 /** Warp styles, named after Photoshop's and similar in spirit; the exact shapes differ. */
 export type WarpStyle =
