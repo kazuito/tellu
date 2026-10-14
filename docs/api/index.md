@@ -61,7 +61,7 @@ The rest of `tellu/react`'s exports are re-exported from `tellu/remotion` for co
 
 - In Remotion projects, import `Text` from `tellu/remotion`, not `tellu/react`. Only the Remotion one holds frame capture with `delayRender`.
 - `<Text>` takes the caption style as `textStyle`. Its `style` prop is the wrapper element's CSS.
-- Remotion renders need `Config.setChromiumOpenGlRenderer("angle")` (or `--gl=angle`), because PixiJS needs WebGL.
+- Remotion renders need a `--gl` backend that gives Chrome WebGL: `angle` on macOS, `swangle` on Linux without a GPU. Without WebGL, blur, layer opacity and blend modes are silently dropped.
 - Font stylesheets must be loaded before `<Text>` mounts or `createCanvasText()` runs. tellu can only load faces from `@font-face` rules that already exist, and falls back silently otherwise.
 - `style.layers` is ordered bottom → top. Outlines must get narrower toward the top, and the fill is usually last.
 - Animate with `glyphTransform`. Create PixiJS filters and pattern images once, outside render functions, because they are compared by identity.

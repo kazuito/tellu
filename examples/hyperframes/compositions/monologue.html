@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja"><head></head>
+  <body>
+    <template id="monologue-template">
+      <div data-hf-id="hf-b032" data-composition-id="monologue" data-width="1920" data-height="1080" data-duration="6">
+        <div data-hf-id="hf-xrbk" class="layer street"></div>
+        <div data-hf-id="hf-55xx" class="bokeh" style="left: 180px; top: 220px; width: 220px; height: 220px; background: #ff3d8b"></div>
+        <div data-hf-id="hf-70za" class="bokeh" style="left: 620px; top: 120px; width: 140px; height: 140px; background: #ffb547"></div>
+        <div data-hf-id="hf-snut" class="bokeh" style="left: 980px; top: 280px; width: 260px; height: 260px; background: #00b7ff"></div>
+        <div data-hf-id="hf-ftmq" class="bokeh" style="left: 1240px; top: 90px; width: 120px; height: 120px; background: #ff3d8b"></div>
+        <div data-hf-id="hf-12tp" class="bokeh" style="left: 1650px; top: 420px; width: 180px; height: 180px; background: #ffb547"></div>
+        <div data-hf-id="hf-5nt8" class="signal"><span data-hf-id="hf-uckh"></span><span data-hf-id="hf-x5xz" class="go"></span></div>
+        <div data-hf-id="hf-imf6" class="crosswalk" data-layout-allow-overflow=""></div>
+        <div data-hf-id="hf-ntg7" class="layer rain"></div>
+        <div data-hf-id="hf-2g3p" id="monologue-track" class="host"></div>
+        <div data-hf-id="hf-8fjd" id="monologue-side" class="host"></div>
+        <div data-hf-id="hf-ojry" id="monologue-line" class="host"></div>
+
+        <style>
+          [data-composition-id="monologue"] .street {
+            background: linear-gradient(180deg, #120d2e 0%, #1d0f33 55%, #2a0f2c 100%);
+          }
+          [data-composition-id="monologue"] .bokeh {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(18px);
+            opacity: 0.55;
+          }
+          [data-composition-id="monologue"] .crosswalk {
+            position: absolute;
+            left: -400px;
+            right: -400px;
+            bottom: -160px;
+            height: 520px;
+            transform: perspective(700px) rotateX(62deg);
+            background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.13) 0 70px, transparent 70px 140px);
+          }
+          [data-composition-id="monologue"] .rain {
+            background-image: repeating-linear-gradient(105deg, rgba(200, 220, 255, 0.07) 0 2px, transparent 2px 28px);
+          }
+          [data-composition-id="monologue"] .signal {
+            position: absolute;
+            left: 1440px;
+            top: 330px;
+            width: 120px;
+            height: 230px;
+            padding: 18px;
+            border-radius: 14px;
+            background: #0a0918;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+          }
+          [data-composition-id="monologue"] .signal span {
+            flex: 1;
+            border-radius: 50%;
+            background: #1c1a30;
+          }
+          [data-composition-id="monologue"] .signal .go {
+            background: #3dffc0;
+            box-shadow:
+              0 0 30px #3dffc0,
+              0 0 90px rgba(61, 255, 192, 0.6);
+          }
+          #monologue-line {
+            left: 960px;
+            top: 970px;
+          }
+          #monologue-side {
+            left: 1770px;
+            top: 110px;
+          }
+          #monologue-track {
+            left: 120px;
+            top: 100px;
+          }
+        </style>
+
+        <script>
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo(".rain", { backgroundPosition: "0px 0px" }, { backgroundPosition: "-260px 1300px", duration: 6, ease: "none" }, 0);
+          tl.fromTo(".bokeh", { x: -50 }, { x: 50, duration: 5, ease: "sine.inOut", stagger: 0.2 }, 0);
+          tl.fromTo(".signal .go", { opacity: 0.15 }, { opacity: 1, duration: 0.4, ease: "steps(3)" }, 3);
+
+          window.telluCaptions.attach("monologue", tl, 6).then(() => {
+            window.__timelines.monologue = tl;
+            window.__hfForceTimelineRebind?.();
+          });
+        </script>
+      </div>
+    </template>
+  </body>
+</html>

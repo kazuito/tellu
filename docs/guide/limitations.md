@@ -40,6 +40,6 @@ This rarely shows at normal letter spacing. When it does, give the overlapping r
 
 tellu loads the font faces and subsets a caption needs, but only from `@font-face` rules that already exist. If a caption is drawn before your font stylesheet loads, it uses a fallback font. `<Text>` and `createCanvasText()` warn about it by default, and `fontCheck: "error"` makes it fail instead. See [Checking fonts](./fonts#checking-fonts).
 
-## WebGL is required
+## WebGL is needed for blur, opacity and blend modes
 
-Composition runs on PixiJS with WebGL. Headless Chrome needs `--gl=angle` (`Config.setChromiumOpenGlRenderer("angle")` in Remotion).
+Composition runs on PixiJS. Without WebGL, PixiJS falls back to its Canvas 2D renderer **without an error**: captions still draw, but blurred layers (glows, soft shadows) lose their blur, and layer `opacity` and `blendMode` are ignored. Which Chrome `--gl` setting gives WebGL depends on the machine: `angle` did on macOS but not in a Linux container without a GPU, where `swangle` did. See [Remotion › WebGL and the `--gl` option](./remotion#webgl-and-the-gl-option). Check `(await TextRenderer.shared()).renderer.name` (`"webgl"` or `"canvas"`) if in doubt.

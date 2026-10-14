@@ -114,6 +114,7 @@ export default defineConfig({
           text: "Integrations",
           items: [
             { text: "Remotion", link: "/guide/remotion" },
+            { text: "HyperFrames", link: "/guide/hyperframes" },
             { text: "React", link: "/guide/react" },
             { text: "Canvas", link: "/guide/canvas" },
             { text: "PixiJS scene", link: "/guide/pixi" },

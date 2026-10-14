@@ -55,4 +55,4 @@ const frame = useCurrentFrame();
 const { style, ...props } = example(frame);
 ```
 
-The [`examples/remotion`](https://github.com/kazuito/tellu/tree/main/examples/remotion) project in the repository has complete Remotion compositions (variety show, subtitles, news, quiz, film credits and more) plus a vertical Shorts video.
+The [`examples/remotion`](https://github.com/kazuito/tellu/tree/main/examples/remotion) project in the repository has complete Remotion compositions (variety show, subtitles, news, quiz, film credits and more) plus a vertical Shorts video. [`examples/hyperframes`](https://github.com/kazuito/tellu/tree/main/examples/hyperframes) does the same in a [HyperFrames](https://hyperframes.heygen.com) project: plain HTML scenes animated with GSAP, with tellu drawing the captions into canvases on every seek.

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja"><head></head>
+  <body>
+    <template id="chapter-template">
+      <div data-hf-id="hf-jn33" data-composition-id="chapter" data-width="1920" data-height="1080" data-duration="5">
+        <div data-hf-id="hf-tnzd" class="layer grid"></div>
+        <div data-hf-id="hf-owjm" class="panel"></div>
+        <div data-hf-id="hf-2whe" class="hr"></div>
+        <div data-hf-id="hf-fq93" id="chapter-number" class="host"></div>
+        <div data-hf-id="hf-l5g5" id="chapter-kanji" class="host"></div>
+        <div data-hf-id="hf-gdaz" id="chapter-roman" class="host"></div>
+        <div data-hf-id="hf-d031" id="chapter-place" class="host"></div>
+        <div data-hf-id="hf-ii9s" id="chapter-body" class="host"></div>
+        <div data-hf-id="hf-00j2" id="chapter-clock" class="host"></div>
+
+        <style>
+          [data-composition-id="chapter"] .grid {
+            background-color: #0f0c26;
+            background-image:
+              linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 80px 80px;
+          }
+          [data-composition-id="chapter"] .panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 760px;
+            height: 1080px;
+            background: #ffb547;
+          }
+          [data-composition-id="chapter"] .hr {
+            position: absolute;
+            left: 900px;
+            top: 500px;
+            width: 860px;
+            height: 2px;
+            transform-origin: left;
+            background: rgba(244, 239, 230, 0.5);
+          }
+          #chapter-number {
+            left: 100px;
+            top: 150px;
+          }
+          #chapter-kanji {
+            left: 640px;
+            top: 150px;
+          }
+          #chapter-roman {
+            left: 902px;
+            top: 250px;
+          }
+          #chapter-place {
+            left: 892px;
+            top: 300px;
+          }
+          #chapter-body {
+            left: 900px;
+            top: 540px;
+          }
+          #chapter-clock {
+            left: 900px;
+            top: 820px;
+          }
+        </style>
+
+        <script>
+          const tl = gsap.timeline({ paused: true });
+          tl.from(".panel", { xPercent: -100, duration: 0.7, ease: "expo.out" }, 0);
+          tl.from(".hr", { scaleX: 0, duration: 0.8, ease: "power3.out" }, 0.7);
+
+          window.telluCaptions.attach("chapter", tl, 5).then(() => {
+            window.__timelines.chapter = tl;
+            window.__hfForceTimelineRebind?.();
+          });
+        </script>
+      </div>
+    </template>
+  </body>
+</html>

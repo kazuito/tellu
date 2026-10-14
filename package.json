@@ -13,6 +13,7 @@
     "typecheck": "bun run build && bun run --filter '*' typecheck",
     "dev": "bun run build && bun run --parallel --filter tellu --filter tellu-playground dev",
     "studio": "bun run build && bun run --parallel --filter tellu --filter tellu-remotion-example dev",
+    "hyperframes": "bun run build && bun run --parallel --filter tellu --filter tellu-hyperframes-example dev",
     "docs:dev": "bun run build && bun run --parallel --filter tellu --filter tellu-docs dev",
     "docs:build": "bun run --filter 'tellu-docs...' build",
     "docs:preview": "bun run --filter tellu-docs preview",

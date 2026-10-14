@@ -8,6 +8,7 @@ Bun workspaces monorepo for `tellu`, a telop (caption) rendering library on Pixi
 
 - `packages/tellu`: the library. It has three entries: `tellu` (core), `tellu/react` and `tellu/remotion`.
 - `examples/remotion`: Remotion sample project. Each real-world scene (`Variety`, `Subtitles`, `LowerThird`, `News`, `Quiz`, `Recipe`, `Sale`, `GameStream`, `Cinema`, `Documentary`, `Credits`) is its own composition and `Showcase` plays them in sequence; `Shorts` is a separate vertical (1080×1920) composition.
+- `examples/hyperframes`: [HyperFrames](https://hyperframes.heygen.com) sample (HTML + GSAP, rendered by the `hyperframes` CLI). `index.html` mounts one sub-composition per scene from `compositions/`; `src/` is bundled by `bun build` into `bundle/main.js`, which draws each scene's captions with tellu on every seek.
 - `examples/playground`: browser demo of every feature, served by Bun's HTML dev server.
 - `docs`: the documentation site (VitePress, English only), deployed on Vercel. See [Documentation](#documentation).
 
@@ -21,6 +22,7 @@ bun run typecheck   # build, then tsc --noEmit in every workspace
 bun run build       # tsdown -> packages/tellu/dist
 bun run dev         # playground at http://localhost:3100 (rebuilds tellu on change)
 bun run studio      # Remotion Studio at http://localhost:3200 (rebuilds tellu on change)
+bun run hyperframes # HyperFrames Studio at http://localhost:3300 (rebuilds tellu and the caption bundle on change)
 bun run docs:dev    # docs site at http://localhost:3400/ (rebuilds tellu on change)
 bun run docs:check  # docs examples typecheck + every public export documented + examples formatted
 bun run docs:format # format the docs' example code (Biome, 80 columns)
@@ -44,8 +46,8 @@ TypeScript is v7 (native). tsdown warns that its API is experimental; that warni
 The examples and docs depend on `"tellu": "workspace:*"` and import the built `packages/tellu/dist`, exactly like the published package (`exports` points only at `dist/`).
 
 - `bun run typecheck` and `bun run docs:check` build first; `bun run docs:build` builds tellu before the docs with Bun's dependency-ordered `--filter 'tellu-docs...'`.
-- `dev`, `studio` and `docs:dev` run tellu's `tsdown --watch` alongside the server (`bun run --parallel --filter`), so library changes reach the examples on save.
-- Commands run inside `examples/remotion` (`render`, `stills`) use whatever is in `dist/`: run `bun run build` first.
+- `dev`, `studio`, `hyperframes` and `docs:dev` run tellu's `tsdown --watch` alongside the server (`bun run --parallel --filter`), so library changes reach the examples on save.
+- Commands run inside `examples/remotion` (`render`, `stills`) and `examples/hyperframes` (`check`, `render`) use whatever is in `dist/`: run `bun run build` first.
 - Keep `exports` in `packages/tellu/package.json` in sync with the entries in `tsdown.config.ts`.
 - If a workspace link goes missing (`Cannot find module 'tellu'`), delete every `node_modules` and run `bun install` again.
 
@@ -110,6 +112,6 @@ The pipeline has three stages: **layout (pure) → rasterize (Canvas 2D) → com
 ## Constraints and gotchas
 
 - Fonts: tellu can only load `unicode-range` subsets for `@font-face` rules that are already declared. If text draws before the stylesheet loads, it falls back silently. Apps must gate `<Text>` on the stylesheet; see `FontGate` in `examples/remotion/src/fonts.tsx`, whose `continueRender` runs in an effect after the children mount.
-- Remotion needs `Config.setChromiumOpenGlRenderer("angle")` because PixiJS needs WebGL in headless Chrome.
+- Remotion needs a `--gl` backend that gives headless Chrome WebGL: `angle` on macOS (what `remotion.config.ts` and `scripts/stills.ts` use), `swangle` on Linux without a GPU, where `angle` gives no WebGL. Without WebGL, PixiJS silently falls back to Canvas 2D and blur, layer opacity and blend modes disappear. See `docs/guide/remotion.md`.
 - Known limitations: vertical forms are approximated (Canvas 2D can't apply the `vert` feature), no ruby, no ligatures (glyphs are drawn individually), and overlapping outlines of different colors in the same slot combine per channel with `max`.
 - Pixi, Remotion and React are peer deps that tsdown keeps external. Code under `layout/`, `style/` and `markup.ts` must stay free of Pixi/DOM runtime imports so `bun test` can run it.

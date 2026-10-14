@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja"><head></head>
+  <body>
+    <template id="outro-template">
+      <div data-hf-id="hf-tdfe" data-composition-id="outro" data-width="1920" data-height="1080" data-duration="3.5">
+        <div data-hf-id="hf-vt31" class="layer night"></div>
+        <div data-hf-id="hf-i3qj" class="layer dawn"></div>
+        <div data-hf-id="hf-0t7r" class="sun" data-layout-allow-overflow=""></div>
+        <div data-hf-id="hf-trqc" id="outro-title" class="host"></div>
+        <div data-hf-id="hf-yzx8" id="outro-latin" class="host"></div>
+        <div data-hf-id="hf-q3np" id="outro-credit" class="host"></div>
+
+        <style>
+          [data-composition-id="outro"] .night {
+            background: #0b0d1f;
+          }
+          [data-composition-id="outro"] .dawn {
+            background: linear-gradient(180deg, #0b0d1f 0%, #2b1a55 42%, #a2416b 76%, #ffb06b 100%);
+          }
+          [data-composition-id="outro"] .sun {
+            position: absolute;
+            left: 660px;
+            top: 860px;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffd9a0 0%, #ff9a5c 45%, rgba(255, 120, 90, 0) 70%);
+          }
+          #outro-title {
+            left: 960px;
+            top: 440px;
+          }
+          #outro-latin {
+            left: 960px;
+            top: 570px;
+          }
+          #outro-credit {
+            left: 960px;
+            top: 1030px;
+          }
+        </style>
+
+        <script>
+          const tl = gsap.timeline({ paused: true });
+          tl.from(".dawn", { opacity: 0, duration: 2.6, ease: "power1.inOut" }, 0);
+          tl.from(".sun", { y: 260, duration: 3.2, ease: "power2.out" }, 0);
+
+          window.telluCaptions.attach("outro", tl, 3.5).then(() => {
+            window.__timelines.outro = tl;
+            window.__hfForceTimelineRebind?.();
+          });
+        </script>
+      </div>
+    </template>
+  </body>
+</html>

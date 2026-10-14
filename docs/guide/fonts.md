@@ -27,7 +27,7 @@ It then calls `document.fonts.load(font, text)` for each one. Japanese web fonts
 
 - `<Text>` (React and Remotion) and `createCanvasText()` do this automatically. Both take `waitForFonts`, which defaults to `true`.
 - With a raw `TextNode`, call [`loadFonts(props)`](/api/layout#loadfonts) yourself before creating it.
-- `<Text>` also re-measures when the document finishes loading fonts later (`document.fonts` `loadingdone`), so a late font fixes itself in interactive apps.
+- `<Text>` also re-measures when the document finishes loading fonts later (`document.fonts` `loadingdone`), so a stylesheet that arrives late fixes itself in interactive apps. A `FontFace` that is already loaded when it is added to `document.fonts`, which is how `@remotion/google-fonts` adds faces, fires no such event and isn't picked up.
 
 ## The one rule: declare fonts before drawing
 
@@ -78,7 +78,7 @@ export const FontGate = ({ children }: { children: ReactNode }) => {
 
 Wrap each composition in `<FontGate>`. Releasing the gate's handle in an effect *after* the children mount matters. Each `<Text>` from `tellu/remotion` places its own `delayRender` while it loads the font subsets it needs. Releasing the gate first would leave a gap in which Remotion could capture an empty frame.
 
-If you load fonts with `@remotion/google-fonts` or `@remotion/fonts`, the `@font-face` rules are added for you. Just make sure that happens before `<Text>` mounts.
+`@remotion/google-fonts` and `@remotion/fonts` don't add `@font-face` rules. They add `FontFace` objects to `document.fonts` once each file has downloaded. tellu uses those, but a `<Text>` that drew before they were added keeps its fallback font. Mount captions only after their promise resolves (`waitUntilDone()` for Google Fonts). See [Remotion › Fonts](./remotion#fonts) for how each option behaved.
 
 To make a render fail instead of shipping a frame in the wrong font, set [`fontCheck="error"`](#checking-fonts) on `<Text>`.
 

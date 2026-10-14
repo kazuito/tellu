@@ -19,5 +19,5 @@ bun run stills --diff       # render, then compare against the baseline (diffs i
 
 Notes:
 
-- `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` (PixiJS needs WebGL in headless Chrome).
+- `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` (PixiJS needs WebGL in headless Chrome). That gives WebGL on macOS; on Linux without a GPU, `angle` gave no WebGL in our tests and `swangle` did (see the [Remotion guide](https://tellujs.vercel.app/guide/remotion#webgl-and-the-gl-option)).
 - `src/fonts.tsx` gates the compositions until the Google Fonts stylesheet has declared its `@font-face` rules; each `<Text>` then loads only the subsets its text uses.

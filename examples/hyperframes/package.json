@@ -1,0 +1,23 @@
+{
+  "name": "tellu-hyperframes-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/main.ts --outdir bundle --format iife",
+    "watch": "bun run build --watch",
+    "dev": "bun run build && bun run --parallel watch preview",
+    "preview": "hyperframes preview --port 3300 --foreground",
+    "check": "bun run build && hyperframes check",
+    "render": "bun run build && hyperframes render -o out/tokyo-night-walk.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pixi.js": "^8.22.0",
+    "tellu": "workspace:*"
+  },
+  "devDependencies": {
+    "gsap": "3.14.2",
+    "hyperframes": "0.8.156",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja"><head></head>
+  <body>
+    <template id="neon-template">
+      <div data-hf-id="hf-ceqa" data-composition-id="neon" data-width="1920" data-height="1080" data-duration="4.5">
+        <div data-hf-id="hf-gu15" class="layer wall"></div>
+        <div data-hf-id="hf-9vcs" class="layer sign-glow"></div>
+        <div data-hf-id="hf-lnqb" class="sign-frame"></div>
+        <div data-hf-id="hf-i3t6" id="neon-sign" class="host"></div>
+        <div data-hf-id="hf-akqm" id="neon-hours" class="host"></div>
+        <div data-hf-id="hf-hlj0" id="neon-menu" class="host"></div>
+
+        <style>
+          [data-composition-id="neon"] .wall {
+            background-color: #1a0f1c;
+            background-image:
+              repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 4px, transparent 4px 64px),
+              repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0 4px, transparent 4px 128px);
+          }
+          [data-composition-id="neon"] .sign-glow {
+            background: radial-gradient(ellipse 900px 420px at 50% 32%, rgba(0, 200, 255, 0.28), transparent 70%);
+          }
+          [data-composition-id="neon"] .sign-frame {
+            position: absolute;
+            left: 380px;
+            top: 130px;
+            width: 1160px;
+            height: 420px;
+            border: 4px solid #c4f7ff;
+            border-radius: 36px;
+            box-shadow:
+              0 0 24px #00c8ff,
+              0 0 60px rgba(0, 200, 255, 0.5),
+              inset 0 0 40px rgba(0, 200, 255, 0.35);
+          }
+          #neon-sign {
+            left: 960px;
+            top: 330px;
+          }
+          #neon-hours {
+            left: 960px;
+            top: 600px;
+          }
+          #neon-menu {
+            left: 960px;
+            top: 820px;
+          }
+        </style>
+
+        <script>
+          const tl = gsap.timeline({ paused: true });
+          tl.from(".sign-frame", { opacity: 0.06, duration: 0.6, ease: "steps(6)" }, 0.1);
+          tl.from(".sign-glow", { opacity: 0, duration: 1.2, ease: "power2.out" }, 0.4);
+
+          window.telluCaptions.attach("neon", tl, 4.5).then(() => {
+            window.__timelines.neon = tl;
+            window.__hfForceTimelineRebind?.();
+          });
+        </script>
+      </div>
+    </template>
+  </body>
+</html>

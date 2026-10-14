@@ -80,7 +80,7 @@ Three ideas carry most of the API:
 
 - In Remotion projects, import `Text` from `tellu/remotion` (it holds frames with `delayRender`), not `tellu/react`.
 - `<Text>` takes the caption style as `textStyle`. Its `style` prop is the wrapper element's CSS.
-- Remotion renders need `Config.setChromiumOpenGlRenderer("angle")` because PixiJS needs WebGL.
+- Remotion renders need a `--gl` backend that gives Chrome WebGL: `angle` on macOS, `swangle` on Linux without a GPU. See [Remotion](./remotion#webgl-and-the-gl-option).
 - Load font stylesheets before any caption is drawn. tellu cannot load faces whose `@font-face` rules don't exist yet, and silently falls back.
 - `style.layers` is bottom → top. Each outline must be wider than the ones above it.
 
@@ -90,4 +90,5 @@ Three ideas carry most of the API:
 
 - [Quick start](./quick-start): install and draw your first caption.
 - [Remotion](./remotion): set up `tellu/remotion` in a video project.
+- [HyperFrames](./hyperframes): draw captions in HTML video compositions.
 - [Examples](/examples/): real-world captions to copy from.

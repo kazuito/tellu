@@ -26,7 +26,7 @@ A few rules prevent most mistakes:
 
 1. In Remotion, import `Text` from `tellu/remotion`.
 2. `<Text>` takes the caption style as `textStyle`. `style` is the wrapper's CSS.
-3. Render Remotion with `--gl=angle` (`Config.setChromiumOpenGlRenderer("angle")`).
+3. Render Remotion with a `--gl` backend that gives WebGL: `angle` on macOS, `swangle` on Linux without a GPU.
 4. Load the font stylesheet before any caption is drawn. See [Fonts](/guide/fonts).
 5. `layers` go bottom → top, with outlines getting narrower toward the top.
 6. Animate with `glyphTransform`, and create filters and images once.

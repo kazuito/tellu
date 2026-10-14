@@ -18,7 +18,7 @@ Guide: [Remotion](/guide/remotion).
 - calls `continueRender()` once the renderer is ready, the fonts are loaded and the current props are drawn;
 - passes errors to `cancelRender()`, so a render fails instead of hanging. With `fontCheck="error"`, that includes [font issues](/guide/fonts#checking-fonts), such as a family that isn't declared.
 
-Render with `--gl=angle` (or `Config.setChromiumOpenGlRenderer("angle")`), because PixiJS needs WebGL in headless Chrome.
+Render with a `--gl` backend that gives Chrome WebGL: `angle` on macOS, `swangle` on Linux without a GPU. Without WebGL, blurred layers, layer opacity and blend modes are silently dropped. See [Remotion › WebGL and the `--gl` option](/guide/remotion#webgl-and-the-gl-option).
 
 ### `RemotionTextProps`
 

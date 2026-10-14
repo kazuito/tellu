@@ -60,14 +60,14 @@ export const Caption = () => {
 
 `<Text>` renders a block the size of the layout box; outlines, shadows and transformed glyphs may paint outside of it. `anchor` picks which point of the box sits at the element's position.
 
-`tellu/remotion` holds the frame with `delayRender` until the renderer is ready, the fonts are loaded and the frame is drawn. Render with ANGLE so headless Chrome has WebGL:
+`tellu/remotion` holds the frame with `delayRender` until the renderer is ready, the fonts are loaded and the frame is drawn. Render with a GL backend that gives headless Chrome WebGL. Without it, blur, layer opacity and blend modes are silently dropped:
 
 ```ts
 // remotion.config.ts
-Config.setChromiumOpenGlRenderer("angle");
+Config.setChromiumOpenGlRenderer("angle"); // macOS; use "swangle" on Linux without a GPU
 ```
 
-tellu loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](https://github.com/kazuito/tellu/blob/main/examples/remotion/src/fonts.tsx)). `<Text>` also re-measures whenever the document finishes loading fonts later.
+tellu loads exactly the font faces and `unicode-range` subsets each text needs, but it can only see `@font-face` rules that are already declared. Mount `<Text>` after your font stylesheet has loaded — e.g. a gate component that renders its children once the `<link>` fires `onload` and only then releases its own `delayRender` (see [`examples/remotion/src/fonts.tsx`](https://github.com/kazuito/tellu/blob/main/examples/remotion/src/fonts.tsx)). `<Text>` also re-measures when a stylesheet's fonts finish loading later, but not when an already-loaded `FontFace` is added (as `@remotion/google-fonts` does), so gate on those too.
 
 ### Vanilla
 
@@ -204,7 +204,7 @@ Font checks embed [Adobe Blank 2](https://github.com/adobe-fonts/adobe-blank-2),
 
 ## Development
 
-The [repository](https://github.com/kazuito/tellu) is a Bun workspace: the library in `packages/tellu`, a Remotion sample in `examples/remotion`, a browser playground in `examples/playground` and the docs site in `docs`.
+The [repository](https://github.com/kazuito/tellu) is a Bun workspace: the library in `packages/tellu`, a Remotion sample in `examples/remotion`, a HyperFrames sample in `examples/hyperframes`, a browser playground in `examples/playground` and the docs site in `docs`.
 
 ```sh
 bun install
@@ -213,7 +213,8 @@ bun run typecheck  # every workspace
 bun run build      # packages/tellu/dist
 bun run dev        # playground at http://localhost:3100
 bun run studio     # Remotion Studio at http://localhost:3200
+bun run hyperframes # HyperFrames Studio at http://localhost:3300
 bun run docs:dev   # docs at http://localhost:3400/
 ```
 
-The examples and docs use the built `dist/` through the workspace link, like any other consumer. `dev`, `studio` and `docs:dev` rebuild it on change.
+The examples and docs use the built `dist/` through the workspace link, like any other consumer. `dev`, `studio`, `hyperframes` and `docs:dev` rebuild it on change.
