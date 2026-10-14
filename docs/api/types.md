@@ -292,10 +292,22 @@ A multiple of the font size, or absolute pixels.
 | `opacity` | `number` | `1` | Applied to the merged layer |
 | `blendMode` | [`BlendMode`](#blendmode) | `"normal"` | |
 | `filters` | `readonly Filter[]` | | PixiJS filters |
+| `repeat` | [`LayerRepeat`](#layerrepeat) | | Copies of the layer behind it: extrusion, echoes. [Guide](/guide/layers#extrusion-and-echoes) |
 | `visible` | `boolean` | `true` | |
 | `id` | `string` | | Target for layer patches |
 
 Guide: [Layers](/guide/layers).
+
+### `LayerRepeat`
+
+| Property | Type | Default | |
+| --- | --- | --- | --- |
+| `count` | `number` | | Number of copies, up to `256` |
+| `offset` | `readonly [x: Length, y: Length]` | | Shift of each copy from the one in front of it |
+| `opacity` | `number` | `1` | Opacity of the farthest copy; the ones in between fade to it |
+| `tint` | [`ColorValue`](#colorvalue) | | Tint of the farthest copy, multiplied into its colors; the ones in between blend to it |
+
+Copies are drawn behind the layer, the farthest at the bottom, with the layer's effects, and follow glyph transforms. Built by [`extrude()`](./helpers#extrude) and [`echo()`](./helpers#echo).
 
 ### `BlendMode`
 

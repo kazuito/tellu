@@ -1,5 +1,5 @@
 ---
-description: API reference for layer helpers (fill, stroke, shadow, glow, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond, shape), arcPath, parseMarkup, style override utilities and defaults.
+description: API reference for layer helpers (fill, stroke, shadow, glow, extrude, echo, innerShadow, innerGlow, bevel, satin), decoration helpers (underline, overline, lineThrough, marker, frame), gradient helpers (linear, radial, conic, diamond, shape), arcPath, parseMarkup, style override utilities and defaults.
 ---
 
 # Style helpers
@@ -54,6 +54,47 @@ All [`Layer`](./types#layer) options except `paint` and `stroke`, plus:
 | `color` | `"#ffffff"` | Any paint |
 | `stroke` | `8` | |
 | `blur` | `8` | |
+
+### `extrude()`
+
+```ts
+function extrude(options?: ExtrudeOptions): Layer;
+```
+
+Extruded text (立体文字): a layer with [`repeat`](./types#layerrepeat) copies of the glyph stacked `depth` px deep toward `angle`, a pixel apart. Put it first, below the outlines. See [Extrusion and echoes](/guide/layers#extrusion-and-echoes).
+
+### `ExtrudeOptions`
+
+All [`Layer`](./types#layer) options except `paint`, `stroke` and `repeat`, plus:
+
+| Option | Default | |
+| --- | --- | --- |
+| `color` | `"#000000"` | Any paint |
+| `depth` | `12` | In px |
+| `angle` | `135` | Direction in degrees clockwise from the top: `180` is straight down |
+| `stroke` | `0` | Extrude the glyph grown by this much, e.g. the widest outline |
+| `shade` | | Tint of the back of the extrusion, to shade it |
+
+### `echo()`
+
+```ts
+function echo(options?: EchoOptions): Layer;
+```
+
+Fading copies of the glyph trailing behind it, each `offset` from the one in front. Put it first, below the other layers.
+
+### `EchoOptions`
+
+All [`Layer`](./types#layer) options except `paint`, `stroke`, `offset` and `repeat`, plus:
+
+| Option | Default | |
+| --- | --- | --- |
+| `color` | `"#ffffff"` | Any paint |
+| `count` | `3` | Number of echoes |
+| `offset` | `[6, 6]` | Shift of each echo from the one in front |
+| `fade` | `0.25` | Opacity of the farthest echo, relative to the nearest |
+| `stroke` | `0` | Echo the glyph grown by this much |
+| `opacity` | `0.6` | Opacity of all the echoes |
 
 ### `innerShadow()`
 

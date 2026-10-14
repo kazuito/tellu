@@ -4,6 +4,7 @@ import type {
   BoxDecoration,
   InsetShading,
   Layer,
+  LayerRepeat,
   Length,
   Paint,
   PlateStyle,
@@ -29,6 +30,7 @@ export type ResolvedLayer = Layer & {
   offset?: Pair;
   blur?: number;
   shading?: ResolvedShading;
+  repeat?: LayerRepeat & { offset: Pair };
 };
 
 /** A `PlateStyle` with every length in px. */
@@ -78,7 +80,15 @@ function resolveShading(shading: Layer["shading"], em: number): ResolvedShading 
 export function resolveLayer(layer: Layer, em: number): ResolvedLayer {
   const shading = resolveShading(layer.shading, em);
   const shapeSize = typeof layer.paint === "object" && layer.paint.type === "shape" && isEm(layer.paint.size);
-  if (!isEm(layer.stroke) && !isEmPair(layer.offset) && !isEm(layer.blur) && shading === layer.shading && !shapeSize) {
+  const emRepeat = isEmPair(layer.repeat?.offset);
+  if (
+    !isEm(layer.stroke) &&
+    !isEmPair(layer.offset) &&
+    !isEm(layer.blur) &&
+    shading === layer.shading &&
+    !shapeSize &&
+    !emRepeat
+  ) {
     return layer as ResolvedLayer;
   }
   const resolved: ResolvedLayer = {
@@ -88,6 +98,7 @@ export function resolveLayer(layer: Layer, em: number): ResolvedLayer {
     offset: pair(layer.offset, em),
     blur: length(layer.blur, em),
     shading,
+    repeat: layer.repeat && { ...layer.repeat, offset: pair(layer.repeat.offset, em)! },
   };
   if (shapeSize) {
     const paint = layer.paint as ShapeGradient;

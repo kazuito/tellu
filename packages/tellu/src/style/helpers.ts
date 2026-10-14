@@ -8,6 +8,7 @@ import type {
   GradientStopInput,
   Layer,
   LayerPaint,
+  LayerRepeat,
   Length,
   LinearGradient,
   LineDecoration,
@@ -86,6 +87,74 @@ export interface GlowOptions extends LayerOptions {
 /** A soft halo around the glyph: the glyph grown by `stroke` and blurred. Put it below the fill. */
 export function glow({ color = "#ffffff", stroke = 8, ...options }: GlowOptions = {}): Layer {
   return { blur: 8, ...options, paint: color, stroke };
+}
+
+export interface ExtrudeOptions extends Omit<LayerOptions, "repeat"> {
+  /** Paint of the extrusion. Default: `"#000000"`. */
+  color?: LayerPaint;
+  /** How deep the extrusion goes, in px. Default: `12`. */
+  depth?: number;
+  /** Direction it goes, in degrees clockwise from the top: `180` is straight down, `135` down and to the right. Default: `135`. */
+  angle?: number;
+  /** Extrude the glyph grown by this much, e.g. the width of the widest outline. Default: `0`. */
+  stroke?: Length;
+  /** Tint of the back of the extrusion, multiplied into its paint, to shade it toward the back. Default: none. */
+  shade?: ColorValue;
+}
+
+/** Rounds away the floating-point noise of sines and cosines (`6e-17` for `0`), and `-0`. */
+const tidy = (value: number) => Math.round(value * 1e9) / 1e9 || 0;
+
+/**
+ * Extruded text (立体文字): copies of the glyph stacked `depth` px deep toward `angle`, a pixel apart, so they read as
+ * one solid block. Put it first, below the outlines, with the width of the widest outline as `stroke`.
+ *
+ * @example layers: [extrude({ depth: 10, stroke: 12, color: "#7a0019" }), stroke(12, "#c8102e"), fill("#fff")]
+ */
+export function extrude({
+  color = "#000000",
+  depth = 12,
+  angle = 135,
+  stroke = 0,
+  shade,
+  ...options
+}: ExtrudeOptions = {}): Layer {
+  const radians = (angle * Math.PI) / 180;
+  const count = Math.max(1, Math.round(depth));
+  const step = depth / count;
+  const repeat: LayerRepeat = { count, offset: [tidy(Math.sin(radians) * step), tidy(-Math.cos(radians) * step)] };
+  if (shade !== undefined) repeat.tint = shade;
+  return { ...options, paint: color, stroke, repeat };
+}
+
+export interface EchoOptions extends Omit<LayerOptions, "repeat" | "offset"> {
+  /** Default: `"#ffffff"`. */
+  color?: LayerPaint;
+  /** Number of echoes. Default: `3`. */
+  count?: number;
+  /** `[x, y]` shift of each echo from the one in front of it. Default: `[6, 6]` (px). */
+  offset?: readonly [Length, Length];
+  /** Opacity of the farthest echo, relative to the nearest; the ones in between fade to it. Default: `0.25`. */
+  fade?: number;
+  /** Echo the glyph grown by this much, e.g. an outline. Default: `0`. */
+  stroke?: Length;
+}
+
+/**
+ * Echoes: fading copies of the glyph trailing behind it, each `offset` from the one in front. Put it first, below the
+ * other layers. Its `opacity` (default `0.6`) applies to all the echoes.
+ */
+export function echo({
+  color = "#ffffff",
+  count = 3,
+  offset = [6, 6],
+  fade = 0.25,
+  stroke = 0,
+  ...options
+}: EchoOptions = {}): Layer {
+  const layer: Layer = { opacity: 0.6, ...options, paint: color, stroke, offset };
+  if (count > 1) layer.repeat = { count: count - 1, offset, opacity: fade };
+  return layer;
 }
 
 export interface InnerShadowOptions extends Omit<LayerOptions, "offset" | "shading"> {

@@ -18,13 +18,13 @@ import { shaderBlendMode } from "./render/blendModes";
 import { blurPadding } from "./render/blur";
 import { ContourFilter } from "./render/contourFilter";
 import { traceLine } from "./render/decorationShapes";
-import { planGroups, runLayers } from "./render/groups";
+import { planGroups, repeatCount, runLayers } from "./render/groups";
 import { paintKey, paintScope } from "./render/paint";
 import { plateBoxes, rasterizeBoxes, rasterizePlate } from "./render/plate";
 import { type GlyphShape, keepsGlyphColors, layerReach, layerShape, type PathSource } from "./render/rasterize";
 import { ScopeBoxes, unionBox } from "./render/scope";
 import { invalidateTextures, rasterizer, TextureSet } from "./render/textureCache";
-import { multiplyTints, tintOf, WHITE } from "./render/tint";
+import { mixTints, multiplyTints, tintOf, WHITE } from "./render/tint";
 import { type WarpMapping, warpedBounds, warpMapping } from "./render/warp";
 import { resolveStyle } from "./style/defaults";
 import { layerTransformFor } from "./style/merge";
@@ -48,8 +48,15 @@ export interface TextNodeOptions {
 interface GlyphSprite {
   sprite: Sprite;
   glyph: number;
+  /** Position when the glyph isn't transformed. */
   baseX: number;
   baseY: number;
+  /** Shift of a copy (`Layer.repeat`) from its layer, kept when the glyph is transformed. */
+  copyX: number;
+  copyY: number;
+  /** Opacity and tint of a copy. */
+  alpha: number;
+  tint: number;
   /** The layer it draws: its index and `id`, which `GlyphTransform.layers` target. */
   slot: number;
   layerId: string | undefined;
@@ -269,90 +276,139 @@ export class TextNode extends Container {
 
     const vertical = isVertical(layout.writingMode);
     const lines = new Map<number, LineShape>();
+    /** The texture of a line decoration's layer, and where it goes. */
+    const decorationTexture = (decoration: number, layer: ResolvedLayer) => {
+      let line = lines.get(decoration);
+      if (!line) {
+        line = lineShape(layout, layers, decoration, vertical, res, warp);
+        lines.set(decoration, line);
+      }
+      const shape = line;
+      const scopeBox = scopeOf(scopes.forBand(paintScope(layer.paint), shape.lineIndex, shape.band, vertical));
+      const paintBox = { ...scopeBox, x: scopeBox.x - shape.originX, y: scopeBox.y - shape.originY };
+      const key = [
+        shape.shape.source.key,
+        res,
+        shape.shape.fracX,
+        shape.shape.fracY,
+        warp ? `${warp.key}\u0000${roundPoint(shape.band.x, shape.band.y)}` : "",
+        shape.reach,
+        stableKey(layerShape(layer)),
+        stableKey(layer.shading ?? null),
+        paintKey(layer.paint),
+        paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
+      ].join("\u0000");
+      const cached = this.textures.get(key, res, () => rasterizer.rasterize(shape.shape, layer, paintBox, shape.reach));
+      return {
+        texture: cached.texture,
+        x: (shape.pixelX + cached.offsetX) / res,
+        y: (shape.pixelY + cached.offsetY) / res,
+      };
+    };
+
+    /** The texture of a glyph's layer, and where it goes when the glyph isn't transformed. */
+    const glyphTexture = (index: number, layer: ResolvedLayer) => {
+      const glyph = layout.glyphs[index]!;
+      const style = layout.runs[glyph.runIndex]!.style;
+      const font = fontSpecOf(style, glyph.fontSize);
+
+      // A warped glyph is placed absolutely, so its position isn't snapped and its paint box is in layout px.
+      const [pixelX, fracX] = warp ? [0, 0] : snap(glyph.x * res);
+      const [pixelY, fracY] = warp ? [0, 0] : snap(glyph.y * res);
+      const originX = (pixelX + fracX) / res;
+      const originY = (pixelY + fracY) / res;
+      const scopeBox = scopeOf(scopes.get(paintScope(layer.paint), glyph));
+      const paintBox = { ...scopeBox, x: scopeBox.x - originX, y: scopeBox.y - originY };
+      const shape: GlyphShape = {
+        source: { text: glyph.text, font },
+        scaleX: glyph.scaleX,
+        scaleY: glyph.scaleY,
+        rotation: glyph.rotation,
+        angle: glyph.angle,
+        resolution: res,
+        fracX,
+        fracY,
+      };
+      if (warp) shape.warp = { ...warp, origin: [glyph.x, glyph.y] };
+
+      const key = [
+        glyph.text,
+        fontToCss(font),
+        glyph.scaleX,
+        glyph.scaleY,
+        glyph.rotation,
+        Math.round(glyph.angle * 100) / 100,
+        res,
+        fracX,
+        fracY,
+        warp ? `${warp.key}\u0000${roundPoint(glyph.x, glyph.y)}` : "",
+        reach[index],
+        stableKey(layerShape(layer)),
+        keepsGlyphColors(layer) ? "own colors" : "",
+        stableKey(layer.shading ?? null),
+        paintKey(layer.paint),
+        paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
+      ].join("\u0000");
+      const cached = this.textures.get(key, res, () => rasterizer.rasterize(shape, layer, paintBox, reach[index]!));
+      return { texture: cached.texture, x: (pixelX + cached.offsetX) / res, y: (pixelY + cached.offsetY) / res };
+    };
+
     for (const group of planGroups(layout, layers)) {
-      const { group: container, root } = createEffectContainer(group.effects, `slot ${group.slot}`);
+      const label = `slot ${group.slot}${group.copies ? " copies" : ""}`;
+      const { group: container, root } = createEffectContainer(group.effects, label);
+      // Copies are added back to front across all glyphs once they are all known.
+      const copies: { depth: number; sprite: Sprite }[] = [];
       for (const member of group.members) {
         const { layer } = member;
-        if ("decoration" in member) {
-          let line = lines.get(member.decoration);
-          if (!line) {
-            line = lineShape(layout, layers, member.decoration, vertical, res, warp);
-            lines.set(member.decoration, line);
-          }
-          const scopeBox = scopeOf(scopes.forBand(paintScope(layer.paint), line.lineIndex, line.band, vertical));
-          const paintBox = { ...scopeBox, x: scopeBox.x - line.originX, y: scopeBox.y - line.originY };
-          const key = [
-            line.shape.source.key,
-            res,
-            line.shape.fracX,
-            line.shape.fracY,
-            warp ? `${warp.key}\u0000${roundPoint(line.band.x, line.band.y)}` : "",
-            line.reach,
-            stableKey(layerShape(layer)),
-            stableKey(layer.shading ?? null),
-            paintKey(layer.paint),
-            paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
-          ].join("\u0000");
-          const cached = this.textures.get(key, res, () =>
-            rasterizer.rasterize(line.shape, layer, paintBox, line.reach),
-          );
-          // Decorations don't move with glyph transforms, so they aren't glyph sprites.
-          const sprite = new Sprite({ texture: cached.texture, blendMode: "max", roundPixels: false });
-          sprite.position.set((line.pixelX + cached.offsetX) / res, (line.pixelY + cached.offsetY) / res);
+        const glyph = "glyph" in member ? member.glyph : -1;
+        const { texture, x, y } =
+          "decoration" in member ? decorationTexture(member.decoration, layer) : glyphTexture(member.glyph, layer);
+        if (!group.copies) {
+          const sprite = new Sprite({ texture, blendMode: "max", roundPixels: false });
+          sprite.position.set(x, y);
           container.addChild(sprite);
+          // Decorations don't move with glyph transforms, so they aren't glyph sprites.
+          if (glyph >= 0) {
+            this.glyphSprites.push({
+              sprite,
+              glyph,
+              baseX: x,
+              baseY: y,
+              copyX: 0,
+              copyY: 0,
+              alpha: 1,
+              tint: WHITE,
+              slot: group.slot,
+              layerId: layer.id,
+            });
+          }
           continue;
         }
-        const index = member.glyph;
-        const glyph = layout.glyphs[index]!;
-        const style = layout.runs[glyph.runIndex]!.style;
-        const font = fontSpecOf(style, glyph.fontSize);
-
-        // A warped glyph is placed absolutely, so its position isn't snapped and its paint box is in layout px.
-        const [pixelX, fracX] = warp ? [0, 0] : snap(glyph.x * res);
-        const [pixelY, fracY] = warp ? [0, 0] : snap(glyph.y * res);
-        const originX = (pixelX + fracX) / res;
-        const originY = (pixelY + fracY) / res;
-        const scopeBox = scopeOf(scopes.get(paintScope(layer.paint), glyph));
-        const paintBox = { ...scopeBox, x: scopeBox.x - originX, y: scopeBox.y - originY };
-        const shape: GlyphShape = {
-          source: { text: glyph.text, font },
-          scaleX: glyph.scaleX,
-          scaleY: glyph.scaleY,
-          rotation: glyph.rotation,
-          angle: glyph.angle,
-          resolution: res,
-          fracX,
-          fracY,
-        };
-        if (warp) shape.warp = { ...warp, origin: [glyph.x, glyph.y] };
-
-        const key = [
-          glyph.text,
-          fontToCss(font),
-          glyph.scaleX,
-          glyph.scaleY,
-          glyph.rotation,
-          Math.round(glyph.angle * 100) / 100,
-          res,
-          fracX,
-          fracY,
-          warp ? `${warp.key}\u0000${roundPoint(glyph.x, glyph.y)}` : "",
-          reach[index],
-          stableKey(layerShape(layer)),
-          keepsGlyphColors(layer) ? "own colors" : "",
-          stableKey(layer.shading ?? null),
-          paintKey(layer.paint),
-          paintScope(layer.paint) === null ? "" : stableKey(roundBox(paintBox)),
-        ].join("\u0000");
-        const cached = this.textures.get(key, res, () => rasterizer.rasterize(shape, layer, paintBox, reach[index]!));
-
-        const sprite = new Sprite({ texture: cached.texture, blendMode: "max", roundPixels: false });
-        const baseX = (pixelX + cached.offsetX) / res;
-        const baseY = (pixelY + cached.offsetY) / res;
-        sprite.position.set(baseX, baseY);
-        container.addChild(sprite);
-        this.glyphSprites.push({ sprite, glyph: index, baseX, baseY, slot: group.slot, layerId: layer.id });
+        for (const copy of layerCopies(layer)) {
+          // Blended normally, so a nearer copy covers a farther one.
+          const sprite = new Sprite({ texture, roundPixels: false });
+          sprite.position.set(x + copy.x, y + copy.y);
+          sprite.alpha = copy.alpha;
+          sprite.tint = copy.tint;
+          copies.push({ depth: copy.depth, sprite });
+          if (glyph >= 0) {
+            this.glyphSprites.push({
+              sprite,
+              glyph,
+              baseX: x + copy.x,
+              baseY: y + copy.y,
+              copyX: copy.x,
+              copyY: copy.y,
+              alpha: copy.alpha,
+              tint: copy.tint,
+              slot: group.slot,
+              layerId: layer.id,
+            });
+          }
+        }
       }
+      copies.sort((a, b) => b.depth - a.depth);
+      for (const { sprite } of copies) container.addChild(sprite);
       this.glyphLayer.addChild(root);
     }
 
@@ -465,10 +521,10 @@ export class TextNode extends Container {
     const transforms: (GlyphTransform | null)[] = this.contexts.map((context) => fn?.(context) || null);
 
     let changed = false;
-    for (const { sprite, glyph: index, baseX, baseY, slot, layerId } of this.glyphSprites) {
+    for (const { sprite, glyph: index, baseX, baseY, copyX, copyY, alpha, tint, slot, layerId } of this.glyphSprites) {
       const t = transforms[index];
       if (!t) {
-        changed = placeSprite(sprite, [0, 0, baseX, baseY, 1, 1, 0, 0, 0, 1, WHITE], true) || changed;
+        changed = placeSprite(sprite, [0, 0, baseX, baseY, 1, 1, 0, 0, 0, alpha, tint], true) || changed;
         continue;
       }
       const { box, angle } = layout.glyphs[index]!;
@@ -488,18 +544,19 @@ export class TextNode extends Container {
       if (this.warp) [px, py] = this.warp.forward(px, py);
       const scale = t.scale ?? 1;
       const layer = layerTransformFor(t.layers, slot, layerId);
+      // A copy keeps its shift on screen, so an extrusion keeps its direction when the glyph turns.
       const placement: SpritePlacement = [
-        px - baseX,
-        py - baseY,
-        px + (t.x ?? 0),
-        py + (t.y ?? 0),
+        px - (baseX - copyX),
+        py - (baseY - copyY),
+        px + (t.x ?? 0) + copyX,
+        py + (t.y ?? 0) + copyY,
         scale * (t.scaleX ?? 1),
         scale * (t.scaleY ?? 1),
         (t.rotation ?? 0) * DEG,
         (t.skewX ?? 0) * DEG,
         (t.skewY ?? 0) * DEG,
-        (t.opacity ?? 1) * (layer?.opacity ?? 1),
-        multiplyTints(tintOf(t.tint), tintOf(layer?.tint)),
+        alpha * (t.opacity ?? 1) * (layer?.opacity ?? 1),
+        multiplyTints(tint, multiplyTints(tintOf(t.tint), tintOf(layer?.tint))),
       ];
       changed = placeSprite(sprite, placement, (t.visible ?? true) && (layer?.visible ?? true)) || changed;
     }
@@ -682,6 +739,24 @@ function createEffectContainer(effects: ResolvedLayer, label: string): { group: 
   wrapper.filters = [blend];
   wrapper.addChild(container);
   return { group: container, root: wrapper };
+}
+
+/** The copies `Layer.repeat` draws behind a layer, nearest first: their shift, opacity and tint. */
+function layerCopies(layer: ResolvedLayer): { depth: number; x: number; y: number; alpha: number; tint: number }[] {
+  const count = repeatCount(layer);
+  const { offset = [0, 0], opacity = 1, tint } = layer.repeat ?? {};
+  const farthest = tintOf(tint);
+  return Array.from({ length: count }, (_, i) => {
+    const depth = i + 1;
+    const t = depth / count;
+    return {
+      depth,
+      x: offset[0] * depth,
+      y: offset[1] * depth,
+      alpha: 1 + (opacity - 1) * t,
+      tint: mixTints(WHITE, farthest, t),
+    };
+  });
 }
 
 /** Destroys the filters the node created on a group, and on the group a blend wraps. */

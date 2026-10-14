@@ -26,3 +26,13 @@ export function multiplyTints(a: number, b: number): number {
   const channel = (shift: number) => Math.round((((a >> shift) & 0xff) * ((b >> shift) & 0xff)) / 255) << shift;
   return channel(16) | channel(8) | channel(0);
 }
+
+/** The tint `t` of the way from `a` to `b`, channel by channel. */
+export function mixTints(a: number, b: number, t: number): number {
+  if (a === b) return a;
+  const channel = (shift: number) => {
+    const from = (a >> shift) & 0xff;
+    return Math.round(from + (((b >> shift) & 0xff) - from) * t) << shift;
+  };
+  return channel(16) | channel(8) | channel(0);
+}

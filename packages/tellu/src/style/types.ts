@@ -305,8 +305,29 @@ export interface Layer {
    * on every render rebuild the text. tellu never destroys them.
    */
   filters?: readonly Filter[];
+  /**
+   * Draws copies of the layer behind it, each shifted by `repeat.offset` from the one in front: extruded (立体) text,
+   * long shadows and echoes. The copies reuse the layer's bitmaps and follow glyph transforms. `extrude()` and `echo()`
+   * build common ones.
+   */
+  repeat?: LayerRepeat;
   /** `false` skips the layer, e.g. to turn it off for one run with a layer patch. Default: `true`. */
   visible?: boolean;
+}
+
+/**
+ * Copies of a layer, drawn behind it in order, the farthest at the bottom, with the layer's effects. Where copies of
+ * neighbouring glyphs overlap, the nearer one is on top.
+ */
+export interface LayerRepeat {
+  /** Number of copies, up to `256`. */
+  count: number;
+  /** `[x, y]` shift of each copy from the one in front of it. `{ em }` is relative to the run's font size. */
+  offset: readonly [x: Length, y: Length];
+  /** Opacity of the farthest copy; the copies in between fade to it from `1`. Default: `1`. */
+  opacity?: number;
+  /** Tint of the farthest copy, multiplied into its colors; the copies in between blend to it from none. Default: none. */
+  tint?: ColorValue;
 }
 
 /** CSS `font-weight`: `1`–`1000` or a keyword. */

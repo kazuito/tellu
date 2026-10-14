@@ -1,4 +1,4 @@
-import { multiplyTints, tintOf } from "./render/tint";
+import { mixTints, multiplyTints, tintOf } from "./render/tint";
 import type { ColorValue, GlyphContext, GlyphTransform, GlyphTransformFn, LayerTransform } from "./style/types";
 
 /** What animates as one: each visible glyph, word or line, or the whole text at once. */
@@ -167,11 +167,7 @@ export function animationDuration(
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 function lerpTint(from: ColorValue | undefined, to: ColorValue | undefined, t: number): number {
-  const a = tintOf(from);
-  const b = tintOf(to);
-  if (a === b) return a;
-  const channel = (shift: number) => Math.round(lerp((a >> shift) & 0xff, (b >> shift) & 0xff, t)) << shift;
-  return channel(16) | channel(8) | channel(0);
+  return mixTints(tintOf(from), tintOf(to), t);
 }
 
 const NUMBERS = [

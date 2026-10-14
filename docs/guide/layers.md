@@ -1,5 +1,5 @@
 ---
-description: The layer model behind every fill, outline, shadow and glow, with inner shadows, bevels and satin, stroke position, joins, offsets, blur, opacity, blend modes, PixiJS filters and emoji.
+description: The layer model behind every fill, outline, shadow and glow, with inner shadows, bevels and satin, stroke position, joins, offsets, blur, opacity, blend modes, PixiJS filters and emoji, extrusion and echoes.
 ---
 
 # Layers
@@ -42,7 +42,7 @@ Layers are plain objects, and four helpers cover the common cases:
 | `shadow({ color, offset, blur, stroke })` | A layer offset by `[4, 4]` and blurred by `4`, in `rgba(0,0,0,0.6)` by default |
 | `glow({ color, stroke, blur })` | A white layer grown by `8` and blurred by `8` by default |
 
-Every option of a layer can go in the last argument: `fill("#fff", { opacity: 0.8 })`. Four more helpers shade the inside of the glyph: [`innerShadow()` and `innerGlow()`](#inner-shadows-and-glows), [`bevel()`](#bevels) and [`satin()`](#satin).
+Every option of a layer can go in the last argument: `fill("#fff", { opacity: 0.8 })`. [`extrude()` and `echo()`](#extrusion-and-echoes) stack copies of a layer, and four more helpers shade the inside of the glyph: [`innerShadow()` and `innerGlow()`](#inner-shadows-and-glows), [`bevel()`](#bevels) and [`satin()`](#satin).
 
 ## Outlines merge
 
@@ -189,6 +189,52 @@ export default {
 ```
 
 Contours and noise work on any layer, after its blur and filters and before its opacity.
+
+## Extrusion and echoes
+
+`repeat` draws copies of a layer behind it, each shifted from the one in front. Copies a pixel apart read as one solid block: extruded text (立体文字), built by `extrude()`. Put it first, below the outlines, with the width of the widest outline as `stroke`; `shade` darkens it toward the back:
+
+```ts demo
+import { extrude, fill, linearGradient, stroke } from "tellu";
+
+export default {
+  text: "立体テロップ",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 96,
+    layers: [
+      extrude({ depth: 16, stroke: 14, color: "#ff5a8a", shade: "#4a1030" }),
+      stroke(14, "#ff5a8a"),
+      stroke(7, "#ffffff"),
+      fill(linearGradient(["#fff7a1", "#ffb300"])),
+    ],
+  },
+};
+```
+
+`depth` (default `12` px) is how far it goes and `angle` which way, in degrees clockwise from the top (default `135`, down and to the right).
+
+Copies further apart are echoes, built by `echo()`. They fade toward the back, to `fade` of the nearest one:
+
+```ts demo
+import { echo, fill, stroke } from "tellu";
+
+export default {
+  text: "ECHO エコー",
+  style: {
+    fontFamily: "Montserrat, Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 88,
+    layers: [
+      echo({ color: "#ff3d8b", count: 4, offset: [8, 6], stroke: 8 }),
+      stroke(8, "#1b1b3a"),
+      fill("#ffffff"),
+    ],
+  },
+};
+```
+
+Copies reuse the layer's bitmaps, so a deep extrusion costs sprites, not rasterizing. They share the layer's effects (blur, opacity, blend mode) and follow [glyph transforms](./animation), keeping their direction on screen when a glyph turns. Where copies of neighbouring glyphs overlap, the nearer one is on top. The full form is `repeat: { count, offset, opacity, tint }` on any layer: `opacity` and `tint` are those of the farthest copy, and the copies in between blend to them.
 
 ## Inner shadows and glows
 
@@ -619,6 +665,7 @@ fill("#ffffff", { colorGlyphs: "paint" });
 | `opacity` | `number` | `1` | Applied to the merged layer |
 | `blendMode` | [`BlendMode`](/api/types#blendmode) | `"normal"` | Against the layers below. [Blend modes](#blend-modes) |
 | `filters` | PixiJS `Filter[]` | | |
+| `repeat` | [`LayerRepeat`](/api/types#layerrepeat) | | Copies behind the layer. [Extrusion and echoes](#extrusion-and-echoes) |
 | `visible` | `boolean` | `true` | |
 | `id` | `string` | | Target for run patches |
 

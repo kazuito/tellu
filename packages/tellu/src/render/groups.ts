@@ -11,6 +11,8 @@ export interface LayerGroup {
   slot: number;
   /** Source of the group's effects (offset, blur, opacity, blend mode, filters). */
   effects: ResolvedLayer;
+  /** The copies of its members' layers (`Layer.repeat`), drawn just below the group of the layers themselves. */
+  copies: boolean;
   members: GroupMember[];
 }
 
@@ -38,7 +40,8 @@ export function runLayers(layout: Layout): ResolvedLayer[][] {
 
 /**
  * Groups every visible glyph layer by slot (layer index) and effects. Groups are ordered by slot,
- * so all glyphs' outlines sit below all glyphs' fills and neighbouring outlines merge. Line decorations are part of
+ * so all glyphs' outlines sit below all glyphs' fills and neighbouring outlines merge. A layer with `repeat` also joins
+ * a group of copies just below its own. Line decorations are part of
  * the text's shape: each one joins the groups of its run's layers, after the glyphs.
  */
 export function planGroups(
@@ -49,13 +52,17 @@ export function planGroups(
   const add = (list: readonly ResolvedLayer[], member: (layer: ResolvedLayer) => GroupMember) =>
     list.forEach((layer, slot) => {
       if (layer.visible === false) return;
-      const key = `${slot}|${effectsKey(layer)}`;
-      let group = groups.get(key);
-      if (!group) {
-        group = { key, slot, effects: layer, members: [] };
-        groups.set(key, group);
-      }
-      group.members.push(member(layer));
+      const join = (copies: boolean) => {
+        const key = `${slot}|${copies ? "copies|" : ""}${effectsKey(layer)}`;
+        let group = groups.get(key);
+        if (!group) {
+          group = { key, slot, effects: layer, copies, members: [] };
+          groups.set(key, group);
+        }
+        group.members.push(member(layer));
+      };
+      if (repeatCount(layer) > 0) join(true);
+      join(false);
     });
   for (const glyph of layout.glyphs) {
     if (glyph.isWhitespace) continue;
@@ -65,5 +72,11 @@ export function planGroups(
     if (decoration.type !== "line") return;
     add(layers[runIndex]!, (layer) => ({ decoration: index, layer }));
   });
-  return [...groups.values()].sort((a, b) => a.slot - b.slot);
+  // In each slot, copies go below the layers they copy.
+  return [...groups.values()].sort((a, b) => a.slot - b.slot || Number(b.copies) - Number(a.copies));
+}
+
+/** How many copies `Layer.repeat` draws: `0` to `256`. */
+export function repeatCount(layer: ResolvedLayer): number {
+  return layer.repeat ? Math.max(0, Math.min(256, Math.round(layer.repeat.count))) : 0;
 }
