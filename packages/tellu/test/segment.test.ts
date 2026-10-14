@@ -84,6 +84,15 @@ describe("wordIndexes", () => {
     expect([...wordIndexes(clusters, "ja")]).toEqual([0, -1, 1]);
   });
 
+  test("start after whitespace, with punctuation that opens a word joining it", () => {
+    expect(wordsOf('He said "no" ...then ¿Qué?')).toEqual(["He", "said", '"no"', "...then", "¿Qué?"]);
+    expect(wordsOf("…なるほど")).toEqual(["…なるほど"]);
+  });
+
+  test("never join across whitespace", () => {
+    expect(wordsOf("晴れ「です」 と言った")).toEqual(["晴れ", "「です」", "と", "言った"]);
+  });
+
   test("never span a newline", () => {
     expect(wordsOf("今日は\n天気")).toEqual(["今日は", "天気"]);
     expect(wordsOf("「\n天気")).toEqual(["「", "天気"]);

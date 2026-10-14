@@ -159,23 +159,30 @@ function findPhraseStarts(clusters: readonly Cluster[], locale: string): Set<num
 }
 
 const OPENING_ONLY = /^[\p{Ps}\p{Pi}\s]+$/u;
-const ENDS_CLOSING = /[\p{Pe}\p{Pf}]\s*$/u;
+const PUNCTUATION_ONLY = /^\p{P}+$/u;
+const ENDS_CLOSING = /[\p{Pe}\p{Pf}]$/u;
 
 /**
  * The word each cluster belongs to, numbered from `0`, for animating word by word: Japanese phrases (文節) and words
- * with their punctuation elsewhere, as `lineBreak: "phrase"` finds them. Two units that read as one are merged: an
- * opening bracket joins the word after it, and hiragana after a closing bracket join the word before (「最高の日」と).
- * Words never span a newline. Whitespace and newlines are `-1`.
+ * with their punctuation elsewhere, as `lineBreak: "phrase"` finds them, cut after whitespace. Two units that read as
+ * one are merged: an opening bracket, or punctuation that starts a word in spaced text (`"quoted"`), joins the word
+ * after it, and hiragana right after a closing bracket join the word before (「最高の日」と). Words never span
+ * whitespace or a newline. Whitespace and newlines are `-1`.
  */
 export function wordIndexes(clusters: readonly Cluster[], locale: string): Int32Array {
   const indexes = new Int32Array(clusters.length).fill(-1);
   const phrases = findPhraseStarts(clusters, locale);
-  // Units as cluster ranges: phrases, cut at newlines, each newline a unit of its own.
+  // Units as cluster ranges: phrases, cut at newlines and after whitespace, each newline a unit of its own.
   const units: { start: number; end: number; text: string }[] = [];
   clusters.forEach((cluster, index) => {
     const unit = units.at(-1);
+    const previous = clusters[index - 1];
     const startsUnit =
-      !unit || phrases.has(index) || cluster.kind === "newline" || clusters[index - 1]!.kind === "newline";
+      !unit ||
+      phrases.has(index) ||
+      cluster.kind === "newline" ||
+      previous!.kind === "newline" ||
+      (previous!.kind === "space" && cluster.kind === "char");
     if (startsUnit) units.push({ start: index, end: index + 1, text: cluster.text });
     else {
       unit.end = index + 1;
@@ -188,7 +195,15 @@ export function wordIndexes(clusters: readonly Cluster[], locale: string): Int32
     const unit = units[i]!;
     const previous = merged.at(-1);
     const next = units[i + 1];
-    if (OPENING_ONLY.test(unit.text) && !isNewline(unit) && !isNewline(next)) {
+    if (previous && !isNewline(previous) && !isNewline(unit) && unit.text.trim() === "") {
+      // Whitespace trails the word before it.
+      previous.end = unit.end;
+      previous.text += unit.text;
+      continue;
+    }
+    const startsWord = unit.start === 0 || clusters[unit.start - 1]!.kind !== "char";
+    const opens = OPENING_ONLY.test(unit.text) || (startsWord && PUNCTUATION_ONLY.test(unit.text));
+    if (opens && !isNewline(unit) && !isNewline(next)) {
       // The opening bracket starts the next unit.
       next!.start = unit.start;
       next!.text = unit.text + next!.text;
