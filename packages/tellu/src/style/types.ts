@@ -515,6 +515,13 @@ export interface GlyphContext {
   visibleCount: number;
   lineIndex: number;
   lineCount: number;
+  /**
+   * Index of its word, `-1` for whitespace: a phrase (文節) in Japanese, such as 「今日は」 or 「最高の」, or a word with
+   * its punctuation in spaced text. Use it to animate word by word.
+   */
+  wordIndex: number;
+  /** Number of words. */
+  wordCount: number;
   /** Index within its line. */
   indexInLine: number;
   /** Number of glyphs in its line. */

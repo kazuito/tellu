@@ -451,3 +451,22 @@ describe("glyphs", () => {
     expect(result.height).toBe(10);
   });
 });
+
+describe("words", () => {
+  test("number the words of the glyphs, across lines", () => {
+    const result = layoutText({ text: "今日は最高の日", maxWidth: 40, lineBreak: "char" }, fakeMeasurer);
+    expect(result.lines.length).toBeGreaterThan(1);
+    expect(result.glyphs.map((glyph) => glyph.wordIndex)).toEqual([0, 0, 0, 1, 1, 1, 2]);
+  });
+
+  test("give whitespace -1 and survive vertical 縦中横", () => {
+    const result = layoutText({ text: "第12話 開始", writingMode: "vertical-rl" }, fakeMeasurer);
+    const words = result.glyphs.map((glyph) => glyph.wordIndex);
+    expect(result.glyphs[1]!.text).toBe("12");
+    expect(words[1]).toBeGreaterThanOrEqual(0);
+    expect(words[3]).toBe(-1);
+    const visible = words.filter((word) => word >= 0);
+    expect(visible).toEqual(visible.toSorted((a, b) => a - b));
+    expect(words.at(-1)).toBe(words.at(-2)!);
+  });
+});

@@ -549,6 +549,7 @@ type GlyphTransformFn = (glyph: GlyphContext) => GlyphTransform | void | undefin
 | --- | --- |
 | `index`, `count` | Among all characters, whitespace included |
 | `visibleIndex`, `visibleCount` | Among non-whitespace characters (`visibleIndex` is `-1` for whitespace) |
+| `wordIndex`, `wordCount` | Among words: phrases (文節) such as 「今日は」 in Japanese, words with their punctuation in spaced text (`wordIndex` is `-1` for whitespace) |
 | `lineIndex`, `lineCount` | |
 | `indexInLine`, `lineLength` | |
 | `text` | The grapheme cluster |

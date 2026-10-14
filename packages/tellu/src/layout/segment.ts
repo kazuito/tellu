@@ -157,3 +157,65 @@ function findPhraseStarts(clusters: readonly Cluster[], locale: string): Set<num
   }
   return starts;
 }
+
+const OPENING_ONLY = /^[\p{Ps}\p{Pi}\s]+$/u;
+const ENDS_CLOSING = /[\p{Pe}\p{Pf}]\s*$/u;
+
+/**
+ * The word each cluster belongs to, numbered from `0`, for animating word by word: Japanese phrases (文節) and words
+ * with their punctuation elsewhere, as `lineBreak: "phrase"` finds them. Two units that read as one are merged: an
+ * opening bracket joins the word after it, and hiragana after a closing bracket join the word before (「最高の日」と).
+ * Words never span a newline. Whitespace and newlines are `-1`.
+ */
+export function wordIndexes(clusters: readonly Cluster[], locale: string): Int32Array {
+  const indexes = new Int32Array(clusters.length).fill(-1);
+  const phrases = findPhraseStarts(clusters, locale);
+  // Units as cluster ranges: phrases, cut at newlines, each newline a unit of its own.
+  const units: { start: number; end: number; text: string }[] = [];
+  clusters.forEach((cluster, index) => {
+    const unit = units.at(-1);
+    const startsUnit =
+      !unit || phrases.has(index) || cluster.kind === "newline" || clusters[index - 1]!.kind === "newline";
+    if (startsUnit) units.push({ start: index, end: index + 1, text: cluster.text });
+    else {
+      unit.end = index + 1;
+      unit.text += cluster.text;
+    }
+  });
+  const isNewline = (unit: (typeof units)[number] | undefined) => !unit || clusters[unit.start]!.kind === "newline";
+  const merged: typeof units = [];
+  for (let i = 0; i < units.length; i++) {
+    const unit = units[i]!;
+    const previous = merged.at(-1);
+    const next = units[i + 1];
+    if (OPENING_ONLY.test(unit.text) && !isNewline(unit) && !isNewline(next)) {
+      // The opening bracket starts the next unit.
+      next!.start = unit.start;
+      next!.text = unit.text + next!.text;
+      continue;
+    }
+    if (
+      previous &&
+      !isNewline(previous) &&
+      !isNewline(unit) &&
+      HIRAGANA_ONLY.test(unit.text.trimEnd()) &&
+      ENDS_CLOSING.test(previous.text)
+    ) {
+      previous.end = unit.end;
+      previous.text += unit.text;
+      continue;
+    }
+    merged.push(unit);
+  }
+  let word = 0;
+  for (const { start, end } of merged) {
+    let visible = false;
+    for (let k = start; k < end; k++) {
+      if (clusters[k]!.kind !== "char") continue;
+      indexes[k] = word;
+      visible = true;
+    }
+    if (visible) word++;
+  }
+  return indexes;
+}

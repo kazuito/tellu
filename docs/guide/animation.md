@@ -1,5 +1,5 @@
 ---
-description: Animate captions glyph by glyph with glyphTransform, covering position, scale, rotation, skew, opacity and visibility, plus typewriter, bounce, wave and shake recipes.
+description: Animate captions glyph by glyph with glyphTransform, covering position, scale, rotation, skew, opacity and visibility, plus typewriter, word-by-word, bounce, wave and shake recipes.
 ---
 
 # Glyph transforms
@@ -69,6 +69,7 @@ The function receives a [`GlyphContext`](/api/types#glyphcontext) for every char
 | --- | --- |
 | `index`, `count` | Position among all characters |
 | `visibleIndex`, `visibleCount` | Position among non-whitespace characters (`-1` for whitespace). Use this for staggering |
+| `wordIndex`, `wordCount` | Position among words (`-1` for whitespace). [Word by word](#word-by-word) |
 | `lineIndex`, `lineCount` | Which line |
 | `indexInLine`, `lineLength` | Position within the line |
 | `text` | The character (a grapheme cluster) |
@@ -121,6 +122,34 @@ export default (frame: number): TextNodeProps => ({
 ::: tip Reveal glyphs, don't slice text
 Hiding glyphs keeps the layout fixed, so lines don't reflow and the caption doesn't jump. Changing `text` every frame would also re-layout and re-rasterize on every frame.
 :::
+
+### Word by word
+
+`wordIndex` numbers the words: phrases (文節) such as 「今日は」 or 「最高の」 in Japanese, and words with their punctuation in spaced text. Brackets stay with the words they enclose. Revealing a word at a time reads like speech:
+
+```ts demo loop=90 still=70
+import { fill, stroke, type TextNodeProps } from "tellu";
+
+const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+
+export default (frame: number): TextNodeProps => ({
+  text: "「今日は、最高の日！」と彼は言った。",
+  maxWidth: 640,
+  style: {
+    fontFamily: "Noto Sans JP",
+    fontWeight: 900,
+    fontSize: 52,
+    layers: [stroke(10, "#0a3d62"), fill("#ffffff")],
+  },
+  glyphTransform: (glyph) => {
+    const t = Math.min(1, Math.max(0, (frame - glyph.wordIndex * 8) / 8));
+    if (t === 0) return { visible: false };
+    return { y: (1 - easeOutCubic(t)) * 16, opacity: t };
+  },
+});
+```
+
+The words are the phrases that [`lineBreak: "phrase"`](./line-breaking#phrase-breaking-文節改行) keeps together, so they follow the same rules in every caption.
 
 ### Staggered drop-in
 

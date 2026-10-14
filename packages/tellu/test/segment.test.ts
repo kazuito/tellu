@@ -1,5 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { BREAK_FALLBACK, BREAK_NONE, BREAK_PREFERRED, computeBreaks, segmentRuns } from "../src/layout/segment";
+import {
+  BREAK_FALLBACK,
+  BREAK_NONE,
+  BREAK_PREFERRED,
+  computeBreaks,
+  segmentRuns,
+  wordIndexes,
+} from "../src/layout/segment";
 import { defaultKinsoku } from "../src/style/defaults";
 
 const breaksOf = (text: string, lineBreak: "char" | "phrase" = "char") => {
@@ -44,5 +51,45 @@ describe("computeBreaks", () => {
     expect(breaks[3]).toBe(BREAK_PREFERRED);
     expect(breaks[1]).toBe(BREAK_FALLBACK);
     expect(breaks[2]).toBe(BREAK_FALLBACK);
+  });
+});
+
+describe("wordIndexes", () => {
+  /** The text of each word, in order. */
+  const wordsOf = (...texts: string[]) => {
+    const clusters = segmentRuns(texts, "ja");
+    const indexes = wordIndexes(clusters, "ja");
+    const words: string[] = [];
+    clusters.forEach((cluster, i) => {
+      const index = indexes[i]!;
+      if (index >= 0) words[index] = (words[index] ?? "") + cluster.text;
+    });
+    return words;
+  };
+
+  test("are Japanese phrases, with brackets joining the words they belong to", () => {
+    expect(wordsOf("「今日は、最高の日！」と彼は言った。")).toEqual([
+      "「今日は、",
+      "最高の",
+      "日！」と",
+      "彼は",
+      "言った。",
+    ]);
+    expect(wordsOf("今日はAIの話（前編）です")).toEqual(["今日は", "AIの", "話", "（前編）です"]);
+  });
+
+  test("are words with their punctuation in spaced text, whitespace left out", () => {
+    expect(wordsOf("Hello, world! It's 2024.")).toEqual(["Hello,", "world!", "It's", "2024."]);
+    const clusters = segmentRuns(["a b"], "ja");
+    expect([...wordIndexes(clusters, "ja")]).toEqual([0, -1, 1]);
+  });
+
+  test("never span a newline", () => {
+    expect(wordsOf("今日は\n天気")).toEqual(["今日は", "天気"]);
+    expect(wordsOf("「\n天気")).toEqual(["「", "天気"]);
+  });
+
+  test("run across runs", () => {
+    expect(wordsOf("最高", "の", "日")).toEqual(["最高の", "日"]);
   });
 });

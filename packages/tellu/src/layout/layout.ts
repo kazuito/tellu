@@ -16,6 +16,7 @@ import {
   isOpening,
   isSquare,
   segmentRuns,
+  wordIndexes,
 } from "./segment";
 import { placeOnPath, textPathSampler } from "./textPath";
 import { combineUpright, isVertical, type VerticalOrientation, verticalOrientation, verticalShift } from "./vertical";
@@ -40,6 +41,11 @@ export interface LayoutGlyph {
   /** Index within its line. */
   indexInLine: number;
   isWhitespace: boolean;
+  /**
+   * Index of its word: a phrase (文節) in Japanese, or a word with its punctuation in spaced text, as
+   * `lineBreak: "phrase"` finds them. `-1` for whitespace.
+   */
+  wordIndex: number;
   /**
    * Where the glyph is drawn from: the start of its baseline, before `rotation` (baseline shift included).
    * It lies before `box` when `tsume` or `punctuationTrim` removed space in front of the glyph.
@@ -144,6 +150,8 @@ interface Prepared {
   /** Blank space `tsume` removes before and after each cluster along the line, at the run's font size. */
   tsume: Float64Array;
   kinsoku: KinsokuRules | null;
+  /** Word of each cluster (see `wordIndexes`). */
+  words: Int32Array;
 }
 
 interface LineRange {
@@ -199,6 +207,7 @@ function layoutLines(options: LayoutOptions, measurer: Measurer): Layout {
     shifts,
     tsume: measureTsume(clusters, runs, orientations, metrics, shifts, measurer),
     kinsoku,
+    words: wordIndexes(clusters, locale),
   };
 
   const { maxLines, overflow = "visible" } = options;
@@ -387,7 +396,7 @@ interface LineMetrics {
 
 /** @param truncate Drop the lines after `maxLines`. */
 function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout {
-  const { options, vertical, runs, clusters, orientations, breaks, advances, metrics, shifts, tsume, kinsoku } =
+  const { options, vertical, runs, clusters, orientations, breaks, advances, metrics, shifts, tsume, kinsoku, words } =
     prepared;
   const { maxLines, align = "start", overflow = "visible", punctuationTrim = "none", autospace = false } = options;
   const writingMode = options.writingMode ?? "horizontal-tb";
@@ -557,6 +566,7 @@ function build(prepared: Prepared, fontScale: number, truncate: boolean): Layout
         lineIndex,
         indexInLine: k - range.start,
         isWhitespace: cluster.kind !== "char",
+        wordIndex: words[k]!,
         x: pen - before * squeeze,
         y: baseline - shift,
         rotation: 0,

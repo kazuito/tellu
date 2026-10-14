@@ -654,6 +654,7 @@ function destroyFilters(container: Container): void {
  */
 export function createGlyphContexts(layout: Layout): GlyphContext[] {
   const visibleCount = layout.glyphs.filter((glyph) => !glyph.isWhitespace).length;
+  const wordCount = layout.glyphs.reduce((count, glyph) => Math.max(count, glyph.wordIndex + 1), 0);
   let visibleIndex = 0;
   return layout.glyphs.map((glyph) => {
     const line = layout.lines[glyph.lineIndex]!;
@@ -662,6 +663,8 @@ export function createGlyphContexts(layout: Layout): GlyphContext[] {
       count: layout.glyphs.length,
       visibleIndex: glyph.isWhitespace ? -1 : visibleIndex++,
       visibleCount,
+      wordIndex: glyph.wordIndex,
+      wordCount,
       lineIndex: glyph.lineIndex,
       lineCount: layout.lines.length,
       indexInLine: glyph.indexInLine,
