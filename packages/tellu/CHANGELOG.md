@@ -19,9 +19,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Shape gradients: `shapeGradient()` colors a layer by the distance from the glyph's edge instead of across a box, like Photoshop's shape burst, so one outline layer can hold several bands (hard stops) or a smooth blend from the inside out. On a fill, the stops run `size` px into the glyph. Layers take the new `LayerPaint` type, which adds `ShapeGradient` to `Paint`; `fill()`, `stroke()` and the other layer helpers accept it.
 - Font checks: `checkFonts()` loads the fonts a caption needs, then reports each `FontIssue`: a family that is neither declared nor installed (`family-not-found`), a weight or style with no face (`face-unavailable`), a face that failed to load (`load-failed`), and characters no font in the stack has (`missing-glyphs`). Stacks with a generic family accept the fallback, so their characters aren't checked. `<Text>` and `createCanvasText()` run the check and log new issues with `console.warn`; `fontCheck: "error"` reports them as a `FontIssueError` instead (in Remotion, failing the render), and `fontCheck: "off"` skips it. `<Text>` also takes `onFontIssues`. The check embeds the Adobe Blank 2 font (SIL Open Font License), adding about 2 KB.
 - `Layer.colorGlyphs`: `"keep"` draws emoji and the glyphs of color fonts in their own colors on a layer that paints the glyph itself, while outlines and shadows still follow their shape; `"paint"` paints them like any other glyph. `fill()` and the default style keep them.
+- Blend modes: `Layer.blendMode` and `BoxDecoration.blendMode` take every Photoshop and CSS blend mode (the new `BlendMode` type), from `multiply`, `overlay` and `soft-light` to `hue` and `luminosity`. Over transparent parts of the caption a blended layer shows as it is. `TextNode.needsBackdrop` tells whether a node uses a mode that reads the pixels below it, which needs `useBackBuffer: true` in your own WebGL renderer; `TextRenderer` turns it on for the draws that need it.
+
+### Changed
+
+- **Breaking:** `blendMode` takes the new `BlendMode` type instead of PixiJS's `BLEND_MODES`. PixiJS-only names such as `"normal-npm"`, `"min"` and `"max"` are no longer in the type.
 
 ### Fixed
 
+- `blendMode: "multiply"` no longer turns a layer black where nothing is below it, and `"overlay"`, `"darken"`, `"difference"` and the other modes PixiJS can't blend natively no longer silently render as `"normal"`.
 - Emoji drawn with `fill()` or the default style keep their colors instead of turning into silhouettes of the fill color.
 
 ## [0.0.3] - 2026-10-11

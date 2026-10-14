@@ -45,6 +45,8 @@ export interface DrawResult {
 export class TextRenderer {
   private static sharedRenderer: Promise<TextRenderer> | undefined;
   private readonly stage = new Container();
+  /** Rendered to clear the canvas. */
+  private readonly empty = new Container();
   private capacityWidth = 0;
   private capacityHeight = 0;
   private capacityResolution = 0;
@@ -115,9 +117,20 @@ export class TextRenderer {
     node.skew.set(0, 0);
     node.rotation = 0;
     this.stage.addChild(node);
+    // Blends that read the pixels below need PixiJS's back buffer in WebGL. It is drawn over the canvas without
+    // clearing it, and the canvas keeps its last draw (`preserveDrawingBuffer`), so the canvas is cleared first.
+    const backBuffer = "backBuffer" in this.renderer ? this.renderer.backBuffer : undefined;
+    const backBufferWasOn = backBuffer?.useBackBuffer ?? false;
+    const useBackBuffer = !!backBuffer && (backBufferWasOn || node.needsBackdrop);
     try {
+      if (useBackBuffer) {
+        backBuffer.useBackBuffer = false;
+        this.renderer.render({ container: this.empty, clear: true });
+        backBuffer.useBackBuffer = true;
+      }
       this.renderer.render({ container: this.stage, clear: true });
     } finally {
+      if (backBuffer) backBuffer.useBackBuffer = backBufferWasOn;
       this.stage.removeChild(node);
       node.position.set(nodeX, nodeY);
       node.scale.set(scaleX, scaleY);
@@ -174,6 +187,7 @@ export class TextRenderer {
       });
     }
     this.stage.destroy();
+    this.empty.destroy();
     this.renderer.destroy();
   }
 }

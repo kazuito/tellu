@@ -460,7 +460,7 @@ export default {
 
 ## Blend modes
 
-`blendMode` blends a layer against the layers below it, using any PixiJS blend mode. `"add"` makes light build up, which suits neon:
+`blendMode` blends a layer with the layers below it, as layer blend modes do in Photoshop. `"add"` makes light build up, which suits neon:
 
 ```ts demo
 import { fill, glow, stroke } from "tellu";
@@ -481,6 +481,59 @@ export default {
   background: { paint: "#120a1f", padding: [36, 22], radius: 18 },
 };
 ```
+
+The other modes mix the layer's colors with the colors below it. Here the same fill sits over a striped outline and a plate:
+
+```ts demo compare
+import {
+  type BlendMode,
+  fill,
+  linearGradient,
+  stroke,
+  type TextNodeProps,
+} from "tellu";
+
+const sample = (blendMode: BlendMode): TextNodeProps => ({
+  text: "合成",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 88,
+    layers: [
+      stroke(
+        14,
+        linearGradient(["#ff3d8b", "#ffe14d", "#1fd1a5"], { angle: 90 }),
+      ),
+      fill("#5b8cff", { blendMode }),
+    ],
+  },
+  background: { paint: "#f2efe6", padding: [20, 6], radius: 12 },
+});
+
+export default {
+  normal: sample("normal"),
+  multiply: sample("multiply"),
+  overlay: sample("overlay"),
+  difference: sample("difference"),
+  luminosity: sample("luminosity"),
+};
+```
+
+Every mode of Photoshop and CSS `mix-blend-mode` is available:
+
+| Group | Modes |
+| --- | --- |
+| Normal | `"normal"`, `"erase"` (cuts the layer's shape out of what is below) |
+| Darken | `"darken"`, `"multiply"`, `"color-burn"`, `"linear-burn"` |
+| Lighten | `"lighten"`, `"screen"`, `"color-dodge"`, `"linear-dodge"`, `"add"` |
+| Contrast | `"overlay"`, `"soft-light"`, `"hard-light"`, `"vivid-light"`, `"linear-light"`, `"pin-light"`, `"hard-mix"` |
+| Inversion | `"difference"`, `"exclusion"`, `"subtract"`, `"divide"` |
+| Component | `"hue"`, `"saturation"`, `"color"`, `"luminosity"` |
+
+A layer blends with what the caption itself draws below it: lower layers, [decorations](./decorations) and the [plate](./plates). Where nothing is below, it shows as it is. To blend a whole caption with the video or page behind it, use CSS `mix-blend-mode` on `<Text>`.
+
+::: info In your own PixiJS scene
+Except for `"normal"`, `"add"`, `"screen"` and `"erase"`, blend modes read the pixels below the layer, which a WebGL renderer only allows with `useBackBuffer: true`. `TextRenderer` (used by `<Text>` and `createCanvasText()`) turns it on for the draws that need it. When you add a `TextNode` to [your own PixiJS app](./pixi), create its renderer with `useBackBuffer: true`; without it, PixiJS warns and the layer blends normally.
+:::
 
 ## PixiJS filters
 
@@ -562,7 +615,7 @@ fill("#ffffff", { colorGlyphs: "paint" });
 | `contour` | [`Contour`](/api/types#contour) | | Remaps the opacity after the blur. [Contours](#contours) |
 | `noise` | `number` | `0` | Speckles the opacity, `0`–`1`. [Noise](#noise) |
 | `opacity` | `number` | `1` | Applied to the merged layer |
-| `blendMode` | PixiJS `BLEND_MODES` | `"normal"` | Against the layers below |
+| `blendMode` | [`BlendMode`](/api/types#blendmode) | `"normal"` | Against the layers below. [Blend modes](#blend-modes) |
 | `filters` | PixiJS `Filter[]` | | |
 | `visible` | `boolean` | `true` | |
 | `id` | `string` | | Target for run patches |

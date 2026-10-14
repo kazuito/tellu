@@ -280,12 +280,24 @@ A multiple of the font size, or absolute pixels.
 | `contour` | [`Contour`](#contour) | | Remaps the merged layer's opacity after the blur. [Guide](/guide/layers#contours) |
 | `noise` | `number` | `0` | `0`–`1`: speckles the opacity, after the contour. [Guide](/guide/layers#noise) |
 | `opacity` | `number` | `1` | Applied to the merged layer |
-| `blendMode` | PixiJS `BLEND_MODES` | `"normal"` | |
+| `blendMode` | [`BlendMode`](#blendmode) | `"normal"` | |
 | `filters` | `readonly Filter[]` | | PixiJS filters |
 | `visible` | `boolean` | `true` | |
 | `id` | `string` | | Target for layer patches |
 
 Guide: [Layers](/guide/layers).
+
+### `BlendMode`
+
+```ts
+type BlendMode =
+  | "normal" | "add" | "screen" | "erase"
+  | "multiply" | "overlay" | "darken" | "lighten" | "color-dodge" | "color-burn" | "hard-light" | "soft-light"
+  | "difference" | "exclusion" | "hue" | "saturation" | "color" | "luminosity"
+  | "linear-burn" | "linear-dodge" | "linear-light" | "vivid-light" | "pin-light" | "hard-mix" | "subtract" | "divide";
+```
+
+How a layer or box decoration blends with what the caption draws below it, as in Photoshop and CSS `mix-blend-mode`. Over transparent parts it shows as it is. Every mode but `"normal"`, `"add"`, `"screen"` and `"erase"` reads the pixels below, which needs `useBackBuffer: true` in a WebGL renderer of your own. See [Blend modes](/guide/layers#blend-modes).
 
 ### `StrokePosition`
 
@@ -617,6 +629,6 @@ A box along a run, one per line the run spans. Built by [`marker()`](./helpers#m
 | `offset` | `readonly [x, y]` | `[0, 0]` | |
 | `blur` | `number` | `0` | |
 | `opacity` | `number` | `1` | |
-| `blendMode` | PixiJS `BLEND_MODES` | `"normal"` | |
+| `blendMode` | [`BlendMode`](#blendmode) | `"normal"` | |
 | `filters` | `readonly Filter[]` | | PixiJS filters |
 

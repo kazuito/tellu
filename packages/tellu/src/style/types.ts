@@ -1,4 +1,4 @@
-import type { BLEND_MODES, Filter } from "pixi.js";
+import type { Filter } from "pixi.js";
 
 /** Any CSS color string, or a number as `0xRRGGBB`. Numbers have no alpha: use a string such as `rgba()` for that. */
 export type ColorValue = string | number;
@@ -208,6 +208,42 @@ export type Contour = ContourPreset | readonly (readonly [input: number, output:
 export type Shading = InsetShading | BevelShading | SatinShading;
 
 /**
+ * How a layer blends with what is below it, as in Photoshop and CSS `mix-blend-mode`. Colors are blended where the
+ * layer meets lower layers; over transparent parts the layer shows as it is.
+ * - `normal`, `add` (light builds up), `screen` and `erase` (cuts the layer's shape out of what is below) are blended
+ *   by the GPU directly.
+ * - The others read the pixels below the layer, which in a WebGL renderer needs `useBackBuffer: true`
+ *   (`TextRenderer` handles that).
+ */
+export type BlendMode =
+  | "normal"
+  | "add"
+  | "screen"
+  | "erase"
+  | "multiply"
+  | "overlay"
+  | "darken"
+  | "lighten"
+  | "color-dodge"
+  | "color-burn"
+  | "hard-light"
+  | "soft-light"
+  | "difference"
+  | "exclusion"
+  | "hue"
+  | "saturation"
+  | "color"
+  | "luminosity"
+  | "linear-burn"
+  | "linear-dodge"
+  | "linear-light"
+  | "vivid-light"
+  | "pin-light"
+  | "hard-mix"
+  | "subtract"
+  | "divide";
+
+/**
  * One decoration layer. Every layer is the glyph shape grown by `stroke` and painted with `paint`, so fills, outlines,
  * shadows and glows are all layers. Helpers such as `fill()`, `stroke()` and `shadow()` build common ones.
  *
@@ -257,8 +293,11 @@ export interface Layer {
   noise?: number;
   /** Opacity of the whole layer, applied after its glyphs are merged. Default: `1`. */
   opacity?: number;
-  /** Blend mode against the layers below. Default: `"normal"`. */
-  blendMode?: BLEND_MODES;
+  /**
+   * How the merged layer blends with the layers, plate and decorations below it (not with what is behind the caption).
+   * Default: `"normal"`.
+   */
+  blendMode?: BlendMode;
   /**
    * Extra PixiJS filters applied to the whole layer. They are compared by identity, so create them once: new instances
    * on every render rebuild the text. tellu never destroys them.
@@ -700,8 +739,8 @@ export interface BoxDecoration {
   blur?: number;
   /** Default: `1`. */
   opacity?: number;
-  /** Default: `"normal"`. */
-  blendMode?: BLEND_MODES;
+  /** How the box blends with what is below it in the caption, as for layers. Default: `"normal"`. */
+  blendMode?: BlendMode;
   /** Extra PixiJS filters, compared by identity like `Layer.filters`. */
   filters?: readonly Filter[];
 }

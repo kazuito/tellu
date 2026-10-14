@@ -1,8 +1,19 @@
-import { AlphaFilter, BlurFilter, Container, type DestroyOptions, type Filter, Rectangle, Sprite } from "pixi.js";
+import {
+  AlphaFilter,
+  type BLEND_MODES,
+  BlurFilter,
+  Container,
+  type DestroyOptions,
+  type Filter,
+  Rectangle,
+  Sprite,
+} from "pixi.js";
 import { decorationKey, lineThickness } from "./layout/decorations";
 import { type Layout, layoutText } from "./layout/layout";
 import { fontSpecOf, fontToCss, getDefaultMeasurer, type Measurer } from "./layout/measure";
 import { isVertical } from "./layout/vertical";
+import { BlendFilter } from "./render/blendFilter";
+import { shaderBlendMode } from "./render/blendModes";
 import { blurPadding } from "./render/blur";
 import { ContourFilter } from "./render/contourFilter";
 import { traceLine } from "./render/decorationShapes";
@@ -66,6 +77,7 @@ export class TextNode extends Container {
   /** The warp of the current build, which glyph transform origins follow. */
   private warp: WarpMapping | null = null;
   private _revision = 0;
+  private _needsBackdrop = false;
   private readonly measurer: Measurer;
   private readonly textures = new TextureSet();
   private readonly plateLayer = new Container({ label: "plate" });
@@ -115,6 +127,14 @@ export class TextNode extends Container {
    */
   get revision(): number {
     return this._revision;
+  }
+
+  /**
+   * Whether a layer or decoration blends with a mode that reads the pixels below it (`multiply`, `overlay`, …). In a
+   * WebGL renderer such blends need `useBackBuffer: true`; `TextRenderer` turns it on for the draws that need it.
+   */
+  get needsBackdrop(): boolean {
+    return this._needsBackdrop;
   }
 
   /** The current layout: lines, glyph positions and the layout box size. */
@@ -213,7 +233,7 @@ export class TextNode extends Container {
     const vertical = isVertical(layout.writingMode);
     const lines = new Map<number, LineShape>();
     for (const group of planGroups(layout)) {
-      const container = createEffectContainer(group.effects, `slot ${group.slot}`);
+      const { group: container, root } = createEffectContainer(group.effects, `slot ${group.slot}`);
       for (const member of group.members) {
         const { layer } = member;
         if ("decoration" in member) {
@@ -296,11 +316,12 @@ export class TextNode extends Container {
         container.addChild(sprite);
         this.glyphSprites.push({ sprite, glyph: index, baseX, baseY });
       }
-      this.glyphLayer.addChild(container);
+      this.glyphLayer.addChild(root);
     }
 
     if (this._props.background) this.buildPlate(layout, this._props.background);
     this.buildDecorations(layout);
+    this._needsBackdrop = this.groups().some((group) => group.filters?.some((filter) => filter instanceof BlendFilter));
     this.textures.end();
     rasterizer.releaseFields();
   }
@@ -319,14 +340,14 @@ export class TextNode extends Container {
     });
     x = cached.offsetX / res;
     y = cached.offsetY / res;
-    const container = createEffectContainer(
+    const { group: container, root } = createEffectContainer(
       { paint: style.paint, offset: style.offset, blur: style.blur, opacity: style.opacity, filters: style.filters },
       "plate",
     );
     const sprite = new Sprite(cached.texture);
     sprite.position.set(x, y);
     container.addChild(sprite);
-    this.plateLayer.addChild(container);
+    this.plateLayer.addChild(root);
   }
 
   /** The warp of this build, over the text's content, or `null` for none. */
@@ -368,7 +389,7 @@ export class TextNode extends Container {
         );
         return { canvas: drawn.canvas, offsetX: drawn.x * res, offsetY: drawn.y * res };
       });
-      const container = createEffectContainer(
+      const { group: container, root } = createEffectContainer(
         {
           paint: "#000",
           offset: decoration.offset,
@@ -382,7 +403,7 @@ export class TextNode extends Container {
       const sprite = new Sprite(cached.texture);
       sprite.position.set(cached.offsetX / res, cached.offsetY / res);
       container.addChild(sprite);
-      (decoration.placement === "front" ? this.frontDecorationLayer : this.backDecorationLayer).addChild(container);
+      (decoration.placement === "front" ? this.frontDecorationLayer : this.backDecorationLayer).addChild(root);
     }
   }
 
@@ -567,7 +588,11 @@ function lineShape(
 /** Filters created here are owned by the node; user filters are left alone. */
 const ownedFilters = new WeakSet<Filter>();
 
-function createEffectContainer(effects: Layer, label: string): Container {
+/**
+ * The container of a group's sprites, with its effects, and the root to add to the scene: the group itself, or a
+ * container that blends it with what is below.
+ */
+function createEffectContainer(effects: Layer, label: string): { group: Container; root: Container } {
   const container = new Container({ label });
   const [dx, dy] = effects.offset ?? [0, 0];
   container.position.set(dx, dy);
@@ -589,18 +614,34 @@ function createEffectContainer(effects: Layer, label: string): Container {
   }
   // Always isolate the group so glyph sprites merge with `max` blending before being composited.
   const alpha = new AlphaFilter({ alpha: effects.opacity ?? 1, resolution: "inherit" });
-  alpha.blendMode = effects.blendMode ?? "normal";
   ownedFilters.add(alpha);
   filters.push(alpha);
   container.filters = filters;
-  return container;
+
+  const mode = shaderBlendMode(effects.blendMode);
+  if (mode === 0) {
+    alpha.blendMode = (effects.blendMode ?? "normal") as BLEND_MODES;
+    return { group: container, root: container };
+  }
+  // Modes the GPU can't blend read the pixels below. The blend gets a container of its own: if the renderer can't
+  // provide those pixels, PixiJS skips its filters, and the group inside stays isolated, blended normally.
+  const blend = new BlendFilter(effects.blendMode!);
+  blend.padding = filters.reduce((sum, filter) => sum + filter.padding, 0);
+  ownedFilters.add(blend);
+  const wrapper = new Container({ label: `${label} (${effects.blendMode})` });
+  wrapper.filters = [blend];
+  wrapper.addChild(container);
+  return { group: container, root: wrapper };
 }
 
+/** Destroys the filters the node created on a group, and on the group a blend wraps. */
 function destroyFilters(container: Container): void {
   for (const filter of container.filters ?? []) {
     if (ownedFilters.has(filter)) filter.destroy();
   }
   container.filters = null;
+  const inner = container.children[0];
+  if (inner && !(inner instanceof Sprite) && inner.filters) destroyFilters(inner);
 }
 
 /**

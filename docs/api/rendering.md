@@ -61,6 +61,7 @@ Guide: [PixiJS scene](/guide/pixi).
 | `invalidate(): void` | Clears cached measurements and bitmaps, then rebuilds. Use it after fonts change. Bitmaps are shared, so other nodes re-rasterize on their next rebuild |
 | `revision: number` | Increments whenever what the node paints changes: a rebuild, or glyph transforms with new output. Compare it to skip redundant draws |
 | `resolution: number` | Get, or set to re-rasterize at a new pixel density |
+| `needsBackdrop: boolean` | Whether a layer or decoration uses a [blend mode](/guide/layers#blend-modes) that reads the pixels below it, which needs `useBackBuffer: true` in a WebGL renderer. `TextRenderer` handles it |
 | `layout: Layout` | The current [layout](./layout#layout) |
 | `layoutBounds: Rectangle` | `(0, 0, layout.width, layout.height)` |
 | `getInkBounds(): Rectangle` | Everything the node paints (outlines, shadows, blur, plate, transforms) in local coordinates |
@@ -99,7 +100,7 @@ class TextRenderer {
 
 ### `TextRendererOptions`
 
-PixiJS `AutoDetectOptions`, merged over tellu's defaults: `preference: "webgl"`, `backgroundAlpha: 0`, `antialias: false`, `preserveDrawingBuffer: true`.
+PixiJS `AutoDetectOptions`, merged over tellu's defaults: `preference: "webgl"`, `backgroundAlpha: 0`, `antialias: false`, `preserveDrawingBuffer: true`. You don't need `useBackBuffer`: `draw()` turns it on for nodes whose [blend modes](/guide/layers#blend-modes) read the pixels below (`node.needsBackdrop`).
 
 ### `DrawOptions`
 
