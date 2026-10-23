@@ -13,13 +13,7 @@ const DIST_SETTLE_MS = 300;
 const distDir = (root: string) => join(root, "../packages/tellu/dist");
 
 /** Example pages whose demos become TypeScript presets, in sidebar order. */
-const PRESET_PAGES = [
-  "examples/index.md",
-  "examples/variety.md",
-  "examples/broadcast.md",
-  "examples/social.md",
-  "examples/cinema.md",
-];
+const PRESET_PAGES = ["examples/index.md", "examples/variety.md", "examples/broadcast.md", "examples/social.md"];
 
 function pagePresets(root: string, page: string): PlaygroundPreset[] {
   const markdown = readFileSync(join(root, page), "utf8");

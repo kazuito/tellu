@@ -1,5 +1,5 @@
 ---
-description: A gallery of real-world caption recipes for variety shows, news, subtitles, YouTube, Shorts and film, all rendered live.
+description: A gallery of real-world caption recipes for variety shows, news, subtitles, YouTube and Shorts, all rendered live.
 ---
 
 # Examples
@@ -32,10 +32,9 @@ export default {
 
 | Collection | Inside |
 | --- | --- |
-| [Variety shows](./variety) | Classic telop, punchline, cute glow, inner voice, impact pop, quiz |
-| [News & subtitles](./broadcast) | News super, breaking label, lower third, speaker subtitles, karaoke |
-| [YouTube & Shorts](./social) | Edit subtitles, short-form hook, stream alert, sale price |
-| [Film & titles](./cinema) | Film subtitles, title card, end credits |
+| [Variety shows](./variety) | Classic telop, punchline, cute glow, inner voice, impact pop, gold lettering, quiz answer |
+| [News & subtitles](./broadcast) | News super, speaker subtitles, karaoke |
+| [YouTube & Shorts](./social) | Edit subtitles, short-form hook, sale price |
 
 ## Using an example in Remotion
 
@@ -55,4 +54,4 @@ const frame = useCurrentFrame();
 const { style, ...props } = example(frame);
 ```
 
-The [`examples/remotion`](https://github.com/kazuito/tellu/tree/main/examples/remotion) project in the repository has complete Remotion compositions (variety show, subtitles, news, quiz, film credits and more) plus a vertical Shorts video. [`examples/hyperframes`](https://github.com/kazuito/tellu/tree/main/examples/hyperframes) does the same in a [HyperFrames](https://hyperframes.heygen.com) project: plain HTML scenes animated with GSAP, with tellu drawing the captions into canvases on every seek.
+The [`examples/remotion`](https://github.com/kazuito/tellu/tree/main/examples/remotion) project in the repository has complete Remotion compositions (variety show, karaoke subtitles, quiz, recipe, TV shopping, game stream and more) plus a vertical Shorts video. [`examples/hyperframes`](https://github.com/kazuito/tellu/tree/main/examples/hyperframes) does the same in a [HyperFrames](https://hyperframes.heygen.com) project: plain HTML scenes animated with GSAP, with tellu drawing the captions into canvases on every seek.

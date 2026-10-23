@@ -1,5 +1,5 @@
 ---
-description: Captions for YouTube, Shorts and live streams, covering bold edit subtitles, a short-form hook, a neon stream alert and a sale price tag.
+description: Captions for YouTube and Shorts, covering bold edit subtitles, a short-form hook and a sale price tag.
 ---
 
 # YouTube & Shorts
@@ -67,35 +67,6 @@ export default {
     ],
   },
 };
-```
-
-## Stream alert
-
-Additive glows over a dark scene. The glow pulses with a per-glyph opacity animation.
-
-```ts demo loop=60 still=0
-import { fill, glow, stroke, type TextNodeProps } from "tellu";
-
-export default (frame: number): TextNodeProps => ({
-  text: "NEW FOLLOWER!!",
-  style: {
-    fontFamily: "Montserrat",
-    fontWeight: 900,
-    fontSize: 72,
-    letterSpacing: 4,
-    layers: [
-      glow({ color: "#00e5ff", stroke: 8, blur: 20, blendMode: "add" }),
-      glow({ color: "#ff00d4", stroke: 3, blur: 6, blendMode: "add" }),
-      stroke(3, "#b8f7ff"),
-      fill("#ffffff"),
-    ],
-  },
-  glyphTransform: (glyph) => ({
-    opacity:
-      0.75 + 0.25 * Math.cos((frame / 60) * Math.PI * 2 - glyph.index * 0.4),
-    y: Math.sin((frame / 60) * Math.PI * 2 - glyph.index * 0.4) * 3,
-  }),
-});
 ```
 
 ## Sale price

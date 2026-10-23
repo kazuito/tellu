@@ -137,7 +137,6 @@ export default defineConfig({
             { text: "Variety shows", link: "/examples/variety" },
             { text: "News & subtitles", link: "/examples/broadcast" },
             { text: "YouTube & Shorts", link: "/examples/social" },
-            { text: "Film & titles", link: "/examples/cinema" },
           ],
         },
       ],

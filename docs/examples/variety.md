@@ -1,5 +1,5 @@
 ---
-description: Variety-show captions to copy, including the classic gradient telop, punchline, cute glow, inner voice, impact pop, gold lettering and quiz reveal.
+description: Variety-show captions to copy, including the classic gradient telop, punchline, cute glow, inner voice, impact pop, gold lettering and quiz answer.
 ---
 
 # Variety shows
@@ -192,49 +192,32 @@ export default {
 };
 ```
 
-## Quiz question and answer
+## Quiz answer
 
-A question on a plate, then the answer in a contrasting style. The two are separate captions placed on top of each other in your scene.
+The reveal of a quiz answer: a red and a white outline around a gold fill split hard at the middle, like a metal plate.
 
-```ts demo compare
+```ts demo
 import { fill, linearGradient, shadow, stroke } from "tellu";
 
 export default {
-  question: {
-    text: "Q. 日本一高い山は？",
-    style: {
-      fontFamily: "Noto Sans JP",
-      fontWeight: 900,
-      fontSize: 48,
-      layers: [fill("#ffffff")],
-    },
-    background: {
-      paint: linearGradient(["#1c3faa", "#0b1f5c"]),
-      padding: [32, 16],
-      radius: 12,
-      stroke: { width: 4, paint: "#7fd1ff" },
-    },
-  },
-  answer: {
-    text: "富士山",
-    style: {
-      fontFamily: "Dela Gothic One",
-      fontSize: 88,
-      letterSpacing: 10,
-      layers: [
-        shadow({ offset: [0, 8], blur: 8, stroke: 18 }),
-        stroke(18, "#b80000"),
-        stroke(9, "#ffffff"),
-        fill(
-          linearGradient([
-            [0, "#fff9db"],
-            [0.5, "#ffe066"],
-            [0.5, "#ffc300"],
-            [1, "#ff8f00"],
-          ]),
-        ),
-      ],
-    },
+  text: "富士山",
+  style: {
+    fontFamily: "Dela Gothic One",
+    fontSize: 88,
+    letterSpacing: 10,
+    layers: [
+      shadow({ offset: [0, 8], blur: 8, stroke: 18 }),
+      stroke(18, "#b80000"),
+      stroke(9, "#ffffff"),
+      fill(
+        linearGradient([
+          [0, "#fff9db"],
+          [0.5, "#ffe066"],
+          [0.5, "#ffc300"],
+          [1, "#ff8f00"],
+        ]),
+      ),
+    ],
   },
 };
 ```

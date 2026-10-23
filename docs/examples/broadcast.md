@@ -1,5 +1,5 @@
 ---
-description: Broadcast captions to copy, including a news super, breaking-news label, shrink-to-fit headline, lower third, speaker subtitles and the karaoke wipe technique.
+description: Broadcast captions to copy, including a news super, speaker subtitles and the karaoke wipe technique.
 ---
 
 # News & subtitles
@@ -26,73 +26,6 @@ export default {
       stroke(7, "#1a1a1a"),
       fill("#ffffff"),
     ],
-  },
-};
-```
-
-## Breaking label and headline
-
-The label is a plain plate. The headline must fit the bar whatever its length, so it shrinks on one line.
-
-```ts demo compare
-import { fill } from "tellu";
-
-const label = {
-  fontFamily: "Noto Sans JP",
-  fontWeight: 900,
-  fontSize: 36,
-  layers: [fill("#ffffff")],
-};
-
-export default {
-  label: {
-    text: "ニュース速報",
-    style: label,
-    background: { paint: "#d7000f", padding: [24, 12] },
-  },
-  "headline (maxWidth 420, shrink)": {
-    text: "首都圏で記録的な大雨　気象庁「命を守る行動を」",
-    maxWidth: 420,
-    wrap: "none",
-    overflow: "shrink",
-    style: { ...label, layers: [fill("#0b1f44")] },
-    background: { paint: "rgba(255,255,255,0.96)", padding: [24, 12] },
-  },
-};
-```
-
-## Lower third
-
-Name and title in one caption: a run for the smaller title line, and one gradient plate behind both.
-
-```ts demo
-import { fill, linearGradient } from "tellu";
-
-export default {
-  text: [
-    "山田 太郎",
-    {
-      text: "\ntellu 開発者",
-      style: {
-        fontSize: 26,
-        fontWeight: 700,
-        letterSpacing: { em: 0.05 },
-        layers: [fill("#9fd3ff")],
-      },
-    },
-  ],
-  style: {
-    fontFamily: "Noto Sans JP",
-    fontWeight: 900,
-    fontSize: 52,
-    letterSpacing: { em: 0.08 },
-    lineHeight: 1.3,
-    layers: [fill("#ffffff")],
-  },
-  background: {
-    paint: linearGradient(["#0b2a4a", "#14508a"], { angle: 90 }),
-    padding: [36, 18],
-    stroke: { width: 3, paint: "#5ab0ff" },
   },
 };
 ```

@@ -2,7 +2,6 @@ import examplePresets from "virtual:tellu-playground-presets";
 import animated from "./presets/animated.tsx?raw";
 import hello from "./presets/hello.tsx?raw";
 import liveInput from "./presets/live-input.tsx?raw";
-import lowerThird from "./presets/lower-third.tsx?raw";
 
 export type PlaygroundMode = "ts" | "react";
 
@@ -33,5 +32,4 @@ export const presets: readonly PlaygroundPreset[] = [
   react("hello", "Hello, <Text>", hello),
   react("live-input", "Live input", liveInput),
   react("animated", "Animation hook", animated, "studio"),
-  react("lower-third", "Lower third", lowerThird, "street"),
 ];
