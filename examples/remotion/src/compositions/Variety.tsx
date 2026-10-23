@@ -1,32 +1,9 @@
 import { AbsoluteFill, Easing, interpolate, random, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { linearGradient } from "tellu";
 import { Text } from "tellu/remotion";
 import { Background } from "../components/Background";
-import { FONTS } from "../fonts";
 import { note, punchline, variety } from "../styles";
 
 export const VARIETY_DURATION = 180;
-
-const CornerTitle = () => {
-  const frame = useCurrentFrame();
-  const slide = interpolate(frame, [0, 14], [-700, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  return (
-    <Text
-      text="検証！PixiJSで本格テロップは作れるのか？"
-      textStyle={{ fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 52, layers: [{ paint: "#ffffff" }] }}
-      maxWidth={760}
-      wrap="none"
-      overflow="shrink"
-      background={{
-        paint: linearGradient(["#ff3b30", "#ff9500"], { angle: 90, scope: "block" }),
-        padding: [28, 14],
-        radius: 10,
-        stroke: { width: 4, paint: "#ffffff" },
-      }}
-      style={{ position: "absolute", left: 80, top: 70, translate: `${slide}px 0` }}
-    />
-  );
-};
 
 const PopIn = () => {
   const frame = useCurrentFrame();
@@ -95,7 +72,6 @@ const Note = () => {
 export const Variety = () => (
   <AbsoluteFill>
     <Background from="#ff7e5f" to="#feb47b" />
-    <CornerTitle />
     <Sequence from={10} durationInFrames={85} layout="none">
       <PopIn />
     </Sequence>

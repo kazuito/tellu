@@ -2,14 +2,12 @@ import { AbsoluteFill, interpolate, Sequence, useCurrentFrame, useVideoConfig } 
 import { fill, shadow, stroke, wipeClip } from "tellu";
 import { Text } from "tellu/remotion";
 import { Background } from "../components/Background";
-import { FONTS } from "../fonts";
 import { speakerColors, subtitle } from "../styles";
 
 type Speaker = keyof typeof speakerColors;
 
 interface Line {
   speaker: Speaker;
-  name: string;
   text: string;
   /** Seconds. */
   start: number;
@@ -17,12 +15,12 @@ interface Line {
 }
 
 export const SCRIPT: Line[] = [
-  { speaker: "A", name: "ずんだ", text: "テロップって、CSSだけだと限界あるよね", start: 0.2, end: 2.6 },
-  { speaker: "B", name: "めたん", text: "縁取りを何重にも重ねたり、ぼかした影を付けたり", start: 2.8, end: 5.4 },
-  { speaker: "A", name: "ずんだ", text: "それ全部、telluならレイヤーを並べるだけ！", start: 5.6, end: 8.0 },
+  { speaker: "A", text: "テロップって、CSSだけだと限界あるよね", start: 0.2, end: 2.6 },
+  { speaker: "B", text: "縁取りを何重にも重ねたり、ぼかした影を付けたり", start: 2.8, end: 5.4 },
+  { speaker: "A", text: "それ全部、telluならレイヤーを並べるだけ！", start: 5.6, end: 8.0 },
   {
     speaker: "B",
-    name: "めたん",
+
     text: "カラオケ風のワイプも、テロップを重ねて切り抜くだけです",
     start: 8.2,
     end: 11.0,
@@ -45,28 +43,20 @@ const KaraokeLine = ({ line }: { line: Line }) => {
 
   return (
     <div style={{ position: "absolute", left: 960, top: 1000, translate: `-50% calc(-100% + ${lift}px)`, opacity }}>
+      <Text text={line.text} textStyle={subtitle} />
       <Text
-        text={line.name}
-        textStyle={{ fontFamily: FONTS.gothic, fontWeight: 900, fontSize: 34, layers: [fill("#111111")] }}
-        background={{ paint: color, padding: [18, 6], radius: 999 }}
-        style={{ display: "block", marginBottom: 22, marginLeft: 8 }}
+        text={line.text}
+        textStyle={{
+          ...subtitle,
+          layers: [
+            shadow({ offset: [0, 4], blur: 6, stroke: 10, color: "rgba(0,0,0,0.6)" }),
+            stroke(10, "#000000"),
+            fill(color),
+          ],
+        }}
+        clip={(layout) => wipeClip(layout, progress)}
+        style={{ position: "absolute", left: 0, top: 0 }}
       />
-      <div style={{ position: "relative" }}>
-        <Text text={line.text} textStyle={subtitle} />
-        <Text
-          text={line.text}
-          textStyle={{
-            ...subtitle,
-            layers: [
-              shadow({ offset: [0, 4], blur: 6, stroke: 10, color: "rgba(0,0,0,0.6)" }),
-              stroke(10, "#000000"),
-              fill(color),
-            ],
-          }}
-          clip={(layout) => wipeClip(layout, progress)}
-          style={{ position: "absolute", left: 0, top: 0 }}
-        />
-      </div>
     </div>
   );
 };

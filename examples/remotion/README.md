@@ -2,10 +2,15 @@
 
 | Composition | Shows |
 | --- | --- |
-| `Variety` | Multi-layer outlines and gradients, per-glyph spring pop-in, a shaking punchline, a shrink-to-fit title plate, a glowing note |
-| `Subtitles` | Data-driven subtitles with speaker tags and a karaoke wipe (two stacked `<Text>`s, the colored one revealed with `clip-path`) |
-| `LowerThird` | News-style name plate with a gradient background, staggered reveal and a long title shrunk to fit |
+| `Variety` | Multi-layer outlines and gradients, per-glyph spring pop-in, a shaking punchline, a glowing note |
+| `Subtitles` | Data-driven subtitles colored by speaker, with a karaoke wipe (two stacked `<Text>`s, the colored one revealed with `clip`) |
+| `Quiz` | Outlined question on a plate, choices squeezed to fit, a countdown and a slammed-in answer |
+| `Recipe` | Bouncy rounded title and a step whose key words get a marker layer |
+| `Sale` | TV-shopping price in a heavy gradient with double outlines, slammed in with a spring |
+| `GameStream` | Rainbow reaction caption with a brush font, shaking per glyph |
+| `Documentary` | Vertical title (縦書き) with outlines and a gradient, revealed down the column |
 | `Showcase` | All of the above in sequence |
+| `Shorts` | Vertical (1080×1920) word-by-word captions |
 
 Run `bun run studio` at the repo root to open Remotion Studio while tellu rebuilds on change. The commands below use the built `tellu`, so run `bun run build` at the root first.
 

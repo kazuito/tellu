@@ -75,19 +75,3 @@ export const speakerColors = {
   A: "#ffd400",
   B: "#4ad6ff",
 } as const;
-
-export const lowerThirdName: Style = {
-  fontFamily: FONTS.gothic,
-  fontWeight: 900,
-  fontSize: 76,
-  letterSpacing: { em: 0.08 },
-  layers: [fill("#ffffff")],
-};
-
-export const lowerThirdTitle: Style = {
-  fontFamily: FONTS.gothic,
-  fontWeight: 500,
-  fontSize: 36,
-  letterSpacing: { em: 0.05 },
-  layers: [fill("#0b2a4a")],
-};

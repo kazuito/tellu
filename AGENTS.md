@@ -7,7 +7,7 @@ This file provides guidance to AI Agents when working with code in this reposito
 Bun workspaces monorepo for `tellu`, a telop (caption) rendering library on PixiJS v8, built mainly for Remotion.
 
 - `packages/tellu`: the library. It has three entries: `tellu` (core), `tellu/react` and `tellu/remotion`.
-- `examples/remotion`: Remotion sample project. Each real-world scene (`Variety`, `Subtitles`, `LowerThird`, `News`, `Quiz`, `Recipe`, `Sale`, `GameStream`, `Cinema`, `Documentary`, `Credits`) is its own composition and `Showcase` plays them in sequence; `Shorts` is a separate vertical (1080×1920) composition.
+- `examples/remotion`: Remotion sample project. Each real-world scene (`Variety`, `Subtitles`, `Quiz`, `Recipe`, `Sale`, `GameStream`, `Documentary`) is its own composition and `Showcase` plays them in sequence; `Shorts` is a separate vertical (1080×1920) composition.
 - `examples/hyperframes`: [HyperFrames](https://hyperframes.heygen.com) sample (HTML + GSAP, rendered by the `hyperframes` CLI). `index.html` mounts one sub-composition per scene from `compositions/`; `src/` is bundled by `bun build` into `bundle/main.js`, which draws each scene's captions with tellu on every seek.
 - `examples/playground`: browser demo of every feature, served by Bun's HTML dev server.
 - `docs`: the documentation site (VitePress, English only), deployed on Vercel. See [Documentation](#documentation).
@@ -36,7 +36,7 @@ bun run lint:fix    # biome check --write
 - Single test file: `cd packages/tellu && bun test test/layout.test.ts`.
 - Single test by name: add `-t "<name>"`.
 - Render the Remotion sample: `bun run build && cd examples/remotion && bun run render` (writes `out/showcase.mp4`).
-- Representative stills: `bun run stills` (writes `out/stills/*.png`); `bun run stills News Quiz` limits it to those compositions. Inspecting stills is the practical way to check rendering changes visually.
+- Representative stills: `bun run stills` (writes `out/stills/*.png`); `bun run stills Sale Quiz` limits it to those compositions. Inspecting stills is the practical way to check rendering changes visually.
 - Visual regression check: `bun run stills --baseline` on the code to compare against (e.g. with your changes stashed), then `bun run stills --diff` on your changes. It lists the stills that differ, writes their pixel diffs to `out/stills-diff/` and exits 1. Baselines live in the gitignored `out/` and depend on the machine, so compare on one machine. Run it for any change that should not alter rendering.
 
 TypeScript is v7 (native). tsdown warns that its API is experimental; that warning is expected.

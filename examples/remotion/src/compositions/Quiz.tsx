@@ -24,7 +24,7 @@ const choice: Partial<TextStyle> = {
   fontFamily: [FONTS.latin, FONTS.gothic],
   fontWeight: 900,
   fontSize: 52,
-  layers: [fill("#ffffff")],
+  layers: [stroke(9, "#0b1430"), fill("#ffffff")],
 };
 
 const Question = () => {
@@ -90,9 +90,9 @@ const Choice = ({ index }: { index: number }) => {
     >
       <Text
         text={parseMarkup(`<k>${"ABCD"[index]}</k>　${CHOICES[index]}`, {
-          k: { fontSize: 64, layers: [fill(highlight ? "#ffffff" : "#ffd400")] },
+          k: { fontSize: 64, layers: { 1: { paint: highlight ? "#ffffff" : "#ffd400" } } },
         })}
-        textStyle={choice}
+        textStyle={highlight ? { ...choice, layers: [stroke(9, "#8a1500"), fill("#ffffff")] } : choice}
         maxWidth={640}
         wrap="none"
         overflow="squeeze"
@@ -140,7 +140,7 @@ const Timer = () => {
             fontFamily: FONTS.latin,
             fontWeight: 900,
             fontSize: 84,
-            layers: [fill(remaining <= 3 ? "#ff4d4d" : "#ffffff")],
+            layers: [stroke(16, "#ffffff"), stroke(9, "#14123a"), fill(remaining <= 3 ? "#ff4d4d" : "#ffd400")],
           }}
           glyphTransform={() => ({ scale: 1 + tick * 0.3 })}
         />

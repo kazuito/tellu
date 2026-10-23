@@ -15,15 +15,11 @@ import { PNG } from "pngjs";
 const frames: Record<string, number[]> = {
   Variety: [8, 40, 100, 150],
   Subtitles: [40, 110, 200, 300],
-  LowerThird: [10, 60, 145],
-  News: [20, 100, 200],
   Quiz: [20, 150, 270],
   Recipe: [40, 120, 200],
-  Sale: [30, 70, 180],
-  GameStream: [80, 130, 200],
-  Cinema: [40, 100, 160, 230],
-  Documentary: [30, 150],
-  Credits: [60, 200, 300],
+  Sale: [30, 70, 140],
+  GameStream: [30, 80, 150],
+  Documentary: [30, 120],
   Shorts: [35, 70, 120, 170],
 };
 
