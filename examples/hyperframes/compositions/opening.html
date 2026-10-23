@@ -5,11 +5,7 @@
       <div data-hf-id="hf-kpde" data-composition-id="opening" data-width="1920" data-height="1080" data-duration="5">
         <div data-hf-id="hf-j0ic" class="layer sky"></div>
         <div data-hf-id="hf-3p4o" class="skyline" data-layout-allow-overflow=""></div>
-        <div data-hf-id="hf-a46i" class="rule"></div>
         <div data-hf-id="hf-x0ip" id="opening-title" class="host"></div>
-        <div data-hf-id="hf-kbtg" id="opening-episode" class="host"></div>
-        <div data-hf-id="hf-rxkl" id="opening-latin" class="host"></div>
-        <div data-hf-id="hf-5ixk" id="opening-route" class="host"></div>
 
         <style>
           [data-composition-id="opening"] .sky {
@@ -35,30 +31,9 @@
               repeating-linear-gradient(0deg, transparent 0 16px, rgba(255, 181, 71, 0.16) 16px 20px),
               linear-gradient(180deg, #221c4a, #110e2a);
           }
-          [data-composition-id="opening"] .rule {
-            position: absolute;
-            left: 1060px;
-            top: 120px;
-            width: 2px;
-            height: 760px;
-            transform-origin: top;
-            background: linear-gradient(180deg, #ff3d8b, rgba(255, 61, 139, 0));
-          }
           #opening-title {
-            left: 1290px;
+            left: 960px;
             top: 110px;
-          }
-          #opening-episode {
-            left: 160px;
-            top: 300px;
-          }
-          #opening-latin {
-            left: 154px;
-            top: 352px;
-          }
-          #opening-route {
-            left: 160px;
-            top: 600px;
           }
         </style>
 
@@ -74,7 +49,6 @@
 
           const tl = gsap.timeline({ paused: true });
           tl.from(".skyline .bar", { scaleY: 0, duration: 1, ease: "power3.out", stagger: { each: 0.02, from: "center" } }, 0.1);
-          tl.from(".rule", { scaleY: 0, duration: 1.4, ease: "power2.inOut" }, 0.3);
 
           window.telluCaptions.attach("opening", tl, 5).then(() => {
             window.__timelines.opening = tl;

@@ -4,11 +4,11 @@ A 24-second night-walk vlog opener, `Tokyo Night Walk`, built with [HyperFrames]
 
 | Sub-composition | Shows |
 | --- | --- |
-| `opening` | Vertical neon title that flickers on glyph by glyph, typewriter Latin title |
-| `chapter` | Extruded chapter number, vertical 第一章, glyph slide-in, a ticking `REC` clock (the text changes every second) |
+| `opening` | Vertical neon title with a double outline that flickers on glyph by glyph |
+| `chapter` | Outlined, extruded chapter number sliding in glyph by glyph |
 | `monologue` | Karaoke subtitles: a dim copy under a lit copy revealed by `wipeClip()` |
-| `neon` | Neon sign with `warp`, glow and bevel and a broken tube, plus a marker-highlighted menu revealed by a wipe |
-| `outro` | Entrance combined with a wave (`combineGlyphTransforms`) |
+| `neon` | Neon sign with `warp`, glow and bevel and a broken tube |
+| `outro` | Outlined title whose entrance is combined with a wave (`combineGlyphTransforms`) |
 
 Run `bun run hyperframes` at the repo root to open HyperFrames Studio at http://localhost:3300. It rebuilds tellu and the caption bundle on change. The commands below use the built `tellu`, so run `bun run build` at the root first. The `hyperframes` CLI needs Node.js 22+, and rendering needs FFmpeg.
 

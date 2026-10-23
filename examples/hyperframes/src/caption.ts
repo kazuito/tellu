@@ -1,4 +1,4 @@
-import { type CanvasText, createCanvasText, loadFonts, type TextNodeProps } from "tellu";
+import { type CanvasText, createCanvasText, type TextNodeProps } from "tellu";
 
 export interface CaptionSpec {
   /** Id of the element the caption is placed at. */
@@ -8,8 +8,6 @@ export interface CaptionSpec {
   anchor?: readonly [number, number];
   /** Props that change over time, at a frame counted from the start of the scene. */
   animate?: (frame: number) => Partial<TextNodeProps>;
-  /** Every character the caption shows over time, when `animate` changes the text. */
-  charset?: string;
 }
 
 export interface Caption {
@@ -21,7 +19,6 @@ export async function createCaption(spec: CaptionSpec): Promise<Caption> {
   if (!host) throw new Error(`No caption host #${spec.host}`);
   const canvas = document.createElement("canvas");
   host.append(canvas);
-  if (spec.charset) await loadFonts({ text: spec.charset, style: spec.props.style });
 
   const text: CanvasText = await createCanvasText(canvas, { ...spec.props, ...spec.animate?.(0) });
   const [ax, ay] = spec.anchor ?? [0, 0];

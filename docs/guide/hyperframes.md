@@ -80,7 +80,7 @@ Four things make this work:
 3. **Time is converted to frames.** HyperFrames gives seconds. tellu's [animation presets](./animation) count their delays and durations in frames at 30 fps, hence `time * 30`. Use your composition's frame rate if it isn't 30.
 4. **The canvas is moved to the ink bounds.** `update()` resizes the canvas to what the caption paints, including outlines and glows that reach outside the layout box. `r.x` and `r.y` are that region's offset from the layout box (see [Canvas](./canvas#the-canvas-is-resized)), so offsetting the canvas by them keeps the text itself in place.
 
-Changing only `glyphTransform` or `clip` per frame is cheap. Changing `text` per frame works too (the example's ticking clock does it), but each change re-lays out the text. See [Performance](./performance).
+Changing only `glyphTransform` or `clip` per frame is cheap. Changing `text` per frame works too, but each change re-lays out the text. See [Performance](./performance).
 
 ## Loading tellu into a composition
 
